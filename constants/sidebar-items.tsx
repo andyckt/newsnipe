@@ -1,4 +1,4 @@
-import { LayoutDashboard, Play, Heart, Target } from "lucide-react"
+import { LayoutDashboard, Play, Heart, Target, Video } from "lucide-react"
 
 export const sidebarItems = [
   {
@@ -18,6 +18,11 @@ export const sidebarItems = [
   //   icon: <Users />,
   //   badge: "28",
   // },
+  {
+    id: "launch-recorder",
+    title: "Launch Recorder",
+    icon: <Video />,
+  },
   {
     id: "my-snipe",
     title: "My Snipe",
