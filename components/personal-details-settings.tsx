@@ -351,7 +351,7 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
   return (
     <div className="w-full space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Personal Details Collection</h2>
+        <h2 className="text-lg font-medium">Collection Settings</h2>
         <div className="flex items-center space-x-2">
           <Switch 
             id="include-personal-details"
