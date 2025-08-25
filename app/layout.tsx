@@ -6,9 +6,10 @@ import { Toaster } from "@/components/ui/toaster"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "v0 App",
-  description: "Created with v0",
+  title: "Camera Recorder",
+  description: "Mobile-first camera recording app",
   generator: "v0.app",
+  viewport: "width=device-width, initial-scale=1.0",
 }
 
 export default function RootLayout({
