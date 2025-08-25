@@ -117,7 +117,7 @@ export function CreateSnipeTab({ onSnipeCreated }: CreateSnipeTabProps) {
   const canProceed = () => {
     switch (currentStep) {
       case 1:
-        return formData.language !== ""
+        return !!formData.language
       case 2:
         return true
       case 3:
@@ -780,27 +780,35 @@ export function CreateSnipeTab({ onSnipeCreated }: CreateSnipeTabProps) {
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           ) : (
-            <Button
-              onClick={() => {
-                const uniqueId = Date.now().toString(36) + Math.random().toString(36).substr(2, 9)
-                const generatedUrl = `https://snipe.app/interview/${uniqueId}`
+            <>
+              <Button
+                variant="outline"
+                className="rounded-2xl bg-transparent"
+              >
+                Launch Recorder
+              </Button>
+              <Button
+                onClick={() => {
+                  const uniqueId = Date.now().toString(36) + Math.random().toString(36).substr(2, 9)
+                  const generatedUrl = `https://snipe.app/interview/${uniqueId}`
 
-                const snipeData = {
-                  ...formData,
-                  url: generatedUrl,
-                }
+                  const snipeData = {
+                    ...formData,
+                    url: generatedUrl,
+                  }
 
-                console.log("Creating Snipe with data:", snipeData)
-                if (onSnipeCreated) {
-                  onSnipeCreated(snipeData)
-                }
-              }}
-              disabled={!canProceed()}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-2xl"
-            >
-              <Check className="h-4 w-4 mr-2" />
-              Done, Create Snipe
-            </Button>
+                  console.log("Creating Snipe with data:", snipeData)
+                  if (onSnipeCreated) {
+                    onSnipeCreated(snipeData)
+                  }
+                }}
+                disabled={!canProceed()}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-2xl"
+              >
+                <Check className="h-4 w-4 mr-2" />
+                Done, Create Snipe
+              </Button>
+            </>
           )}
         </div>
       </div>
