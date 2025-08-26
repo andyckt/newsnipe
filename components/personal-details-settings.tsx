@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
+import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select"
-import { Trash2, GripVertical, PlusCircle } from "lucide-react"
+import { Trash2, GripVertical, PlusCircle, ToggleLeft, ToggleRight } from "lucide-react"
 import {
   DndContext,
   closestCenter,
@@ -31,6 +32,7 @@ import {
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { PersonalDetailField, PersonalDetailsConfig } from "./personal-details-collector"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface PersonalDetailsSettingsProps {
   config: PersonalDetailsConfig
@@ -40,6 +42,7 @@ interface PersonalDetailsSettingsProps {
 // Sortable field component for drag and drop functionality
 interface SortableFieldProps {
   field: PersonalDetailField;
+  index: number;
   onUpdateField: (id: string, updates: Partial<PersonalDetailField>) => void;
   onAddDropdownOption: (fieldId: string) => void;
   onUpdateDropdownOption: (fieldId: string, optionIndex: number, value: string) => void;
@@ -50,6 +53,7 @@ interface SortableFieldProps {
 
 function SortableField({
   field,
+  index,
   onUpdateField,
   onAddDropdownOption,
   onUpdateDropdownOption,
@@ -74,38 +78,37 @@ function SortableField({
   };
 
   return (
-    <div
+    <motion.div
       ref={setNodeRef}
       style={style}
-      className={`border border-gray-200 rounded-lg p-4 space-y-4 ${isDragging ? 'bg-gray-50' : ''}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1 }}
+      className={`border rounded-2xl p-4 space-y-3 ${isDragging ? 'bg-gray-50' : ''}`}
     >
-      <div className="flex items-center gap-2">
-        <div
-          {...attributes}
-          {...listeners}
-          className="cursor-grab active:cursor-grabbing p-2 text-gray-400 hover:text-gray-600 touch-none"
+      <div className="flex items-start space-x-3">
+        <div 
+          {...attributes} 
+          {...listeners} 
+          className="flex flex-col items-center gap-2 pt-2"
         >
-          <GripVertical className="h-5 w-5" />
+          <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
+          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
+            {index + 1}
+          </div>
         </div>
 
-        <div className="flex-1 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor={`field-label-${field.id}`} className="text-sm font-medium mb-1 block">
-                Question
-              </Label>
-              <Input
-                id={`field-label-${field.id}`}
-                value={field.label}
-                onChange={(e) => onUpdateField(field.id, { label: e.target.value })}
-                placeholder="Enter question"
-              />
-            </div>
+        <div className="flex-1 space-y-3">
+          <Input
+            value={field.label}
+            onChange={(e) => onUpdateField(field.id, { label: e.target.value })}
+            placeholder="Enter question"
+            className="rounded-2xl"
+          />
 
-            <div>
-              <Label htmlFor={`field-type-${field.id}`} className="text-sm font-medium mb-1 block">
-                Answer Type
-              </Label>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Label className="text-sm">Type:</Label>
               <Select
                 value={field.type}
                 onValueChange={(value) => {
@@ -120,7 +123,7 @@ function SortableField({
                   onUpdateField(field.id, updates)
                 }}
               >
-                <SelectTrigger id={`field-type-${field.id}`}>
+                <SelectTrigger className="w-32 rounded-2xl">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -130,82 +133,92 @@ function SortableField({
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => onUpdateField(field.id, { required: !field.required })}
+                className="flex items-center space-x-1 text-sm"
+              >
+                {field.required ? (
+                  <ToggleRight className="h-4 w-4 text-blue-600" />
+                ) : (
+                  <ToggleLeft className="h-4 w-4 text-gray-400" />
+                )}
+                <span>Required</span>
+              </button>
+              <Button
+                onClick={() => onRemoveField(field.id)}
+                variant="ghost"
+                size="sm"
+                className="rounded-2xl"
+                disabled={disableRemove}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           {field.type === "dropdown" && (
-            <div className="space-y-2 border-t border-gray-100 pt-4">
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="bg-gray-50 rounded-2xl p-4 space-y-4"
+            >
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">Options</Label>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id={`multiple-${field.id}`}
-                      checked={field.allowMultiple || false}
-                      onCheckedChange={(checked) => onUpdateField(field.id, { allowMultiple: checked })}
-                    />
-                    <Label htmlFor={`multiple-${field.id}`} className="text-xs">
-                      Allow multiple
-                    </Label>
-                  </div>
-                  <Button
-                    onClick={() => onAddDropdownOption(field.id)}
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 text-xs"
-                  >
-                    <PlusCircle className="h-3 w-3 mr-1" /> Add Option
-                  </Button>
-                </div>
+                <h5 className="font-medium text-sm">Dropdown Configuration</h5>
+                <button
+                  onClick={() => onUpdateField(field.id, { allowMultiple: !field.allowMultiple })}
+                  className="flex items-center space-x-1 text-sm"
+                >
+                  {field.allowMultiple ? (
+                    <ToggleRight className="h-4 w-4 text-blue-600" />
+                  ) : (
+                    <ToggleLeft className="h-4 w-4 text-gray-400" />
+                  )}
+                  <span>Allow multiple selection</span>
+                </button>
               </div>
 
               <div className="space-y-2">
-                {(field.dropdownOptions || []).map((option, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Input
-                      value={option}
-                      onChange={(e) => onUpdateDropdownOption(field.id, index, e.target.value)}
-                      placeholder="Option text"
-                      className="text-sm"
-                    />
-                    <Button
-                      onClick={() => onRemoveDropdownOption(field.id, index)}
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-gray-500"
-                      disabled={(field.dropdownOptions || []).length <= 1}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+                <Label className="text-sm font-medium">Options</Label>
+                <div className="space-y-2">
+                  {(field.dropdownOptions || []).map((option, optionIndex) => (
+                    <div key={optionIndex} className="flex items-center space-x-2">
+                      <Input
+                        placeholder="Option text"
+                        value={option}
+                        onChange={(e) => onUpdateDropdownOption(field.id, optionIndex, e.target.value)}
+                        className="rounded-2xl flex-1"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="rounded-2xl"
+                        onClick={() => onRemoveDropdownOption(field.id, optionIndex)}
+                        disabled={(field.dropdownOptions || []).length <= 1}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-2xl bg-white"
+                    onClick={() => onAddDropdownOption(field.id)}
+                  >
+                    <PlusCircle className="h-3 w-3 mr-1" />
+                    Add Option
+                  </Button>
+                </div>
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
-
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id={`required-${field.id}`}
-              checked={field.required}
-              onCheckedChange={(checked) => onUpdateField(field.id, { required: checked })}
-            />
-            <Label htmlFor={`required-${field.id}`} className="text-xs">
-              Required
-            </Label>
-          </div>
-          <Button
-            onClick={() => onRemoveField(field.id)}
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-red-500"
-            disabled={disableRemove}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -350,61 +363,73 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
 
   return (
     <div className="w-full space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium">Collection Settings</h2>
-        <div className="flex items-center space-x-2">
-          <Switch 
-            id="include-personal-details"
-            checked={includePersonalDetails}
-            onCheckedChange={handleToggleIncludePersonalDetails}
-          />
-          <Label htmlFor="include-personal-details">
-            {includePersonalDetails ? "Enabled" : "Disabled"}
-          </Label>
-        </div>
+      <div className="flex items-center space-x-3 p-4 border rounded-2xl">
+        <button
+          onClick={handleToggleIncludePersonalDetails}
+          className="flex items-center space-x-2"
+        >
+          {includePersonalDetails ? (
+            <ToggleRight className="h-6 w-6 text-blue-600" />
+          ) : (
+            <ToggleLeft className="h-6 w-6 text-gray-400" />
+          )}
+          <span className="font-medium">Do you want to collect personal details?</span>
+        </button>
       </div>
 
-      {includePersonalDetails && (
-        <div className="space-y-4 animate-in fade-in duration-300">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">Questions</h3>
-            <Button 
-              onClick={handleAddField}
-              variant="outline" 
-              size="sm"
-              className="flex items-center gap-1"
-            >
-              <PlusCircle className="h-4 w-4" /> Add Question
-            </Button>
-          </div>
-
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{
+          opacity: includePersonalDetails ? 1 : 0,
+          height: includePersonalDetails ? "auto" : 0,
+        }}
+        transition={{ duration: 0.3 }}
+        className="overflow-hidden"
+      >
+        {includePersonalDetails && (
           <div className="space-y-4">
-            <DndContext 
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext 
-                items={personalFields.map(field => field.id)}
-                strategy={verticalListSortingStrategy}
+            <div className="flex items-center justify-between">
+              <h4 className="font-medium">Personal Detail Fields</h4>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-2xl bg-transparent"
+                onClick={handleAddField}
               >
-                {personalFields.map((field) => (
-                  <SortableField
-                    key={field.id}
-                    field={field}
-                    onUpdateField={handleUpdateField}
-                    onAddDropdownOption={handleAddDropdownOption}
-                    onUpdateDropdownOption={handleUpdateDropdownOption}
-                    onRemoveDropdownOption={handleRemoveDropdownOption}
-                    onRemoveField={handleRemoveField}
-                    disableRemove={personalFields.length <= 1}
-                  />
-                ))}
-              </SortableContext>
-            </DndContext>
+                <PlusCircle className="h-4 w-4 mr-1" />
+                Add Field
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <DndContext 
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext 
+                  items={personalFields.map(field => field.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {personalFields.map((field, index) => (
+                    <SortableField
+                      key={field.id}
+                      field={field}
+                      index={index}
+                      onUpdateField={handleUpdateField}
+                      onAddDropdownOption={handleAddDropdownOption}
+                      onUpdateDropdownOption={handleUpdateDropdownOption}
+                      onRemoveDropdownOption={handleRemoveDropdownOption}
+                      onRemoveField={handleRemoveField}
+                      disableRemove={personalFields.length <= 1}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </motion.div>
     </div>
   )
 }

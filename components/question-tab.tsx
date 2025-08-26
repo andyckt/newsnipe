@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { 
@@ -10,10 +11,12 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select"
-import { PlusCircle, MinusCircle, Volume2, Loader2, GripVertical, Clock } from "lucide-react"
+import { PlusCircle, MinusCircle, Volume2, Loader2, GripVertical, Clock, Sparkles, Trash2, Check } from "lucide-react"
 import { textToSpeechAndUpload, playAudio, getPresignedUrl } from "@/lib/api-service"
 import { unlockAudio } from "@/lib/audio"
 import { initAudioContext, playMobileAudio } from "@/lib/mobile-audio"
+import { Badge } from "@/components/ui/badge"
+import { Textarea } from "@/components/ui/textarea"
 import {
   DndContext,
   closestCenter,
@@ -31,6 +34,17 @@ import {
   verticalListSortingStrategy
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 
 export type AudioLanguage = "english" | "mandarin"
 
@@ -51,11 +65,14 @@ interface QuestionTabProps {
   onLaunch: (numRecordings: number, language: AudioLanguage, textInputs: TextInput[], mode: "question" | "conversation", timeLimit: TimeLimit) => void;
   language: AudioLanguage;
   onLanguageChange: (newLanguage: AudioLanguage) => void;
+  hideTitle?: boolean;
+  hideSubmitButton?: boolean;
 }
 
 // SortableTextInput component for drag and drop functionality
 interface SortableTextInputProps {
   input: TextInput;
+  index: number;
   onTextChange: (id: string, value: string) => void;
   onTimeLimitChange: (id: string, timeLimit: TimeLimit) => void;
   onGenerateSpeech: (id: string, text: string) => void;
@@ -66,6 +83,7 @@ interface SortableTextInputProps {
 
 function SortableTextInput({ 
   input, 
+  index,
   onTextChange,
   onTimeLimitChange,
   onGenerateSpeech, 
@@ -90,93 +108,106 @@ function SortableTextInput({
   };
 
   return (
-    <div 
+    <motion.div 
       ref={setNodeRef} 
       style={style} 
-      className={`flex items-center gap-2 w-full p-1 rounded-md ${isDragging ? 'bg-gray-100' : ''}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1 }}
+      className={`border rounded-2xl p-4 space-y-3 ${isDragging ? 'bg-gray-100' : ''}`}
     >
-      <div 
-        {...attributes} 
-        {...listeners} 
-        className="cursor-grab active:cursor-grabbing p-2 text-gray-400 hover:text-gray-600 touch-none"
-      >
-        <GripVertical size={20} />
-      </div>
-      
-      <Input
-        value={input.value}
-        onChange={(e) => onTextChange(input.id, e.target.value)}
-        placeholder="Enter text..."
-        className="flex-1"
-      />
-      
-      <div className="flex gap-1 items-center">
-        {/* Time limit select */}
-        <div className="flex items-center">
-          <Select
-            value={input.timeLimit || "no_limit"}
-            onValueChange={(value) => onTimeLimitChange(input.id, value as TimeLimit)}
-          >
-            <SelectTrigger className="h-8 px-2 py-1 text-xs gap-1">
-              <Clock size={14} className="text-gray-500" />
-              <SelectValue>
-                {input.timeLimit === "30_seconds" && "30s"}
-                {input.timeLimit === "1_minute" && "1m"}
-                {input.timeLimit === "2_minutes" && "2m"}
-                {input.timeLimit === "3_minutes" && "3m"}
-                {input.timeLimit === "5_minutes" && "5m"}
-                {(!input.timeLimit || input.timeLimit === "no_limit") && "No limit"}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="no_limit">No limit</SelectItem>
-              <SelectItem value="30_seconds">30 seconds</SelectItem>
-              <SelectItem value="1_minute">1 minute</SelectItem>
-              <SelectItem value="2_minutes">2 minutes</SelectItem>
-              <SelectItem value="3_minutes">3 minutes</SelectItem>
-              <SelectItem value="5_minutes">5 minutes</SelectItem>
-            </SelectContent>
-          </Select>
+      <div className="flex items-start space-x-3">
+        <div 
+          {...attributes} 
+          {...listeners} 
+          className="flex flex-col items-center gap-2 pt-2"
+        >
+          <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
+          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
+            {index + 1}
+          </div>
         </div>
-
-        <Button
-          onClick={() => {
-            unlockAudio(); // Unlock audio on user interaction
-            initAudioContext(); // Initialize Web Audio API context
-            input.audioUrl ? onPlayAudio(input.audioUrl, input.audioKey) : onGenerateSpeech(input.id, input.value);
-          }}
-          disabled={!input.value.trim() || input.isGenerating}
-          variant="ghost"
-          size="icon"
-          className={`h-10 w-10 rounded-full ${
-            input.audioUrl 
-              ? "text-green-500 hover:text-green-700 hover:bg-green-50" 
-              : "text-blue-500 hover:text-blue-700 hover:bg-blue-50"
-          }`}
-          title={input.audioUrl ? "Play generated audio" : "Generate audio"}
-        >
-          {input.isGenerating ? (
-            <Loader2 size={20} className="animate-spin" />
-          ) : (
-            <Volume2 size={20} />
-          )}
-        </Button>
         
-        <Button 
-          onClick={() => onRemove(input.id)} 
-          disabled={disableRemove} 
-          variant="ghost" 
-          size="icon" 
-          className="h-10 w-10 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50"
-        >
-          <MinusCircle size={20} />
-        </Button>
+        <div className="flex-1 space-y-3">
+          <div>
+            <div className="flex items-center space-x-2 mb-2">
+              <Badge variant="outline" className="text-xs rounded-xl">
+                Question {index + 1}
+              </Badge>
+            </div>
+            <Textarea
+              value={input.value}
+              onChange={(e) => onTextChange(input.id, e.target.value)}
+              placeholder="Enter your interview question..."
+              className="min-h-[80px] rounded-2xl"
+            />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-gray-500" />
+              <Label className="text-sm">Time limit:</Label>
+              <Select
+                value={input.timeLimit || "no_limit"}
+                onValueChange={(value) => onTimeLimitChange(input.id, value as TimeLimit)}
+              >
+                <SelectTrigger className="w-32 rounded-2xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="no_limit">No limit</SelectItem>
+                  <SelectItem value="30_seconds">30 seconds</SelectItem>
+                  <SelectItem value="1_minute">1 minute</SelectItem>
+                  <SelectItem value="2_minutes">2 minutes</SelectItem>
+                  <SelectItem value="3_minutes">3 minutes</SelectItem>
+                  <SelectItem value="5_minutes">5 minutes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex gap-1 items-center">
+              <Button
+                onClick={() => {
+                  unlockAudio(); // Unlock audio on user interaction
+                  initAudioContext(); // Initialize Web Audio API context
+                  input.audioUrl ? onPlayAudio(input.audioUrl, input.audioKey) : onGenerateSpeech(input.id, input.value);
+                }}
+                disabled={!input.value.trim() || input.isGenerating}
+                variant="ghost"
+                size="sm"
+                className={`rounded-full ${
+                  input.audioUrl 
+                    ? "text-green-500 hover:text-green-700 hover:bg-green-50" 
+                    : "text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                }`}
+                title={input.audioUrl ? "Play generated audio" : "Generate audio"}
+              >
+                {input.isGenerating ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Volume2 size={16} />
+                )}
+                <span className="ml-1">{input.audioUrl ? "Play" : "Generate"}</span>
+              </Button>
+              
+              <Button 
+                onClick={() => onRemove(input.id)} 
+                disabled={disableRemove} 
+                variant="ghost" 
+                size="sm" 
+                className="rounded-full text-red-500 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 size={16} />
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
-export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTabProps) {
+export function QuestionTab({ onLaunch, language, onLanguageChange, hideTitle = false, hideSubmitButton = false }: QuestionTabProps) {
   const [textInputs, setTextInputs] = useState<TextInput[]>([
     { 
       id: crypto.randomUUID(), 
@@ -187,6 +218,12 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
       timeLimit: "no_limit"
     }
   ])
+  
+  const [showAIDialog, setShowAIDialog] = useState(false)
+  const [aiContext, setAiContext] = useState("")
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [generatedQuestions, setGeneratedQuestions] = useState<string[]>([])
+  const [selectedQuestions, setSelectedQuestions] = useState<Set<number>>(new Set())
   
   // Try to unlock audio on component mount and on any user interaction
   useEffect(() => {
@@ -351,27 +388,187 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
     // Update the array order using arrayMove from dnd-kit
     setTextInputs(arrayMove(textInputs, oldIndex, newIndex))
   }
+
+  const generateAIQuestions = async () => {
+    setIsGenerating(true)
+    setSelectedQuestions(new Set())
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    const sampleQuestions = [
+      "Tell me about your motivation for applying to this position.",
+      "How do you handle challenging situations or setbacks?",
+      "What unique perspective or skills would you bring to our team?",
+      "Describe a time when you had to work with people from different backgrounds.",
+      "What are your long-term goals and how does this opportunity align with them?",
+      "How do you adapt to new environments and cultures?",
+      "What challenges do you expect to face and how would you overcome them?",
+      "Describe a project or achievement you're particularly proud of.",
+    ]
+
+    setGeneratedQuestions(sampleQuestions)
+    setIsGenerating(false)
+  }
+
+  const toggleQuestionSelection = (index: number) => {
+    const newSelected = new Set(selectedQuestions)
+    if (newSelected.has(index)) {
+      newSelected.delete(index)
+    } else {
+      newSelected.add(index)
+    }
+    setSelectedQuestions(newSelected)
+  }
+
+  const addSelectedQuestions = () => {
+    const questionsToAdd = Array.from(selectedQuestions).map((index) => ({
+      id: crypto.randomUUID(),
+      value: generatedQuestions[index],
+      audioUrl: undefined,
+      audioKey: undefined,
+      isGenerating: false,
+      timeLimit: "1_minute" as TimeLimit
+    }))
+
+    setTextInputs(prev => [...prev, ...questionsToAdd])
+    setSelectedQuestions(new Set())
+    setShowAIDialog(false)
+  }
   
   return (
     <div className="w-full">
-      <div className="flex flex-col items-center mb-12 w-full">
-        <h2 className="text-xl font-semibold mb-2">Custom Text Fields</h2>
-        <p className="text-sm text-gray-500 mb-6 text-center">Each text field will correspond to one recording. Drag to reorder.</p>
-        
+      {!hideTitle && (
+        <div className="flex flex-col items-center mb-6 w-full">
+          <h2 className="text-xl font-semibold mb-2">Custom Text Fields</h2>
+          <p className="text-sm text-gray-500 mb-6 text-center">Each text field will correspond to one recording. Drag to reorder.</p>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between mb-4">
+        <h3 className={hideTitle ? "text-lg font-semibold" : "sr-only"}>Interview Questions</h3>
+        <div className="flex items-center space-x-2">
+          <Dialog open={showAIDialog} onOpenChange={setShowAIDialog}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0 hover:from-purple-700 hover:to-blue-700 rounded-2xl"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Let AI Help Me
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-6xl h-[80vh] rounded-3xl">
+              <DialogHeader>
+                <DialogTitle>AI Question Generator</DialogTitle>
+                <DialogDescription>
+                  Describe what you're building and let AI generate relevant interview questions for you.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="grid grid-cols-2 gap-6 h-full">
+                <div className="space-y-4 border-r pr-6">
+                  <div>
+                    <Label htmlFor="context" className="text-base font-medium">
+                      Context
+                    </Label>
+                    <Textarea
+                      id="context"
+                      placeholder="e.g., I'm creating an interview for a student exchange program to Japan. I want to assess their cultural adaptability, language skills, and motivation..."
+                      value={aiContext}
+                      onChange={(e) => setAiContext(e.target.value)}
+                      rows={8}
+                      className="rounded-2xl mt-2"
+                    />
+                  </div>
+                  <Button
+                    onClick={generateAIQuestions}
+                    disabled={!aiContext.trim() || isGenerating}
+                    className="w-full rounded-2xl"
+                    size="lg"
+                  >
+                    {isGenerating ? "Generating..." : "Generate Questions"}
+                  </Button>
+                </div>
+
+                <div className="space-y-4 pl-6">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-base">Generated Questions</h4>
+                    {generatedQuestions.length > 0 && (
+                      <Button
+                        onClick={addSelectedQuestions}
+                        disabled={selectedQuestions.size === 0}
+                        className="rounded-2xl"
+                        size="sm"
+                      >
+                        Add Selected ({selectedQuestions.size})
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2">
+                    {generatedQuestions.length === 0 && !isGenerating && (
+                      <div className="text-center text-muted-foreground py-8">
+                        <Sparkles className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                        <p>Generate questions to see them here</p>
+                      </div>
+                    )}
+
+                    {isGenerating && (
+                      <div className="text-center text-muted-foreground py-8">
+                        <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3"></div>
+                        <p>Generating questions...</p>
+                      </div>
+                    )}
+
+                    {generatedQuestions.map((question, index) => (
+                      <div
+                        key={index}
+                        className={`flex items-start space-x-3 p-4 border rounded-2xl cursor-pointer transition-colors ${
+                          selectedQuestions.has(index)
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
+                        onClick={() => toggleQuestionSelection(index)}
+                      >
+                        <div className="flex items-center mt-1">
+                          <div
+                            className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                              selectedQuestions.has(index) ? "bg-blue-600 border-blue-600" : "border-gray-300"
+                            }`}
+                          >
+                            {selectedQuestions.has(index) && <Check className="h-3 w-3 text-white" />}
+                          </div>
+                        </div>
+                        <p className="text-sm flex-1 leading-relaxed">{question}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Button variant="outline" onClick={handleAddTextInput} className="rounded-2xl bg-transparent">
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Add Question
+          </Button>
+        </div>
+      </div>
+      
+      <div className="flex flex-col gap-4 w-full mb-6">
         <DndContext 
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex flex-col gap-3 w-full">
-            <SortableContext 
-              items={textInputs.map(input => input.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              {textInputs.map((input) => (
+          <SortableContext 
+            items={textInputs.map(input => input.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-4">
+              {textInputs.map((input, index) => (
                 <SortableTextInput
                   key={input.id}
                   input={input}
+                  index={index}
                   onTextChange={handleTextInputChange}
                   onTimeLimitChange={handleTimeLimitChange}
                   onGenerateSpeech={generateSpeech}
@@ -380,31 +577,25 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
                   disableRemove={textInputs.length <= 1}
                 />
               ))}
-            </SortableContext>
-            
-            <Button
-              onClick={handleAddTextInput}
-              variant="outline"
-              className="mt-2 flex items-center gap-2 text-blue-500 hover:text-blue-700 border-dashed"
-            >
-              <PlusCircle size={18} /> Add Text Field
-            </Button>
-          </div>
+            </div>
+          </SortableContext>
         </DndContext>
       </div>
       
-      <div className="flex justify-center">
-        <Button 
-          onClick={() => {
-            unlockAudio(); // Unlock audio on user interaction
-            initAudioContext(); // Initialize Web Audio API context
-            onLaunch(textInputs.length, language, textInputs, "question", "no_limit");
-          }}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-4 text-xl rounded-full"
-        >
-          Launch Recorder
-        </Button>
-      </div>
+      {!hideSubmitButton && (
+        <div className="flex justify-center">
+          <Button 
+            onClick={() => {
+              unlockAudio(); // Unlock audio on user interaction
+              initAudioContext(); // Initialize Web Audio API context
+              onLaunch(textInputs.length, language, textInputs, "question", "no_limit");
+            }}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-4 text-xl rounded-full"
+          >
+            Launch Recorder
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
