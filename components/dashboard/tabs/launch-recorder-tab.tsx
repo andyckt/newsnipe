@@ -24,8 +24,11 @@ import {
   User,
   MessageSquare,
   Video,
-  Settings
+  Settings,
+  ChevronRight,
+  Download
 } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 // App states
 type AppState = "settings" | "personal_details" | "recording" | "completed"
@@ -46,6 +49,17 @@ const steps: Step[] = [
   { id: 4, title: "Review", description: "Finalize and launch", icon: Settings },
 ]
 
+// Recording interface
+interface RecordingData {
+  id: string
+  index: number
+  question: string
+  duration: string
+  date: string
+  url?: string
+  audioUrl?: string
+}
+
 export function LaunchRecorderTab() {
   // State management
   const [appState, setAppState] = useState<AppState>("settings")
@@ -55,6 +69,8 @@ export function LaunchRecorderTab() {
   const [textInputs, setTextInputs] = useState<TextInput[]>([{ id: "default", value: "" }])
   const [mode, setMode] = useState<"question" | "conversation">("question")
   const [timeLimit, setTimeLimit] = useState<TimeLimit>("no_limit")
+  const [completedRecordings, setCompletedRecordings] = useState<RecordingData[]>([])
+  const [recordingProgress, setRecordingProgress] = useState(0)
   
   // Personal details configuration and responses
   const [personalDetailsConfig, setPersonalDetailsConfig] = useState<PersonalDetailsConfig>({
@@ -130,6 +146,14 @@ export function LaunchRecorderTab() {
     completeSession
   } = mode === "question" ? questionRecording : conversationRecording
 
+  // Update recording progress when recording changes
+  useEffect(() => {
+    if (totalRecordings > 0) {
+      const progress = ((currentRecordingIndex) / totalRecordings) * 100;
+      setRecordingProgress(progress);
+    }
+  }, [currentRecordingIndex, totalRecordings]);
+
   // Navigation functions
   const nextStep = () => {
     if (currentStep < steps.length) {
@@ -193,14 +217,34 @@ export function LaunchRecorderTab() {
     await startRecording()
   }
 
-  // Handle session completion
-  if (isSessionComplete) {
-    // Stop the camera and transition to completed state
-    setTimeout(() => {
-      stopCamera() // Stop the camera when recordings are complete
-      setAppState("completed")
-    }, 100)
+  // Handle recording completion
+  const handleRecordingComplete = (index: number) => {
+    // Add the recording to the completed recordings list
+    if (index < textInputs.length) {
+      const newRecording: RecordingData = {
+        id: `recording-${Date.now()}-${index}`,
+        index: index,
+        question: textInputs[index].value,
+        duration: "00:30", // Placeholder, would be actual duration in real app
+        date: new Date().toISOString(),
+        url: `recording-${Date.now()}-${index}.webm`,
+        audioUrl: textInputs[index].audioUrl
+      };
+      
+      setCompletedRecordings(prev => [...prev, newRecording]);
+    }
   }
+
+  // Handle session completion
+  useEffect(() => {
+    if (isSessionComplete) {
+      // Stop the camera and transition to completed state
+      setTimeout(() => {
+        stopCamera() // Stop the camera when recordings are complete
+        setAppState("completed")
+      }, 100)
+    }
+  }, [isSessionComplete, stopCamera]);
 
   // Calculate progress percentage
   const progress = (currentStep / steps.length) * 100
@@ -322,8 +366,22 @@ export function LaunchRecorderTab() {
   // Render based on current app state
   if (appState === "settings") {
     return (
-      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
-        <div className="flex flex-col h-full w-full bg-white md:max-w-4xl md:h-screen p-6">
+      <div className="relative flex flex-col h-screen w-full overflow-hidden bg-background">
+        {/* Animated background gradient */}
+        <motion.div
+          className="absolute inset-0 -z-10 opacity-20"
+          animate={{
+            background: [
+              "radial-gradient(circle at 50% 50%, rgba(120, 41, 190, 0.5) 0%, rgba(53, 71, 125, 0.5) 50%, rgba(0, 0, 0, 0) 100%)",
+              "radial-gradient(circle at 30% 70%, rgba(233, 30, 99, 0.5) 0%, rgba(81, 45, 168, 0.5) 50%, rgba(0, 0, 0, 0) 100%)",
+              "radial-gradient(circle at 70% 30%, rgba(76, 175, 80, 0.5) 0%, rgba(32, 119, 188, 0.5) 50%, rgba(0, 0, 0, 0) 100%)",
+              "radial-gradient(circle at 50% 50%, rgba(120, 41, 190, 0.5) 0%, rgba(53, 71, 125, 0.5) 50%, rgba(0, 0, 0, 0) 100%)",
+            ],
+          }}
+          transition={{ duration: 30, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+        />
+
+        <div className="flex flex-col h-full w-full md:max-w-4xl mx-auto md:h-screen p-6 z-10">
           {/* Progress Steps */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
@@ -376,7 +434,7 @@ export function LaunchRecorderTab() {
           </div>
 
           {/* Step Content */}
-          <Card className="mb-8 rounded-3xl flex-1">
+          <Card className="mb-8 rounded-3xl flex-1 border-opacity-50 bg-white bg-opacity-95">
             <CardContent className="p-6">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -429,8 +487,22 @@ export function LaunchRecorderTab() {
   
   if (appState === "personal_details") {
     return (
-      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
-        <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen">
+      <div className="relative flex flex-col h-screen w-full overflow-hidden bg-background">
+        {/* Animated background gradient */}
+        <motion.div
+          className="absolute inset-0 -z-10 opacity-20"
+          animate={{
+            background: [
+              "radial-gradient(circle at 50% 50%, rgba(120, 41, 190, 0.5) 0%, rgba(53, 71, 125, 0.5) 50%, rgba(0, 0, 0, 0) 100%)",
+              "radial-gradient(circle at 30% 70%, rgba(233, 30, 99, 0.5) 0%, rgba(81, 45, 168, 0.5) 50%, rgba(0, 0, 0, 0) 100%)",
+              "radial-gradient(circle at 70% 30%, rgba(76, 175, 80, 0.5) 0%, rgba(32, 119, 188, 0.5) 50%, rgba(0, 0, 0, 0) 100%)",
+              "radial-gradient(circle at 50% 50%, rgba(120, 41, 190, 0.5) 0%, rgba(53, 71, 125, 0.5) 50%, rgba(0, 0, 0, 0) 100%)",
+            ],
+          }}
+          transition={{ duration: 30, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+        />
+        
+        <div className="flex flex-col h-full w-full md:max-w-sm mx-auto md:h-screen z-10">
           <PersonalDetailsCollector 
             config={personalDetailsConfig}
             onComplete={handlePersonalDetailsComplete}
@@ -443,12 +515,80 @@ export function LaunchRecorderTab() {
   
   if (appState === "completed") {
     return (
-      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
-        <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen p-8 items-center justify-center text-center">
-          <h1 className="text-3xl font-bold mb-4">Thank You!</h1>
-          <p className="text-lg">
-            All {numRecordings} recordings have been completed and downloaded.
-          </p>
+      <div className="relative flex flex-col h-screen w-full overflow-hidden bg-background">
+        {/* Animated background gradient */}
+        <motion.div
+          className="absolute inset-0 -z-10 opacity-20"
+          animate={{
+            background: [
+              "radial-gradient(circle at 50% 50%, rgba(120, 41, 190, 0.5) 0%, rgba(53, 71, 125, 0.5) 50%, rgba(0, 0, 0, 0) 100%)",
+              "radial-gradient(circle at 30% 70%, rgba(233, 30, 99, 0.5) 0%, rgba(81, 45, 168, 0.5) 50%, rgba(0, 0, 0, 0) 100%)",
+              "radial-gradient(circle at 70% 30%, rgba(76, 175, 80, 0.5) 0%, rgba(32, 119, 188, 0.5) 50%, rgba(0, 0, 0, 0) 100%)",
+              "radial-gradient(circle at 50% 50%, rgba(120, 41, 190, 0.5) 0%, rgba(53, 71, 125, 0.5) 50%, rgba(0, 0, 0, 0) 100%)",
+            ],
+          }}
+          transition={{ duration: 30, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+        />
+        
+        <div className="flex flex-col h-full w-full md:max-w-xl mx-auto md:h-screen p-8 items-center justify-center text-center z-10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="rounded-3xl border-opacity-50 bg-white bg-opacity-95 p-8">
+              <CardContent className="flex flex-col items-center">
+                <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-6">
+                  <Check className="h-10 w-10 text-green-600" />
+                </div>
+                
+                <h1 className="text-3xl font-bold mb-4">Thank You!</h1>
+                <p className="text-lg mb-8">
+                  All {numRecordings} recordings have been completed and downloaded.
+                </p>
+                
+                <div className="w-full space-y-4">
+                  <h2 className="text-xl font-semibold">Your Recordings</h2>
+                  
+                  {completedRecordings.length > 0 ? (
+                    <div className="space-y-2">
+                      {completedRecordings.map((recording, index) => (
+                        <div key={recording.id} className="flex items-center justify-between p-3 border rounded-xl">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                              <span className="text-sm font-medium text-blue-600">{index + 1}</span>
+                            </div>
+                            <div className="text-left">
+                              <p className="font-medium truncate max-w-[200px]">{recording.question}</p>
+                              <p className="text-xs text-muted-foreground">Recorded {new Date(recording.date).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="icon" className="rounded-full">
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground text-center py-4">No recordings found</p>
+                  )}
+                  
+                  <div className="pt-4">
+                    <Button 
+                      onClick={() => {
+                        setAppState("settings");
+                        setCurrentStep(1);
+                        setCompletedRecordings([]);
+                      }}
+                      className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 w-full"
+                    >
+                      Create New Recording Session
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </div>
     )
@@ -456,9 +596,20 @@ export function LaunchRecorderTab() {
 
   // Recording state
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
-      <div className="flex flex-col h-full w-full bg-black md:max-w-sm md:h-screen">
+    <div className="relative flex flex-col h-screen w-full overflow-hidden bg-background">
+      <div className="flex flex-col h-full w-full bg-black md:max-w-sm md:mx-auto md:h-screen">
         <CameraView videoRef={videoRef} countdown={countdown} recordingTimeLeft={recordingTimeLeft} />
+        
+        {/* Recording progress */}
+        <div className="absolute top-4 left-4 right-4 z-20">
+          <div className="space-y-1">
+            <div className="flex justify-between items-center text-xs text-white">
+              <span>Question {currentRecordingIndex + 1} of {totalRecordings}</span>
+              <span>{Math.round(recordingProgress)}% Complete</span>
+            </div>
+            <Progress value={recordingProgress} className="h-1" />
+          </div>
+        </div>
 
         <CameraControls
           showPermissionButton={showPermissionButton}
@@ -470,8 +621,14 @@ export function LaunchRecorderTab() {
           isLastRecording={isLastRecording}
           onRequestPermissions={requestPermissions}
           onStartRecording={handleStartRecording}
-          onNextRecording={nextRecording}
-          onCompleteSession={completeSession}
+          onNextRecording={() => {
+            handleRecordingComplete(currentRecordingIndex);
+            nextRecording();
+          }}
+          onCompleteSession={() => {
+            handleRecordingComplete(currentRecordingIndex);
+            completeSession();
+          }}
         />
       </div>
     </div>
