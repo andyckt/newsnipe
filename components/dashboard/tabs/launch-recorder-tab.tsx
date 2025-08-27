@@ -576,8 +576,8 @@ export function LaunchRecorderTab() {
 
   // Recording state
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background">
-      <div className="flex flex-col h-[80vh] w-full bg-black md:max-w-sm md:mx-auto">
+    <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
+      <div className="flex flex-col h-full w-full bg-black md:max-w-sm md:h-screen">
         <CameraView videoRef={videoRef} countdown={countdown} recordingTimeLeft={recordingTimeLeft} />
         
         {/* Recording progress */}
