@@ -563,119 +563,12 @@ export function LaunchRecorderTab() {
   
   if (appState === "completed") {
     return (
-      <div className="relative min-h-screen overflow-hidden bg-background">
-        {/* Animated background gradient */}
-        <motion.div
-          className="absolute inset-0 -z-10 opacity-20"
-          animate={{
-            background: [
-              "radial-gradient(circle at 50% 50%, rgba(120, 41, 190, 0.5) 0%, rgba(53, 71, 125, 0.5) 50%, rgba(0, 0, 0, 0) 100%)",
-              "radial-gradient(circle at 30% 70%, rgba(233, 30, 99, 0.5) 0%, rgba(81, 45, 168, 0.5) 50%, rgba(0, 0, 0, 0) 100%)",
-              "radial-gradient(circle at 70% 30%, rgba(76, 175, 80, 0.5) 0%, rgba(32, 119, 188, 0.5) 50%, rgba(0, 0, 0, 0) 100%)",
-              "radial-gradient(circle at 50% 50%, rgba(120, 41, 190, 0.5) 0%, rgba(53, 71, 125, 0.5) 50%, rgba(0, 0, 0, 0) 100%)",
-            ],
-          }}
-          transition={{ duration: 30, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-        />
-        
-        <div className="p-8 max-w-xl mx-auto text-center z-10">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="w-full"
-          >
-            <Card className="rounded-3xl border-opacity-50 bg-white bg-opacity-95 shadow-lg">
-              <CardContent className="flex flex-col items-center p-8">
-                <motion.div 
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.2, duration: 0.5, type: "spring" }}
-                  className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center mb-6 shadow-md"
-                >
-                  <Check className="h-10 w-10 text-white" />
-                </motion.div>
-                
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4, duration: 0.5 }}
-                >
-                  <h1 className="text-3xl font-bold mb-2">Success!</h1>
-                  <p className="text-lg mb-8 text-gray-600">
-                    All {numRecordings} recordings have been completed and downloaded.
-                  </p>
-                </motion.div>
-                
-                <div className="w-full space-y-6">
-                  <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.6, duration: 0.5 }}
-                    className="text-left"
-                  >
-                    <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
-                      <Video className="h-5 w-5 text-blue-600" />
-                      Your Recordings
-                    </h2>
-                    
-                    {completedRecordings.length > 0 ? (
-                      <div className="space-y-3">
-                        {completedRecordings.map((recording, index) => (
-                          <motion.div 
-                            key={recording.id} 
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.7 + (index * 0.1), duration: 0.3 }}
-                            className="flex items-center justify-between p-3 border border-blue-100 bg-blue-50/30 rounded-xl hover:bg-blue-50 transition-colors"
-                          >
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-sm">
-                                <span className="text-sm font-medium text-white">{index + 1}</span>
-                              </div>
-                              <div className="text-left">
-                                <p className="font-medium truncate max-w-[200px]">{recording.question}</p>
-                                <p className="text-xs text-muted-foreground">Recorded {new Date(recording.date).toLocaleDateString()}</p>
-                              </div>
-                            </div>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="rounded-full hover:bg-blue-100 hover:text-blue-700 transition-colors"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          </motion.div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 border border-dashed border-gray-300 rounded-xl">
-                        <p className="text-muted-foreground">No recordings found</p>
-                      </div>
-                    )}
-                  </motion.div>
-                  
-                  <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.8 + (completedRecordings.length * 0.1), duration: 0.5 }}
-                    className="pt-4"
-                  >
-                    <Button 
-                      onClick={() => {
-                        setAppState("settings");
-                        setCurrentStep(1);
-                        setCompletedRecordings([]);
-                      }}
-                      className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 w-full h-12 shadow-md"
-                    >
-                      Create New Recording Session
-                    </Button>
-                  </motion.div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
+        <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen p-8 items-center justify-center text-center">
+          <h1 className="text-3xl font-bold mb-4">Thank You!</h1>
+          <p className="text-lg">
+            All {numRecordings} recordings have been completed and downloaded.
+          </p>
         </div>
       </div>
     )
