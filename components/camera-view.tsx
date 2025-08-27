@@ -24,7 +24,7 @@ export function CameraView({ videoRef, countdown, recordingTimeLeft }: CameraVie
       )}
 
       {/* Recording Time Left */}
-      {recordingTimeLeft !== null && recordingTimeLeft !== undefined && (
+      {recordingTimeLeft !== null && (
         <div className="absolute top-4 right-4 bg-black bg-opacity-50 rounded-lg px-3 py-1">
           <div className="text-white text-xl font-semibold">
             {Math.floor(recordingTimeLeft / 60)}:{(recordingTimeLeft % 60).toString().padStart(2, '0')}
