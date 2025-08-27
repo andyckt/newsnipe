@@ -71,7 +71,6 @@ export function LaunchRecorderTab() {
   const [textInputs, setTextInputs] = useState<TextInput[]>([{ id: "default", value: "" }])
   const [mode, setMode] = useState<"question" | "conversation">("question")
   const [timeLimit, setTimeLimit] = useState<TimeLimit>("no_limit")
-  const [completedRecordings, setCompletedRecordings] = useState<RecordingData[]>([])
   const [recordingProgress, setRecordingProgress] = useState(0)
   
   // Personal details configuration and responses
@@ -186,17 +185,16 @@ export function LaunchRecorderTab() {
   }
 
   // Handle launching the recorder with selected settings
-  const handleLaunch = () => {
+  const handleLaunch = (selectedNumRecordings: number, selectedLanguage: AudioLanguage, selectedTextInputs: TextInput[], selectedMode: "question" | "conversation", selectedTimeLimit: TimeLimit) => {
     // The number of recordings is now determined by the number of text inputs
-    setNumRecordings(textInputs.length)
+    setNumRecordings(selectedTextInputs.length)
+    setAudioLanguage(selectedLanguage)
+    setTextInputs(selectedTextInputs)
+    setMode(selectedMode)
+    setTimeLimit(selectedTimeLimit)
     
-    // If personal details are included, go to personal details collection first
-    if (personalDetailsConfig.includePersonalDetails) {
-      setAppState("personal_details")
-    } else {
-      // Skip personal details and go straight to recording
-      setAppState("recording")
-    }
+    // Go to personal details collection first
+    setAppState("personal_details")
   }
   
   // Handle completion of personal details
@@ -219,34 +217,15 @@ export function LaunchRecorderTab() {
     await startRecording()
   }
 
-  // Handle recording completion
-  const handleRecordingComplete = (index: number) => {
-    // Add the recording to the completed recordings list
-    if (index < textInputs.length) {
-      const newRecording: RecordingData = {
-        id: `recording-${Date.now()}-${index}`,
-        index: index,
-        question: textInputs[index].value,
-        duration: "00:30", // Placeholder, would be actual duration in real app
-        date: new Date().toISOString(),
-        url: `recording-${Date.now()}-${index}.webm`,
-        audioUrl: textInputs[index].audioUrl
-      };
-      
-      setCompletedRecordings(prev => [...prev, newRecording]);
-    }
-  }
-
   // Handle session completion
-  useEffect(() => {
-    if (isSessionComplete) {
-      // Stop the camera and transition to completed state
-      setTimeout(() => {
-        stopCamera() // Stop the camera when recordings are complete
-        setAppState("completed")
-      }, 100)
-    }
-  }, [isSessionComplete, stopCamera]);
+  // Using if statement directly instead of useEffect
+  if (isSessionComplete) {
+    // Stop the camera and transition to completed state
+    setTimeout(() => {
+      stopCamera() // Stop the camera when recordings are complete
+      setAppState("completed")
+    }, 100)
+  }
 
   // Calculate progress percentage
   const progress = (currentStep / steps.length) * 100
@@ -258,13 +237,7 @@ export function LaunchRecorderTab() {
         return (
           <div className="space-y-6">
             <SettingsScreen 
-              onLaunch={(numRec, lang, inputs, selectedMode, selectedTimeLimit) => {
-                setAudioLanguage(lang)
-                setTextInputs(inputs)
-                setMode(selectedMode)
-                setTimeLimit(selectedTimeLimit)
-                nextStep()
-              }} 
+              onLaunch={handleLaunch}
               personalDetailsConfig={personalDetailsConfig}
               onPersonalDetailsConfigChange={setPersonalDetailsConfig}
               currentStep={currentStep}
@@ -277,13 +250,7 @@ export function LaunchRecorderTab() {
         return (
           <div className="space-y-6">
             <SettingsScreen 
-              onLaunch={(numRec, lang, inputs, selectedMode, selectedTimeLimit) => {
-                setAudioLanguage(lang)
-                setTextInputs(inputs)
-                setMode(selectedMode)
-                setTimeLimit(selectedTimeLimit)
-                nextStep()
-              }} 
+              onLaunch={handleLaunch}
               personalDetailsConfig={personalDetailsConfig}
               onPersonalDetailsConfigChange={setPersonalDetailsConfig}
               currentStep={currentStep}
@@ -296,14 +263,7 @@ export function LaunchRecorderTab() {
         return (
           <div className="space-y-6">
             <SettingsScreen 
-              onLaunch={(numRec, lang, inputs, selectedMode, selectedTimeLimit) => {
-                // Update the inputs immediately when changed
-                setAudioLanguage(lang)
-                setTextInputs(inputs)
-                setMode(selectedMode)
-                setTimeLimit(selectedTimeLimit)
-                // Don't call nextStep() here - we'll use the Next button
-              }} 
+              onLaunch={handleLaunch}
               personalDetailsConfig={personalDetailsConfig}
               onPersonalDetailsConfigChange={setPersonalDetailsConfig}
               currentStep={currentStep}
@@ -518,7 +478,7 @@ export function LaunchRecorderTab() {
                 </Button>
               ) : (
                 <Button
-                  onClick={handleLaunch}
+                  onClick={() => handleLaunch(textInputs.length, audioLanguage, textInputs, mode, timeLimit)}
                   disabled={!canProceed()}
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-2xl"
                 >
@@ -601,14 +561,8 @@ export function LaunchRecorderTab() {
           isLastRecording={isLastRecording}
           onRequestPermissions={requestPermissions}
           onStartRecording={handleStartRecording}
-          onNextRecording={() => {
-            handleRecordingComplete(currentRecordingIndex);
-            nextRecording();
-          }}
-          onCompleteSession={() => {
-            handleRecordingComplete(currentRecordingIndex);
-            completeSession();
-          }}
+          onNextRecording={nextRecording}
+          onCompleteSession={completeSession}
         />
       </div>
     </div>
