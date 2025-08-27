@@ -41,7 +41,6 @@ export function SettingsScreen({
           <div className="space-y-6">
             <div className="text-center">
               <h3 className="text-lg font-semibold mb-2">Select Interview Language</h3>
-              <p className="text-muted-foreground">Choose the language for the audio prompts</p>
             </div>
             
             <RadioGroup

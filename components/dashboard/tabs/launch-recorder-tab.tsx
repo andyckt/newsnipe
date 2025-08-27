@@ -478,14 +478,8 @@ export function LaunchRecorderTab() {
           </div>
 
           {/* Progress Bar */}
-          <div className="space-y-2 mb-6">
+          <div className="mb-6">
             <Progress value={progress} className="h-2 rounded-full bg-gray-100" />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>
-                Step {currentStep} of {steps.length}
-              </span>
-              <span>{Math.round(progress)}% Complete</span>
-            </div>
           </div>
 
           {/* Step Content */}
