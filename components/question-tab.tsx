@@ -108,106 +108,88 @@ function SortableTextInput({
   };
 
   return (
-    <motion.div 
+    <div 
       ref={setNodeRef} 
       style={style} 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      className={`border rounded-2xl p-4 space-y-3 ${
-        isDragging 
-          ? 'bg-gray-100 border-blue-300 shadow-lg' 
-          : 'hover:border-gray-300 transition-colors'
-      }`}
+      className={`flex items-center gap-2 w-full p-1 rounded-md ${isDragging ? 'bg-gray-100' : ''}`}
     >
-      <div className="flex items-start space-x-3">
-        <div 
-          {...attributes} 
-          {...listeners} 
-          className="flex flex-col items-center gap-2 pt-2"
-        >
-          <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
-          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
-            {index + 1}
-          </div>
-        </div>
-        
-        <div className="flex-1 space-y-3">
-          <div>
-            <div className="flex items-center space-x-2 mb-2">
-              <Badge variant="outline" className="text-xs rounded-xl">
-                Question {index + 1}
-              </Badge>
-            </div>
-            <Textarea
-              value={input.value}
-              onChange={(e) => onTextChange(input.id, e.target.value)}
-              placeholder="Enter your interview question..."
-              className="min-h-[80px] rounded-2xl"
-            />
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-gray-500" />
-              <Label className="text-sm">Time limit:</Label>
-              <Select
-                value={input.timeLimit || "no_limit"}
-                onValueChange={(value) => onTimeLimitChange(input.id, value as TimeLimit)}
-              >
-                <SelectTrigger className="w-32 rounded-2xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="no_limit">No limit</SelectItem>
-                  <SelectItem value="30_seconds">30 seconds</SelectItem>
-                  <SelectItem value="1_minute">1 minute</SelectItem>
-                  <SelectItem value="2_minutes">2 minutes</SelectItem>
-                  <SelectItem value="3_minutes">3 minutes</SelectItem>
-                  <SelectItem value="5_minutes">5 minutes</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex gap-1 items-center">
-              <Button
-                onClick={() => {
-                  unlockAudio(); // Unlock audio on user interaction
-                  initAudioContext(); // Initialize Web Audio API context
-                  input.audioUrl ? onPlayAudio(input.audioUrl, input.audioKey) : onGenerateSpeech(input.id, input.value);
-                }}
-                disabled={!input.value.trim() || input.isGenerating}
-                variant="ghost"
-                size="sm"
-                className={`rounded-full ${
-                  input.audioUrl 
-                    ? "text-green-500 hover:text-green-700 hover:bg-green-50" 
-                    : "text-blue-500 hover:text-blue-700 hover:bg-blue-50"
-                }`}
-                title={input.audioUrl ? "Play generated audio" : "Generate audio"}
-              >
-                {input.isGenerating ? (
-                  <Loader2 size={16} className="animate-spin" />
-                ) : (
-                  <Volume2 size={16} />
-                )}
-                <span className="ml-1">{input.audioUrl ? "Play" : "Generate"}</span>
-              </Button>
-              
-              <Button 
-                onClick={() => onRemove(input.id)} 
-                disabled={disableRemove} 
-                variant="ghost" 
-                size="sm" 
-                className="rounded-full text-red-500 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 size={16} />
-              </Button>
-            </div>
-          </div>
-        </div>
+      <div 
+        {...attributes} 
+        {...listeners} 
+        className="cursor-grab active:cursor-grabbing p-2 text-gray-400 hover:text-gray-600 touch-none"
+      >
+        <GripVertical size={20} />
       </div>
-    </motion.div>
+      
+      <Input
+        value={input.value}
+        onChange={(e) => onTextChange(input.id, e.target.value)}
+        placeholder="Enter text..."
+        className="flex-1"
+      />
+      
+      <div className="flex gap-1 items-center">
+        {/* Time limit select */}
+        <div className="flex items-center">
+          <Select
+            value={input.timeLimit || "no_limit"}
+            onValueChange={(value) => onTimeLimitChange(input.id, value as TimeLimit)}
+          >
+            <SelectTrigger className="h-8 px-2 py-1 text-xs gap-1">
+              <Clock size={14} className="text-gray-500" />
+              <SelectValue>
+                {input.timeLimit === "30_seconds" && "30s"}
+                {input.timeLimit === "1_minute" && "1m"}
+                {input.timeLimit === "2_minutes" && "2m"}
+                {input.timeLimit === "3_minutes" && "3m"}
+                {input.timeLimit === "5_minutes" && "5m"}
+                {(!input.timeLimit || input.timeLimit === "no_limit") && "No limit"}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="no_limit">No limit</SelectItem>
+              <SelectItem value="30_seconds">30 seconds</SelectItem>
+              <SelectItem value="1_minute">1 minute</SelectItem>
+              <SelectItem value="2_minutes">2 minutes</SelectItem>
+              <SelectItem value="3_minutes">3 minutes</SelectItem>
+              <SelectItem value="5_minutes">5 minutes</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Button
+          onClick={() => {
+            unlockAudio(); // Unlock audio on user interaction
+            initAudioContext(); // Initialize Web Audio API context
+            input.audioUrl ? onPlayAudio(input.audioUrl, input.audioKey) : onGenerateSpeech(input.id, input.value);
+          }}
+          disabled={!input.value.trim() || input.isGenerating}
+          variant="ghost"
+          size="icon"
+          className={`h-10 w-10 rounded-full ${input.audioUrl 
+            ? "text-green-500 hover:text-green-700 hover:bg-green-50" 
+            : "text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+          }`}
+          title={input.audioUrl ? "Play generated audio" : "Generate audio"}
+        >
+          {input.isGenerating ? (
+            <Loader2 size={20} className="animate-spin" />
+          ) : (
+            <Volume2 size={20} />
+          )}
+        </Button>
+        
+        <Button 
+          onClick={() => onRemove(input.id)} 
+          disabled={disableRemove} 
+          variant="ghost" 
+          size="icon" 
+          className="h-10 w-10 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50"
+        >
+          <MinusCircle size={20} />
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -585,10 +567,6 @@ export function QuestionTab({ onLaunch, language, onLanguageChange, hideTitle = 
               </div>
             </DialogContent>
           </Dialog>
-          <Button variant="outline" onClick={handleAddTextInput} className="rounded-2xl bg-transparent">
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Add Question
-          </Button>
         </div>
       </div>
       
@@ -598,11 +576,11 @@ export function QuestionTab({ onLaunch, language, onLanguageChange, hideTitle = 
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
-          <SortableContext 
-            items={textInputs.map(input => input.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="space-y-4">
+          <div className="flex flex-col gap-3 w-full">
+            <SortableContext 
+              items={textInputs.map(input => input.id)}
+              strategy={verticalListSortingStrategy}
+            >
               {textInputs.map((input, index) => (
                 <SortableTextInput
                   key={input.id}
@@ -616,8 +594,16 @@ export function QuestionTab({ onLaunch, language, onLanguageChange, hideTitle = 
                   disableRemove={textInputs.length <= 1}
                 />
               ))}
-            </div>
-          </SortableContext>
+            </SortableContext>
+            
+            <Button
+              onClick={handleAddTextInput}
+              variant="outline"
+              className="mt-2 flex items-center gap-2 text-blue-500 hover:text-blue-700 border-dashed"
+            >
+              <PlusCircle size={18} /> Add Text Field
+            </Button>
+          </div>
         </DndContext>
       </div>
       
