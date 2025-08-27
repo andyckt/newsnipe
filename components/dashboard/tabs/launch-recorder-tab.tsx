@@ -12,6 +12,7 @@ import { useConversationRecording } from "@/hooks/use-conversation-recording"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import { Badge } from "@/components/ui/badge"
 import { unlockAudio } from "@/lib/audio"
 import { initAudioContext } from "@/lib/mobile-audio"
 import PersonalDetailsCollector, { PersonalDetailField, PersonalDetailsConfig, PersonalDetailsResponse } from "@/components/personal-details-collector"
@@ -26,7 +27,8 @@ import {
   Video,
   Settings,
   ChevronRight,
-  Download
+  Download,
+  Volume2
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -312,48 +314,101 @@ export function LaunchRecorderTab() {
       case 4: // Review step
         return (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold">Review Your Settings</h3>
-            <div className="space-y-4">
-              <Card className="rounded-3xl">
-                <CardHeader>
-                  <CardTitle className="text-base">Language & Details</CardTitle>
+            <h3 className="text-lg font-semibold text-center mb-6">Review Your Settings</h3>
+            <div className="space-y-6">
+              <Card className="rounded-3xl border-blue-100 shadow-sm">
+                <CardHeader className="bg-blue-50/50 rounded-t-3xl border-b border-blue-100 pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Languages className="h-5 w-5 text-blue-600" />
+                    Language Settings
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Language: {audioLanguage === "english" ? "English" : "Mandarin"}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Personal Details: {personalDetailsConfig.includePersonalDetails ? `${personalDetailsConfig.personalFields.length} fields` : "Not collected"}
-                  </p>
+                <CardContent className="pt-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">Interview Language</p>
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                      {audioLanguage === "english" ? "English" : "Mandarin"}
+                    </Badge>
+                  </div>
                 </CardContent>
               </Card>
 
-              <Card className="rounded-3xl">
-                <CardHeader>
-                  <CardTitle className="text-base">
-                    Questions ({textInputs.filter(q => q.value.trim()).length})
+              <Card className="rounded-3xl border-green-100 shadow-sm">
+                <CardHeader className="bg-green-50/50 rounded-t-3xl border-b border-green-100 pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <User className="h-5 w-5 text-green-600" />
+                    Personal Details
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
+                <CardContent className="pt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium">Collection Status</p>
+                    <Badge variant="outline" className={personalDetailsConfig.includePersonalDetails 
+                      ? "bg-green-50 text-green-700 border-green-200"
+                      : "bg-gray-100 text-gray-700 border-gray-200"}>
+                      {personalDetailsConfig.includePersonalDetails ? "Enabled" : "Disabled"}
+                    </Badge>
+                  </div>
+                  
+                  {personalDetailsConfig.includePersonalDetails && (
+                    <div className="mt-4 space-y-2 border-t border-green-100 pt-3">
+                      <p className="text-sm font-medium">Fields to Collect ({personalDetailsConfig.personalFields.length})</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {personalDetailsConfig.personalFields.map((field, index) => (
+                          <div key={field.id} className="text-xs px-2 py-1 bg-green-50/50 rounded-lg border border-green-100 flex items-center justify-between">
+                            <span>{field.label}</span>
+                            {field.required && <span className="text-green-600 text-[10px]">Required</span>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-3xl border-purple-100 shadow-sm">
+                <CardHeader className="bg-purple-50/50 rounded-t-3xl border-b border-purple-100 pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5 text-purple-600" />
+                    Interview Questions ({textInputs.filter(q => q.value.trim()).length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <div className="space-y-3">
                     {textInputs
                       .filter(q => q.value.trim())
                       .map((question, index) => (
-                        <div key={question.id} className="text-sm">
-                          <span className="font-medium">{index + 1}.</span> {question.value}
-                          <span className="text-muted-foreground ml-2">
-                            ({question.timeLimit === "no_limit" ? "No limit" : 
-                              question.timeLimit === "30_seconds" ? "30s" :
-                              question.timeLimit === "1_minute" ? "1m" :
-                              question.timeLimit === "2_minutes" ? "2m" :
-                              question.timeLimit === "3_minutes" ? "3m" :
-                              question.timeLimit === "5_minutes" ? "5m" : ""})
-                          </span>
+                        <div key={question.id} className="p-3 bg-purple-50/50 rounded-xl border border-purple-100">
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center text-xs font-medium text-purple-700">
+                              {index + 1}
+                            </div>
+                            <p className="text-sm font-medium">Question {index + 1}</p>
+                            <Badge variant="outline" className="ml-auto bg-white text-purple-700 border-purple-200 text-xs">
+                              {question.timeLimit === "no_limit" ? "No time limit" : 
+                               question.timeLimit === "30_seconds" ? "30 seconds" :
+                               question.timeLimit === "1_minute" ? "1 minute" :
+                               question.timeLimit === "2_minutes" ? "2 minutes" :
+                               question.timeLimit === "3_minutes" ? "3 minutes" :
+                               question.timeLimit === "5_minutes" ? "5 minutes" : ""}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-700">{question.value}</p>
+                          {question.audioUrl && (
+                            <div className="mt-1 text-xs text-purple-600 flex items-center gap-1">
+                              <Volume2 className="h-3 w-3" />
+                              Audio prompt ready
+                            </div>
+                          )}
                         </div>
                       ))}
                   </div>
                 </CardContent>
               </Card>
+              
+              <div className="text-center text-sm text-muted-foreground mt-6">
+                Ready to launch your interview? Click the "Launch Recorder" button below to begin.
+              </div>
             </div>
           </div>
         )
@@ -366,7 +421,7 @@ export function LaunchRecorderTab() {
   // Render based on current app state
   if (appState === "settings") {
     return (
-      <div className="relative flex flex-col h-screen w-full overflow-hidden bg-background">
+      <div className="relative min-h-screen overflow-hidden bg-background">
         {/* Animated background gradient */}
         <motion.div
           className="absolute inset-0 -z-10 opacity-20"
@@ -381,7 +436,7 @@ export function LaunchRecorderTab() {
           transition={{ duration: 30, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
         />
 
-        <div className="flex flex-col h-full w-full md:max-w-4xl mx-auto md:h-screen p-6 z-10">
+        <div className="p-6 max-w-4xl mx-auto z-10">
           {/* Progress Steps */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
@@ -395,14 +450,14 @@ export function LaunchRecorderTab() {
                     <div className="flex flex-col items-center">
                       <div
                         className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-                          currentStep > step.id
+                          isCompleted
                             ? "bg-green-600 text-white"
-                            : currentStep === step.id
+                            : isActive
                               ? "bg-blue-600 text-white"
                               : "bg-gray-200 text-gray-600"
                         }`}
                       >
-                        {currentStep > step.id ? <Check className="h-5 w-5" /> : <StepIcon className="h-5 w-5" />}
+                        {isCompleted ? <Check className="h-5 w-5" /> : <StepIcon className="h-5 w-5" />}
                       </div>
                       <div className="mt-2 text-center">
                         <p className="text-sm font-medium">{step.title}</p>
@@ -412,7 +467,7 @@ export function LaunchRecorderTab() {
                     {index < steps.length - 1 && (
                       <div
                         className={`flex-1 h-0.5 mx-4 transition-colors ${
-                          currentStep > step.id ? "bg-green-600" : "bg-gray-200"
+                          isCompleted ? "bg-green-600" : "bg-gray-200"
                         }`}
                       />
                     )}
@@ -424,7 +479,7 @@ export function LaunchRecorderTab() {
 
           {/* Progress Bar */}
           <div className="space-y-2 mb-6">
-            <Progress value={progress} className="h-2" />
+            <Progress value={progress} className="h-2 rounded-full bg-gray-100" />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>
                 Step {currentStep} of {steps.length}
@@ -434,19 +489,17 @@ export function LaunchRecorderTab() {
           </div>
 
           {/* Step Content */}
-          <Card className="mb-8 rounded-3xl flex-1 border-opacity-50 bg-white bg-opacity-95">
+          <Card className="mb-8 rounded-3xl">
             <CardContent className="p-6">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentStep}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {renderStepContent()}
-                </motion.div>
-              </AnimatePresence>
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                {renderStepContent()}
+              </motion.div>
             </CardContent>
           </Card>
 
@@ -515,7 +568,7 @@ export function LaunchRecorderTab() {
   
   if (appState === "completed") {
     return (
-      <div className="relative flex flex-col h-screen w-full overflow-hidden bg-background">
+      <div className="relative min-h-screen overflow-hidden bg-background">
         {/* Animated background gradient */}
         <motion.div
           className="absolute inset-0 -z-10 opacity-20"
@@ -530,61 +583,100 @@ export function LaunchRecorderTab() {
           transition={{ duration: 30, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
         />
         
-        <div className="flex flex-col h-full w-full md:max-w-xl mx-auto md:h-screen p-8 items-center justify-center text-center z-10">
+        <div className="p-8 max-w-xl mx-auto text-center z-10">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
+            className="w-full"
           >
-            <Card className="rounded-3xl border-opacity-50 bg-white bg-opacity-95 p-8">
-              <CardContent className="flex flex-col items-center">
-                <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-6">
-                  <Check className="h-10 w-10 text-green-600" />
-                </div>
+            <Card className="rounded-3xl border-opacity-50 bg-white bg-opacity-95 shadow-lg">
+              <CardContent className="flex flex-col items-center p-8">
+                <motion.div 
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.2, duration: 0.5, type: "spring" }}
+                  className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center mb-6 shadow-md"
+                >
+                  <Check className="h-10 w-10 text-white" />
+                </motion.div>
                 
-                <h1 className="text-3xl font-bold mb-4">Thank You!</h1>
-                <p className="text-lg mb-8">
-                  All {numRecordings} recordings have been completed and downloaded.
-                </p>
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                >
+                  <h1 className="text-3xl font-bold mb-2">Success!</h1>
+                  <p className="text-lg mb-8 text-gray-600">
+                    All {numRecordings} recordings have been completed and downloaded.
+                  </p>
+                </motion.div>
                 
-                <div className="w-full space-y-4">
-                  <h2 className="text-xl font-semibold">Your Recordings</h2>
-                  
-                  {completedRecordings.length > 0 ? (
-                    <div className="space-y-2">
-                      {completedRecordings.map((recording, index) => (
-                        <div key={recording.id} className="flex items-center justify-between p-3 border rounded-xl">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                              <span className="text-sm font-medium text-blue-600">{index + 1}</span>
+                <div className="w-full space-y-6">
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.6, duration: 0.5 }}
+                    className="text-left"
+                  >
+                    <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+                      <Video className="h-5 w-5 text-blue-600" />
+                      Your Recordings
+                    </h2>
+                    
+                    {completedRecordings.length > 0 ? (
+                      <div className="space-y-3">
+                        {completedRecordings.map((recording, index) => (
+                          <motion.div 
+                            key={recording.id} 
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: 0.7 + (index * 0.1), duration: 0.3 }}
+                            className="flex items-center justify-between p-3 border border-blue-100 bg-blue-50/30 rounded-xl hover:bg-blue-50 transition-colors"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-sm">
+                                <span className="text-sm font-medium text-white">{index + 1}</span>
+                              </div>
+                              <div className="text-left">
+                                <p className="font-medium truncate max-w-[200px]">{recording.question}</p>
+                                <p className="text-xs text-muted-foreground">Recorded {new Date(recording.date).toLocaleDateString()}</p>
+                              </div>
                             </div>
-                            <div className="text-left">
-                              <p className="font-medium truncate max-w-[200px]">{recording.question}</p>
-                              <p className="text-xs text-muted-foreground">Recorded {new Date(recording.date).toLocaleDateString()}</p>
-                            </div>
-                          </div>
-                          <Button variant="ghost" size="icon" className="rounded-full">
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground text-center py-4">No recordings found</p>
-                  )}
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="rounded-full hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </motion.div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 border border-dashed border-gray-300 rounded-xl">
+                        <p className="text-muted-foreground">No recordings found</p>
+                      </div>
+                    )}
+                  </motion.div>
                   
-                  <div className="pt-4">
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.8 + (completedRecordings.length * 0.1), duration: 0.5 }}
+                    className="pt-4"
+                  >
                     <Button 
                       onClick={() => {
                         setAppState("settings");
                         setCurrentStep(1);
                         setCompletedRecordings([]);
                       }}
-                      className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 w-full"
+                      className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 w-full h-12 shadow-md"
                     >
                       Create New Recording Session
                     </Button>
-                  </div>
+                  </motion.div>
                 </div>
               </CardContent>
             </Card>
@@ -596,8 +688,8 @@ export function LaunchRecorderTab() {
 
   // Recording state
   return (
-    <div className="relative flex flex-col h-screen w-full overflow-hidden bg-background">
-      <div className="flex flex-col h-full w-full bg-black md:max-w-sm md:mx-auto md:h-screen">
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      <div className="flex flex-col h-[80vh] w-full bg-black md:max-w-sm md:mx-auto">
         <CameraView videoRef={videoRef} countdown={countdown} recordingTimeLeft={recordingTimeLeft} />
         
         {/* Recording progress */}

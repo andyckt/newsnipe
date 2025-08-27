@@ -114,7 +114,11 @@ function SortableTextInput({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className={`border rounded-2xl p-4 space-y-3 ${isDragging ? 'bg-gray-100' : ''}`}
+      className={`border rounded-2xl p-4 space-y-3 ${
+        isDragging 
+          ? 'bg-gray-100 border-blue-300 shadow-lg' 
+          : 'hover:border-gray-300 transition-colors'
+      }`}
     >
       <div className="flex items-start space-x-3">
         <div 
@@ -458,7 +462,10 @@ export function QuestionTab({ onLaunch, language, onLanguageChange, hideTitle = 
             </DialogTrigger>
             <DialogContent className="max-w-6xl h-[80vh] rounded-3xl">
               <DialogHeader>
-                <DialogTitle>AI Question Generator</DialogTitle>
+                <DialogTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-purple-600" />
+                  AI Question Generator
+                </DialogTitle>
                 <DialogDescription>
                   Describe what you're building and let AI generate relevant interview questions for you.
                 </DialogDescription>
@@ -468,7 +475,7 @@ export function QuestionTab({ onLaunch, language, onLanguageChange, hideTitle = 
                 <div className="space-y-4 border-r pr-6">
                   <div>
                     <Label htmlFor="context" className="text-base font-medium">
-                      Context
+                      Interview Context
                     </Label>
                     <Textarea
                       id="context"
@@ -482,26 +489,51 @@ export function QuestionTab({ onLaunch, language, onLanguageChange, hideTitle = 
                   <Button
                     onClick={generateAIQuestions}
                     disabled={!aiContext.trim() || isGenerating}
-                    className="w-full rounded-2xl"
+                    className="w-full rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                     size="lg"
                   >
-                    {isGenerating ? "Generating..." : "Generate Questions"}
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Generating Questions...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Generate Questions
+                      </>
+                    )}
                   </Button>
                 </div>
 
                 <div className="space-y-4 pl-6">
                   <div className="flex items-center justify-between">
                     <h4 className="font-medium text-base">Generated Questions</h4>
-                    {generatedQuestions.length > 0 && (
-                      <Button
-                        onClick={addSelectedQuestions}
-                        disabled={selectedQuestions.size === 0}
-                        className="rounded-2xl"
-                        size="sm"
-                      >
-                        Add Selected ({selectedQuestions.size})
-                      </Button>
-                    )}
+                    <div className="flex gap-2">
+                      {generatedQuestions.length > 0 && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="rounded-2xl"
+                            onClick={() => {
+                              setGeneratedQuestions([]);
+                              setSelectedQuestions(new Set());
+                            }}
+                          >
+                            Clear All
+                          </Button>
+                          <Button
+                            onClick={addSelectedQuestions}
+                            disabled={selectedQuestions.size === 0}
+                            className="rounded-2xl"
+                            size="sm"
+                          >
+                            Add Selected ({selectedQuestions.size})
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2">
@@ -524,15 +556,17 @@ export function QuestionTab({ onLaunch, language, onLanguageChange, hideTitle = 
                         key={index}
                         className={`flex items-start space-x-3 p-4 border rounded-2xl cursor-pointer transition-colors ${
                           selectedQuestions.has(index)
-                            ? "border-blue-500 bg-blue-50"
-                            : "border-gray-200 hover:border-gray-300"
+                            ? "border-blue-500 bg-blue-50/80"
+                            : "border-gray-200 hover:border-gray-300 hover:bg-gray-50/50"
                         }`}
                         onClick={() => toggleQuestionSelection(index)}
                       >
                         <div className="flex items-center mt-1">
                           <div
-                            className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                              selectedQuestions.has(index) ? "bg-blue-600 border-blue-600" : "border-gray-300"
+                            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
+                              selectedQuestions.has(index) 
+                                ? "bg-blue-600 border-blue-600" 
+                                : "border-gray-300"
                             }`}
                           >
                             {selectedQuestions.has(index) && <Check className="h-3 w-3 text-white" />}

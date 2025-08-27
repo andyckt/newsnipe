@@ -84,7 +84,11 @@ function SortableField({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className={`border rounded-2xl p-4 space-y-3 ${isDragging ? 'bg-gray-50' : ''}`}
+      className={`border rounded-2xl p-4 space-y-3 ${
+        isDragging 
+          ? 'bg-gray-100 border-blue-300 shadow-lg' 
+          : 'hover:border-gray-300 transition-colors'
+      }`}
     >
       <div className="flex items-start space-x-3">
         <div 
@@ -135,22 +139,20 @@ function SortableField({
             </div>
 
             <div className="flex items-center space-x-2">
-              <button
-                onClick={() => onUpdateField(field.id, { required: !field.required })}
-                className="flex items-center space-x-1 text-sm"
-              >
-                {field.required ? (
-                  <ToggleRight className="h-4 w-4 text-blue-600" />
-                ) : (
-                  <ToggleLeft className="h-4 w-4 text-gray-400" />
-                )}
-                <span>Required</span>
-              </button>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={field.required}
+                  onCheckedChange={(checked) => onUpdateField(field.id, { required: checked })}
+                  size="sm"
+                  className="data-[state=checked]:bg-blue-600"
+                />
+                <Label className="text-sm">Required</Label>
+              </div>
               <Button
                 onClick={() => onRemoveField(field.id)}
                 variant="ghost"
                 size="sm"
-                className="rounded-2xl"
+                className="rounded-full text-red-500 hover:text-red-700 hover:bg-red-50"
                 disabled={disableRemove}
               >
                 <Trash2 className="h-4 w-4" />
@@ -168,17 +170,15 @@ function SortableField({
             >
               <div className="flex items-center justify-between">
                 <h5 className="font-medium text-sm">Dropdown Configuration</h5>
-                <button
-                  onClick={() => onUpdateField(field.id, { allowMultiple: !field.allowMultiple })}
-                  className="flex items-center space-x-1 text-sm"
-                >
-                  {field.allowMultiple ? (
-                    <ToggleRight className="h-4 w-4 text-blue-600" />
-                  ) : (
-                    <ToggleLeft className="h-4 w-4 text-gray-400" />
-                  )}
-                  <span>Allow multiple selection</span>
-                </button>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={field.allowMultiple || false}
+                    onCheckedChange={(checked) => onUpdateField(field.id, { allowMultiple: checked })}
+                    size="sm"
+                    className="data-[state=checked]:bg-blue-600"
+                  />
+                  <Label className="text-sm">Allow multiple selection</Label>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -363,19 +363,23 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
 
   return (
     <div className="w-full space-y-6">
-      <div className="flex items-center space-x-3 p-4 border rounded-2xl">
-        <button
-          onClick={handleToggleIncludePersonalDetails}
-          className="flex items-center space-x-2"
-        >
-          {includePersonalDetails ? (
-            <ToggleRight className="h-6 w-6 text-blue-600" />
-          ) : (
-            <ToggleLeft className="h-6 w-6 text-gray-400" />
-          )}
-          <span className="font-medium">Do you want to collect personal details?</span>
-        </button>
-      </div>
+      <Card className="rounded-2xl">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-medium">Personal Details Collection</h4>
+              <p className="text-sm text-muted-foreground">
+                Collect basic information from candidates before the interview
+              </p>
+            </div>
+            <Switch
+              checked={includePersonalDetails}
+              onCheckedChange={handleToggleIncludePersonalDetails}
+              className="data-[state=checked]:bg-blue-600"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       <motion.div
         initial={{ opacity: 0, height: 0 }}
