@@ -288,9 +288,14 @@ export function QuestionTab({ onLaunch, language, onLanguageChange, hideTitle = 
   }
   
   const handleTextInputChange = (id: string, value: string) => {
-    setTextInputs(prev => 
-      prev.map(input => input.id === id ? { ...input, value } : input)
-    )
+    const updatedInputs = textInputs.map(input => 
+      input.id === id ? { ...input, value } : input
+    );
+    
+    setTextInputs(updatedInputs);
+    
+    // Notify parent component of changes
+    onLaunch(updatedInputs.length, language, updatedInputs, "question", "no_limit");
   }
   
   const handleTimeLimitChange = (id: string, timeLimit: TimeLimit) => {

@@ -297,11 +297,12 @@ export function LaunchRecorderTab() {
           <div className="space-y-6">
             <SettingsScreen 
               onLaunch={(numRec, lang, inputs, selectedMode, selectedTimeLimit) => {
+                // Update the inputs immediately when changed
                 setAudioLanguage(lang)
                 setTextInputs(inputs)
                 setMode(selectedMode)
                 setTimeLimit(selectedTimeLimit)
-                nextStep()
+                // Don't call nextStep() here - we'll use the Next button
               }} 
               personalDetailsConfig={personalDetailsConfig}
               onPersonalDetailsConfigChange={setPersonalDetailsConfig}
