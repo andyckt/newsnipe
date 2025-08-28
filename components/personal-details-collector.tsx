@@ -185,26 +185,21 @@ export default function PersonalDetailsCollector({ config, onComplete, onSkip }:
           </div>
 
           <div className="flex justify-between pt-4">
-            {currentFieldIndex > 0 ? (
-              <Button 
-                variant="ghost"
-                onClick={() => {
-                  setCurrentFieldIndex(prev => prev - 1)
-                  // Restore previous response
-                  const prevField = personalFields[currentFieldIndex - 1]
-                  setCurrentResponse(responses[prevField.id] || "")
-                }}
-              >
-                Back
-              </Button>
-            ) : (
-              <Button 
-                variant="ghost" 
-                onClick={onSkip}
-              >
-                Skip
-              </Button>
-            )}
+            <div>
+              {currentFieldIndex > 0 && (
+                <Button 
+                  variant="ghost"
+                  onClick={() => {
+                    setCurrentFieldIndex(prev => prev - 1)
+                    // Restore previous response
+                    const prevField = personalFields[currentFieldIndex - 1]
+                    setCurrentResponse(responses[prevField.id] || "")
+                  }}
+                >
+                  Back
+                </Button>
+              )}
+            </div>
             
             <Button
               onClick={handleNext}
