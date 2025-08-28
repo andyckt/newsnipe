@@ -354,9 +354,7 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
   
   return (
     <div className="w-full">
-      <div className="flex flex-col items-center mb-12 w-full">
-        <h2 className="text-xl font-semibold mb-2">Custom Text Fields</h2>
-        <p className="text-sm text-gray-500 mb-6 text-center">Each text field will correspond to one recording. Drag to reorder.</p>
+      <div className="flex flex-col items-center mb-6 w-full">
         
         <DndContext 
           sensors={sensors}
