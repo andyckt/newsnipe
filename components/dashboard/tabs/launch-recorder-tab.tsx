@@ -150,9 +150,21 @@ export function LaunchRecorderTab() {
   if (appState === "settings") {
     return (
       <div className="p-6 h-full w-full">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">Camera Recorder Settings</h1>
-          <p className="text-muted-foreground">Configure your recording session</p>
+        <div className="mb-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Camera Recorder Settings</h1>
+            <p className="text-muted-foreground">Configure your recording session</p>
+          </div>
+          <Button 
+            onClick={() => {
+              unlockAudio(); // Unlock audio on user interaction
+              initAudioContext(); // Initialize Web Audio API context
+              handleLaunch(textInputs.length, audioLanguage, textInputs, "question", "no_limit");
+            }}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 text-lg rounded-full"
+          >
+            Launch Recorder
+          </Button>
         </div>
         <div className="w-full space-y-6">
           <Tabs defaultValue="language" className="space-y-6">
@@ -236,15 +248,7 @@ export function LaunchRecorderTab() {
                     config={personalDetailsConfig}
                     onConfigChange={setPersonalDetailsConfig}
                   />
-                  
-                  <div className="mt-8 flex justify-center">
-                    <Button 
-                      onClick={() => handleLaunch(textInputs.length, audioLanguage, textInputs, "question", "no_limit")}
-                      className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-4 text-xl rounded-full"
-                    >
-                      Launch Recorder
-                    </Button>
-                  </div>
+
                 </CardContent>
               </Card>
             </TabsContent>

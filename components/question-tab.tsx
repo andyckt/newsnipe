@@ -391,18 +391,7 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
         </DndContext>
       </div>
       
-      <div className="flex justify-center">
-        <Button 
-          onClick={() => {
-            unlockAudio(); // Unlock audio on user interaction
-            initAudioContext(); // Initialize Web Audio API context
-            onLaunch(textInputs.length, language, textInputs, "question", "no_limit");
-          }}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-4 text-xl rounded-full"
-        >
-          Launch Recorder
-        </Button>
-      </div>
+
     </div>
   )
 }
