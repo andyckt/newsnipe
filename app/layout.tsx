@@ -8,8 +8,8 @@ import { AuthProvider } from "@/providers/auth-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard",
-  description: "A comprehensive admin dashboard",
+  title: "Snipe",
+  description: "Knowledge Assessment Platform",
 }
 
 export default function RootLayout({
