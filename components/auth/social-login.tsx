@@ -1,15 +1,26 @@
 "use client"
 
+import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { Github, Mail } from "lucide-react"
+import { FcGoogle } from "react-icons/fc"
 
 interface SocialLoginProps {
-  onSocialLogin: (provider: string) => void
-  type: "signin" | "signup"
+  onSocialLogin?: (provider: string) => void
+  isLoading: boolean
+  type?: "signin" | "signup"
 }
 
-export function SocialLogin({ onSocialLogin, type }: SocialLoginProps) {
+export function SocialLogin({ onSocialLogin, isLoading, type = "signin" }: SocialLoginProps) {
+  const handleSocialLogin = async (provider: string) => {
+    if (onSocialLogin) {
+      onSocialLogin(provider)
+      return
+    }
+    
+    await signIn(provider.toLowerCase(), { callbackUrl: '/' })
+  }
+
   return (
     <div className="space-y-6">
       <div className="relative">
@@ -21,24 +32,16 @@ export function SocialLogin({ onSocialLogin, type }: SocialLoginProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="flex justify-center">
         <Button
           type="button"
           variant="outline"
-          className="bg-[#2c2c2e] border border-[#3a3a3c] text-white hover:bg-[#3a3a3c] hover:text-white hover:border-[#48484a] transition-all duration-200 rounded-2xl h-14 font-medium font-sans"
-          onClick={() => onSocialLogin("Google")}
+          className="bg-[#2c2c2e] border border-[#3a3a3c] text-white hover:bg-[#3a3a3c] hover:text-white hover:border-[#48484a] transition-all duration-200 rounded-2xl h-14 font-medium font-sans px-8"
+          onClick={() => handleSocialLogin("Google")}
+          disabled={isLoading}
         >
-          <Mail className="w-5 h-5 mr-2" />
+          <FcGoogle className="w-5 h-5 mr-2" />
           Google
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="bg-[#2c2c2e] border border-[#3a3a3c] text-white hover:bg-[#3a3a3c] hover:text-white hover:border-[#48484a] transition-all duration-200 rounded-2xl h-14 font-medium font-sans"
-          onClick={() => onSocialLogin("GitHub")}
-        >
-          <Github className="w-5 h-5 mr-2" />
-          GitHub
         </Button>
       </div>
     </div>

@@ -13,65 +13,6 @@ export default function AuthPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const { toast } = useToast()
 
-  const validateEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-  }
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!validateEmail(email)) {
-      toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsLoading(true)
-
-    // Simulate authentication
-    setTimeout(() => {
-      setIsLoading(false)
-      toast({
-        title: "Signed in successfully!",
-        description: "Welcome back to your account.",
-      })
-    }, 1500)
-  }
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (password.length < 8) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 8 characters long.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsLoading(true)
-
-    // Simulate registration
-    setTimeout(() => {
-      setIsLoading(false)
-      toast({
-        title: "Account created!",
-        description: "Your account has been created successfully.",
-      })
-    }, 1500)
-  }
-
-  const handleSocialLogin = (provider: string) => {
-    toast({
-      title: `${provider} login`,
-      description: `Redirecting to ${provider}...`,
-    })
-  }
-
   const handleForgotPassword = () => {
     toast({
       title: "Reset link sent",
@@ -91,15 +32,13 @@ export default function AuthPage() {
     >
       <AuthCard
         isLoading={isLoading}
+        setIsLoading={setIsLoading}
         email={email}
         setEmail={setEmail}
         password={password}
         setPassword={setPassword}
         rememberMe={rememberMe}
         setRememberMe={setRememberMe}
-        onSignIn={handleSignIn}
-        onSignUp={handleSignUp}
-        onSocialLogin={handleSocialLogin}
         onForgotPassword={handleForgotPassword}
       />
       <Toaster />
