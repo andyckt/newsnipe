@@ -263,7 +263,7 @@ export function AuthCard({
               <Button
                 type="submit"
                 className="w-full bg-white/20 backdrop-blur-sm border border-white/20 hover:bg-white/30 text-white font-medium rounded-2xl h-14 mt-8 text-base transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
-                disabled={isLoading || (confirmPassword && password !== confirmPassword)}
+                disabled={isLoading || (confirmPassword !== "" && password !== confirmPassword)}
               >
                 {isLoading ? "Creating account..." : "Create an account"}
               </Button>
