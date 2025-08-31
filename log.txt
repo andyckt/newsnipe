@@ -1,0 +1,137 @@
+commit b8db55be038c750b1288a795164c1ca804fdc296
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 15:33:44 2025 +0800
+
+    remove checkbox
+
+commit 6a9e25b1accf91ea9ff0503ec6cd538f20e4f595
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 15:23:56 2025 +0800
+
+    change from launch recorder button to create now
+
+commit 28a4ad4a9e8e02f7f7d80dd76ea86f389a03236b
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 14:50:09 2025 +0800
+
+    added logo for qr code
+
+commit f07f763b7b1a3e64b8c8daad243a2ebc8dba30cd
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 12:02:08 2025 +0800
+
+    change from video icon to plus icon at the sidebar
+
+commit dd594c3fe4c7a62ae57cfc64432d356269a2cbe0
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 11:58:50 2025 +0800
+
+    remove create snipe tab and replace with launch recorder tab
+
+commit 5d6ab443809b018bea746a0487a74548502ce95d
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sat Aug 30 22:47:01 2025 +0800
+
+    try increasing audio volumn inside recording
+
+commit 0f6b023ae5f3bd1e35217cb6ed5242a057400657
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sat Aug 30 22:41:30 2025 +0800
+
+    try increasing the audio volume
+
+commit ce9a5dbee5d907489122a824d7d5b72a9261be01
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sat Aug 30 17:19:43 2025 +0800
+
+    updated metadata
+
+commit 584fa3e4506c10a36a9f46037053e8a009a43d9f
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sat Aug 30 16:55:59 2025 +0800
+
+    fixed linter
+
+commit c7ce1656d42026bdd54c32c39317a140cb484503
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sat Aug 30 16:17:28 2025 +0800
+
+    impved header
+
+commit 41219bf59c0da01519d012d7ca39b4a4eff8a5db
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sat Aug 30 16:12:55 2025 +0800
+
+    enhance the ui
+
+commit 47dcfa8337f75cff19bae3efcababc0c2b3ec603
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sat Aug 30 16:01:31 2025 +0800
+
+    added user auth and oauth
+
+commit 017a148863ced8365b8d097f312c98476f10a403
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Fri Aug 29 01:32:54 2025 +0800
+
+    actual google icon
+
+commit 509aedf1f59857bfd211cc9b91fae2f3298c7ed4
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Fri Aug 29 00:55:10 2025 +0800
+
+    added user auth UI files
+
+commit 085d667b2596b61c83644983442af982dacf2b35
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Aug 28 23:41:06 2025 +0800
+
+    removed skip button
+
+commit 071e11ec4d3274d638fa5717a2c572f45ea7f295
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Aug 28 23:30:53 2025 +0800
+
+    Placed Launch recorder button at the top right
+
+commit 30d8cf14425c8a8a8a27c3beabda4a752b1f862d
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Aug 28 16:32:40 2025 +0800
+
+    improved launch recorder tab interface
+
+commit c3d9564b41074250e9cf49818dfaaab31e19a158
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 23:57:22 2025 +0800
+
+    correct order in launch recorder
+
+commit fff8d6c8012aaeb64006787a61afd753d1bcc342
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 23:00:59 2025 +0800
+
+    pnpm install more packages
+
+commit 9a849275f0e0dfe5f2e00e386a37939c093c0be8
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 22:51:23 2025 +0800
+
+    added launch recorder tab, working
+
+commit bca5a2e0a646ba45af8a61176eb505e71fd9120c
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 20:27:22 2025 +0800
+
+    added launch recorder tab
+
+commit a7d039c6529d610bbe9fe8fd47167830be7c5d66
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 19:58:52 2025 +0800
+
+    add launch recorder button
+
+commit eaf463e111802fc16b2344473409702f7e4438de
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 19:02:25 2025 +0800
+
+    first commit with sound icon
