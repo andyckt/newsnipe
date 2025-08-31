@@ -218,7 +218,9 @@ export function AuthCard({
           </div>
         </div>
 
+        {/* Social login section commented out - we are not implementing social login for now
         {/* Divider */}
+        {/*
         <div className="flex items-center my-8">
           <div className="flex-1 h-px bg-white/10"></div>
           <span className="px-4 text-white/40 text-sm font-medium">
@@ -226,8 +228,10 @@ export function AuthCard({
           </span>
           <div className="flex-1 h-px bg-white/10"></div>
         </div>
+        */}
 
         {/* Google button */}
+        {/*
         <div className="flex justify-center">
           <button
             onClick={() => onSocialLogin("Google")}
@@ -242,6 +246,7 @@ export function AuthCard({
             <span className="text-white font-medium">Google</span>
           </button>
         </div>
+        */}
 
 
       </div>
