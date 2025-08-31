@@ -21,7 +21,7 @@ commit dd594c3fe4c7a62ae57cfc64432d356269a2cbe0
 Author: Andy <kamtocheung1104@gmail.com>
 Date:   Sun Aug 31 11:58:50 2025 +0800
 
-    remove create snipe tab and replace with launch recorder tab
+    remove create snipe tab and replace with launch recorder tab OK
 
 commit 5d6ab443809b018bea746a0487a74548502ce95d
 Author: Andy <kamtocheung1104@gmail.com>
@@ -45,7 +45,7 @@ commit 584fa3e4506c10a36a9f46037053e8a009a43d9f
 Author: Andy <kamtocheung1104@gmail.com>
 Date:   Sat Aug 30 16:55:59 2025 +0800
 
-    fixed linter
+    fixed linter OK
 
 commit c7ce1656d42026bdd54c32c39317a140cb484503
 Author: Andy <kamtocheung1104@gmail.com>
