@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { LaunchRecorderTab } from "@/components/dashboard/tabs/launch-recorder-tab"
 import { unlockAudio } from "@/lib/audio"
@@ -8,7 +8,8 @@ import { initAudioContext } from "@/lib/mobile-audio"
 import { TextInput, AudioLanguage, TimeLimit } from "@/components/question-tab"
 import { PersonalDetailsConfig } from "@/components/personal-details-collector"
 
-export default function SnipePage() {
+// Client component that uses useSearchParams
+function SnipeContent() {
   const searchParams = useSearchParams()
   const [isLoaded, setIsLoaded] = useState(false)
   
@@ -63,15 +64,24 @@ export default function SnipePage() {
   const initialSettings = isLoaded ? parseSettings() : null
 
   return (
+    <div className="container mx-auto py-4">
+      {isLoaded && (
+        <LaunchRecorderTab 
+          initialState="personal_details" 
+          initialSettings={initialSettings}
+        />
+      )}
+    </div>
+  )
+}
+
+// Main page component with Suspense boundary
+export default function SnipePage() {
+  return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-4">
-        {isLoaded && (
-          <LaunchRecorderTab 
-            initialState="personal_details" 
-            initialSettings={initialSettings}
-          />
-        )}
-      </div>
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+        <SnipeContent />
+      </Suspense>
     </div>
   )
 }
