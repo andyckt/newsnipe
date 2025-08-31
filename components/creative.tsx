@@ -11,7 +11,6 @@ import { SessionScheduler } from "./session-scheduler"
 import { DashboardHome } from "./dashboard/tabs/dashboard-home"
 // import { CandidatesTab } from "./dashboard/tabs/candidates-tab"
 import { SubmissionsTab } from "./dashboard/tabs/submissions-tab"
-import { CreateSnipeTab } from "./dashboard/tabs/create-snipe-tab"
 import { FromAndyTab } from "./dashboard/tabs/from-andy-tab"
 import { MySnipeTab } from "./dashboard/tabs/my-snipe-tab"
 import { SettingsTab } from "./dashboard/tabs/settings-tab"
@@ -121,8 +120,6 @@ export function DesignaliCreative() {
         return <SubmissionsTab />
       case "my-snipe":
         return <MySnipeTab createdSnipes={createdSnipes} />
-      case "create-snipe":
-        return <CreateSnipeTab onSnipeCreated={handleSnipeCreated} />
       case "from-andy":
         return <FromAndyTab />
       case "launch-recorder":
