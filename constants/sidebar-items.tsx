@@ -18,11 +18,7 @@ export const sidebarItems = [
   //   icon: <Users />,
   //   badge: "28",
   // },
-  {
-    id: "launch-recorder",
-    title: "Launch Recorder",
-    icon: <Video />,
-  },
+
   {
     id: "my-snipe",
     title: "My Snipe",

@@ -6,8 +6,8 @@ import { Toaster } from "@/components/ui/toaster"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Camera Recorder",
-  description: "Mobile-first camera recording app",
+  title: "Snipe",
+  description: "Access Better",
   generator: "v0.app",
   viewport: "width=device-width, initial-scale=1.0",
 }

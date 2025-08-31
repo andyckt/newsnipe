@@ -2,25 +2,20 @@ commit b8db55be038c750b1288a795164c1ca804fdc296
 Author: Andy <kamtocheung1104@gmail.com>
 Date:   Sun Aug 31 15:33:44 2025 +0800
 
-    remove checkbox
+    remove checkbox OK
 
 commit 6a9e25b1accf91ea9ff0503ec6cd538f20e4f595
 Author: Andy <kamtocheung1104@gmail.com>
 Date:   Sun Aug 31 15:23:56 2025 +0800
 
-    change from launch recorder button to create now
+    change from launch recorder button to create now OK
 
 commit 28a4ad4a9e8e02f7f7d80dd76ea86f389a03236b
 Author: Andy <kamtocheung1104@gmail.com>
 Date:   Sun Aug 31 14:50:09 2025 +0800
 
-    added logo for qr code
+    added logo for qr code OK
 
-commit f07f763b7b1a3e64b8c8daad243a2ebc8dba30cd
-Author: Andy <kamtocheung1104@gmail.com>
-Date:   Sun Aug 31 12:02:08 2025 +0800
-
-    change from video icon to plus icon at the sidebar
 
 commit dd594c3fe4c7a62ae57cfc64432d356269a2cbe0
 Author: Andy <kamtocheung1104@gmail.com>
@@ -44,7 +39,7 @@ commit ce9a5dbee5d907489122a824d7d5b72a9261be01
 Author: Andy <kamtocheung1104@gmail.com>
 Date:   Sat Aug 30 17:19:43 2025 +0800
 
-    updated metadata
+    updated metadata OK
 
 commit 584fa3e4506c10a36a9f46037053e8a009a43d9f
 Author: Andy <kamtocheung1104@gmail.com>

@@ -11,7 +11,7 @@ import { SessionScheduler } from "./session-scheduler"
 import { DashboardHome } from "./dashboard/tabs/dashboard-home"
 // import { CandidatesTab } from "./dashboard/tabs/candidates-tab"
 import { SubmissionsTab } from "./dashboard/tabs/submissions-tab"
-import { CreateSnipeTab } from "./dashboard/tabs/create-snipe-tab"
+
 import { FromAndyTab } from "./dashboard/tabs/from-andy-tab"
 import { MySnipeTab } from "./dashboard/tabs/my-snipe-tab"
 import { SettingsTab } from "./dashboard/tabs/settings-tab"
@@ -86,25 +86,7 @@ export function DesignaliCreative() {
     })
   }
 
-  const handleSnipeCreated = (formData: any) => {
-    const newSnipe: CreatedSnipe = {
-      id: Date.now().toString(),
-      title: `Interview - ${new Date().toLocaleDateString()}`,
-      accessType: "public",
-      language: formData.language,
-      questionsCount: formData.questions.filter((q: any) => q.text.trim()).length,
-      personalDetailsEnabled: formData.includePersonalDetails,
-      createdAt: new Date().toISOString().split("T")[0],
-      status: "active",
-      submissions: 0,
-      url: `snipe.ai/interview-${Date.now()}`,
-      questions: formData.questions.filter((q: any) => q.text.trim()),
-      personalFields: formData.personalFields || [],
-    }
 
-    setCreatedSnipes((prev) => [newSnipe, ...prev])
-    setActiveMenu("my-snipe")
-  }
 
   const renderContent = () => {
     switch (activeMenu) {
@@ -121,8 +103,7 @@ export function DesignaliCreative() {
         return <SubmissionsTab />
       case "my-snipe":
         return <MySnipeTab createdSnipes={createdSnipes} />
-      case "create-snipe":
-        return <CreateSnipeTab onSnipeCreated={handleSnipeCreated} />
+
       case "from-andy":
         return <FromAndyTab />
       case "launch-recorder":

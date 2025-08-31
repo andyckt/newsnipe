@@ -14,9 +14,11 @@ interface SidebarProps {
   onClose?: () => void
   activeMenu?: string
   onMenuSelect?: (menu: string) => void
+  expandedItems?: Record<string, boolean>
+  toggleExpanded?: (title: string) => void
 }
 
-export function Sidebar({ isOpen, isMobile = false, onClose, activeMenu = "dashboard", onMenuSelect }: SidebarProps) {
+export function Sidebar({ isOpen, isMobile = false, onClose, activeMenu = "dashboard", onMenuSelect, expandedItems, toggleExpanded }: SidebarProps) {
   const sidebarClasses = cn(
     "fixed inset-y-0 left-0 z-50 w-64 transform bg-background transition-transform duration-300 ease-in-out",
     isMobile ? "md:hidden" : "hidden md:block z-30",
@@ -48,13 +50,14 @@ export function Sidebar({ isOpen, isMobile = false, onClose, activeMenu = "dashb
 
           <div className="px-3 py-2">
             <Button
-              onClick={() => handleMenuClick("create-snipe")}
+              onClick={() => handleMenuClick("launch-recorder")}
               className="w-full rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
             >
               <Plus className="mr-2 h-4 w-4" />
-              Create Snipe
+              Launch Recorder
             </Button>
           </div>
+
 
           <ScrollArea className="flex-1 px-3 py-2">
             <div className="space-y-1">
