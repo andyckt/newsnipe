@@ -21,24 +21,39 @@ import { Languages, User } from "lucide-react"
 // App states
 type AppState = "settings" | "personal_details" | "recording" | "completed"
 
-export function LaunchRecorderTab() {
+interface LaunchRecorderTabProps {
+  initialState?: AppState
+  initialSettings?: {
+    textInputs?: TextInput[]
+    audioLanguage?: AudioLanguage
+    timeLimit?: TimeLimit
+    personalDetailsConfig?: PersonalDetailsConfig
+  }
+}
+
+export function LaunchRecorderTab({ 
+  initialState = "settings",
+  initialSettings
+}: LaunchRecorderTabProps) {
   // State management
-  const [appState, setAppState] = useState<AppState>("settings")
-  const [numRecordings, setNumRecordings] = useState(3)
-  const [audioLanguage, setAudioLanguage] = useState<AudioLanguage>("english")
-  const [textInputs, setTextInputs] = useState<TextInput[]>([{ id: "default", value: "" }])
+  const [appState, setAppState] = useState<AppState>(initialState)
+  const [numRecordings, setNumRecordings] = useState(initialSettings?.textInputs?.length || 3)
+  const [audioLanguage, setAudioLanguage] = useState<AudioLanguage>(initialSettings?.audioLanguage || "english")
+  const [textInputs, setTextInputs] = useState<TextInput[]>(initialSettings?.textInputs || [{ id: "default", value: "" }])
   const [mode, setMode] = useState<"question" | "conversation">("question")
-  const [timeLimit, setTimeLimit] = useState<TimeLimit>("no_limit")
+  const [timeLimit, setTimeLimit] = useState<TimeLimit>(initialSettings?.timeLimit || "no_limit")
   
   // Personal details configuration and responses
-  const [personalDetailsConfig, setPersonalDetailsConfig] = useState<PersonalDetailsConfig>({
-    includePersonalDetails: true,
-    personalFields: [
-      { id: "name", label: "What is your full name?", type: "text", required: true },
-      { id: "email", label: "What is your email address?", type: "text", required: true },
-      { id: "role", label: "What is your role?", type: "dropdown", required: true, dropdownOptions: ["Student", "Teacher", "Professional", "Other"] }
-    ]
-  })
+  const [personalDetailsConfig, setPersonalDetailsConfig] = useState<PersonalDetailsConfig>(
+    initialSettings?.personalDetailsConfig || {
+      includePersonalDetails: true,
+      personalFields: [
+        { id: "name", label: "What is your full name?", type: "text", required: true },
+        { id: "email", label: "What is your email address?", type: "text", required: true },
+        { id: "role", label: "What is your role?", type: "dropdown", required: true, dropdownOptions: ["Student", "Teacher", "Professional", "Other"] }
+      ]
+    }
+  )
   const [personalDetailsResponses, setPersonalDetailsResponses] = useState<PersonalDetailsResponse>({})
   
   // Try to unlock audio on component mount and on any user interaction
@@ -159,7 +174,20 @@ export function LaunchRecorderTab() {
             onClick={() => {
               unlockAudio(); // Unlock audio on user interaction
               initAudioContext(); // Initialize Web Audio API context
-              handleLaunch(textInputs.length, audioLanguage, textInputs, "question", "no_limit");
+              
+              // Create settings object
+              const settings = {
+                textInputs,
+                audioLanguage,
+                timeLimit,
+                personalDetailsConfig
+              };
+              
+              // Encode settings as URL parameter
+              const encodedSettings = encodeURIComponent(JSON.stringify(settings));
+              
+              // Open new window with settings
+              window.open(`/snipe?settings=${encodedSettings}`, '_blank');
             }}
             className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 text-lg rounded-full"
           >
