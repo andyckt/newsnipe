@@ -4,10 +4,12 @@ import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
 
 export default function UserProfile() {
   const { data: session } = useSession()
   const { toast } = useToast()
+  const router = useRouter()
 
   const handleSignOut = async () => {
     await signOut({ redirect: false })
@@ -15,6 +17,8 @@ export default function UserProfile() {
       title: "Signed out",
       description: "You have been signed out successfully.",
     })
+    // Redirect to auth page
+    router.push('/auth')
   }
 
   if (!session?.user) {
