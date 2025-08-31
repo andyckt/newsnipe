@@ -1,6 +1,6 @@
 "use client"
 
-import { Settings, Video } from "lucide-react"
+import { Settings, Plus } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -51,7 +51,7 @@ export function Sidebar({ isOpen, isMobile = false, onClose, activeMenu = "dashb
               onClick={() => handleMenuClick("launch-recorder")}
               className="w-full rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
             >
-              <Video className="mr-2 h-4 w-4" />
+              <Plus className="mr-2 h-4 w-4" />
               Launch Recorder
             </Button>
           </div>
