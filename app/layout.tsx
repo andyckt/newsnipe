@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Toaster } from "@/components/ui/toaster"
+import { SessionProvider } from "@/components/providers/session-provider"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -29,8 +30,10 @@ html {
         `}</style>
       </head>
       <body>
-        {children}
-        <Toaster />
+        <SessionProvider>
+          {children}
+          <Toaster />
+        </SessionProvider>
       </body>
     </html>
   )

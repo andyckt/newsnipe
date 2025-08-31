@@ -12,6 +12,8 @@ interface AuthCardProps {
   setEmail: (email: string) => void
   password: string
   setPassword: (password: string) => void
+  name?: string
+  setName?: (name: string) => void
   rememberMe: boolean
   setRememberMe: (remember: boolean) => void
   onSignIn: (e: React.FormEvent) => void
@@ -26,6 +28,8 @@ export function AuthCard({
   setEmail,
   password,
   setPassword,
+  name,
+  setName,
   rememberMe,
   setRememberMe,
   onSignIn,
@@ -34,7 +38,6 @@ export function AuthCard({
   onForgotPassword,
 }: AuthCardProps) {
   const [activeTab, setActiveTab] = useState("signup")
-  const [nickname, setNickname] = useState("")
   const [showPassword, setShowPassword] = useState(false)
 
 
@@ -89,15 +92,16 @@ export function AuthCard({
               }}
               className="space-y-4"
             >
-              {/* Nickname field */}
+              {/* Name field */}
               <div className="relative">
                 <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40 transition-colors duration-200" />
                 <Input
                   type="text"
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
+                  value={name || ""}
+                  onChange={(e) => setName?.(e.target.value)}
                   className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl h-14 text-white placeholder:text-white/40 focus:border-white/30 focus:ring-0 pl-12 text-base transition-all duration-200 hover:bg-black/30 focus:bg-black/30"
-                  placeholder="My nickname"
+                  placeholder="Your full name"
+                  required
                 />
               </div>
 
@@ -110,6 +114,7 @@ export function AuthCard({
                   onChange={(e) => setEmail(e.target.value)}
                   className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl h-14 text-white placeholder:text-white/40 focus:border-white/30 focus:ring-0 pl-12 text-base transition-all duration-200 hover:bg-black/30 focus:bg-black/30"
                   placeholder="Enter your email"
+                  required
                 />
               </div>
 
@@ -122,6 +127,8 @@ export function AuthCard({
                   onChange={(e) => setPassword(e.target.value)}
                   className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl h-14 text-white placeholder:text-white/40 focus:border-white/30 focus:ring-0 pl-12 pr-12 text-base transition-all duration-200 hover:bg-black/30 focus:bg-black/30"
                   placeholder="Enter your password (8+ characters)"
+                  required
+                  minLength={8}
                 />
                 <button
                   type="button"
@@ -164,6 +171,7 @@ export function AuthCard({
                   onChange={(e) => setEmail(e.target.value)}
                   className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl h-14 text-white placeholder:text-white/40 focus:border-white/30 focus:ring-0 pl-12 text-base transition-all duration-200 hover:bg-black/30 focus:bg-black/30"
                   placeholder="Enter your email"
+                  required
                 />
               </div>
 
@@ -176,6 +184,7 @@ export function AuthCard({
                   onChange={(e) => setPassword(e.target.value)}
                   className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl h-14 text-white placeholder:text-white/40 focus:border-white/30 focus:ring-0 pl-12 pr-12 text-base transition-all duration-200 hover:bg-black/30 focus:bg-black/30"
                   placeholder="Enter your password"
+                  required
                 />
                 <button
                   type="button"

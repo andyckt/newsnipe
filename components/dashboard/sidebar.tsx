@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { sidebarItems } from "@/constants/sidebar-items"
+import UserProfile from "@/components/user-profile"
 
 interface SidebarProps {
   isOpen: boolean
@@ -93,21 +94,7 @@ export function Sidebar({ isOpen, isMobile = false, onClose, activeMenu = "dashb
                 <Settings className="h-5 w-5" />
                 <span>Settings</span>
               </button>
-              <button
-                className="flex w-full items-center justify-between rounded-2xl px-3 py-2 text-sm font-medium hover:bg-muted"
-                onClick={() => handleMenuClick("profile")}
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
-                    <AvatarFallback>JD</AvatarFallback>
-                  </Avatar>
-                  <span>John Doe</span>
-                </div>
-                <Badge variant="outline" className="ml-auto">
-                  Pro
-                </Badge>
-              </button>
+              <UserProfile />
             </div>
           </div>
         </div>
