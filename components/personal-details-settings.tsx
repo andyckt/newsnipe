@@ -110,7 +110,7 @@ function SortableField({
                 value={field.type}
                 onValueChange={(value) => {
                   const updates: Partial<PersonalDetailField> = { 
-                    type: value as "text" | "dropdown" | "checkbox"
+                    type: value as "text" | "dropdown"
                   }
                   
                   if (value === "dropdown" && !field.dropdownOptions) {
@@ -126,7 +126,6 @@ function SortableField({
                 <SelectContent>
                   <SelectItem value="text">Text Input</SelectItem>
                   <SelectItem value="dropdown">Dropdown</SelectItem>
-                  <SelectItem value="checkbox">Checkbox</SelectItem>
                 </SelectContent>
               </Select>
             </div>

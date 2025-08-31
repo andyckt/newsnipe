@@ -5,7 +5,6 @@ import { CameraView } from "@/components/camera-view"
 import { CameraControls } from "@/components/camera-controls"
 import { SettingsScreen } from "@/components/settings-screen"
 import { QuestionTab, AudioLanguage, TextInput, TimeLimit } from "@/components/question-tab"
-import { ConversationTab } from "@/components/conversation-tab"
 import { useCamera } from "@/hooks/use-camera"
 import { useQuestionRecording } from "@/hooks/use-question-recording"
 import { useConversationRecording } from "@/hooks/use-conversation-recording"
@@ -163,7 +162,7 @@ export function LaunchRecorderTab() {
             }}
             className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 text-lg rounded-full"
           >
-            Launch Recorder
+            Create Now
           </Button>
         </div>
         <div className="w-full space-y-6">

@@ -17,7 +17,7 @@ import { ArrowRight, Check } from "lucide-react"
 export interface PersonalDetailField {
   id: string
   label: string
-  type: "text" | "dropdown" | "checkbox"
+  type: "text" | "dropdown"
   required: boolean
   dropdownOptions?: string[]
   allowMultiple?: boolean
@@ -77,9 +77,7 @@ export default function PersonalDetailsCollector({ config, onComplete, onSkip }:
       setCurrentFieldIndex(prev => prev + 1)
       // Reset current response based on the next field type
       const nextField = personalFields[currentFieldIndex + 1]
-      if (nextField.type === "checkbox") {
-        setCurrentResponse(false)
-      } else if (nextField.type === "dropdown" && nextField.allowMultiple) {
+      if (nextField.type === "dropdown" && nextField.allowMultiple) {
         setCurrentResponse([])
       } else {
         setCurrentResponse("")
@@ -150,17 +148,7 @@ export default function PersonalDetailsCollector({ config, onComplete, onSkip }:
             </Select>
           )
         }
-      case "checkbox":
-        return (
-          <div className="flex items-center space-x-3">
-            <Checkbox
-              id="terms"
-              checked={currentResponse as boolean}
-              onCheckedChange={setCurrentResponse as (checked: boolean) => void}
-            />
-            <Label htmlFor="terms" className="text-lg">{currentField.label}</Label>
-          </div>
-        )
+
       default:
         return null
     }
