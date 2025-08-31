@@ -92,7 +92,7 @@ export function AuthCard({
               }}
               className="space-y-4"
             >
-              {/* Name field */}
+              {/* Nickname field */}
               <div className="relative">
                 <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40 transition-colors duration-200" />
                 <Input
@@ -100,7 +100,7 @@ export function AuthCard({
                   value={name || ""}
                   onChange={(e) => setName?.(e.target.value)}
                   className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl h-14 text-white placeholder:text-white/40 focus:border-white/30 focus:ring-0 pl-12 text-base transition-all duration-200 hover:bg-black/30 focus:bg-black/30"
-                  placeholder="Your full name"
+                  placeholder="My nickname"
                   required
                 />
               </div>
