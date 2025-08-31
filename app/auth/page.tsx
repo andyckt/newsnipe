@@ -40,6 +40,9 @@ export default function AuthPage() {
         email,
         password,
         redirect: false,
+        callbackUrl: "/",
+        // Pass remember me as a custom parameter
+        remember: rememberMe,
       })
 
       if (result?.error) {
@@ -129,6 +132,9 @@ export default function AuthPage() {
         email,
         password,
         redirect: false,
+        callbackUrl: "/",
+        // Pass remember me as a custom parameter
+        remember: rememberMe,
       })
 
       if (result?.error) {
