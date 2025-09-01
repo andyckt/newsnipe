@@ -109,14 +109,15 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
         // For the first recording, play starter audio followed by the first text input audio
         console.log("Playing starter audio...");
         
-        // First play the starter audio using mobile-friendly method
+        // First play the starter audio using mobile-friendly method with volume boost
         try {
-          await playMobileAudio(getAudioPath());
-          console.log("Starter audio played successfully");
+          // Apply a volume boost of 8.0 to compensate for the automatic volume reduction during recording
+          await playMobileAudio(getAudioPath(), 8.0);
+          console.log("Starter audio played successfully with volume boost");
         } catch (error) {
           console.error("Mobile audio playback failed, falling back to standard method:", error);
-          // Fallback to standard method
-          await playAudio(getAudioPath());
+          // Fallback to standard method with maximum volume
+          await playAudio(getAudioPath(), 1.0);
         }
         
         // Then play the first generated audio if available
@@ -137,14 +138,15 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
           
           console.log("Playing first generated audio...");
           
-          // Play the first generated audio immediately after starter audio
+          // Play the first generated audio immediately after starter audio with volume boost
           try {
-            await playMobileAudio(urlToPlay);
-            console.log("First generated audio played successfully");
+            // Apply a volume boost of 8.0 to compensate for the automatic volume reduction during recording
+            await playMobileAudio(urlToPlay, 8.0);
+            console.log("First generated audio played successfully with volume boost");
           } catch (error) {
             console.error("Mobile audio playback failed, falling back to standard method:", error);
-            // Fallback to standard method
-            await playAudio(urlToPlay);
+            // Fallback to standard method with maximum volume
+            await playAudio(urlToPlay, 1.0);
           }
         }
         
@@ -168,14 +170,15 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
           
           console.log(`Playing recording ${recordingIndex + 1} audio...`);
           
-          // Play the audio for this recording using mobile-friendly method
+          // Play the audio for this recording using mobile-friendly method with volume boost
           try {
-            await playMobileAudio(urlToPlay);
-            console.log(`Recording ${recordingIndex + 1} audio played successfully`);
+            // Apply a volume boost of 8.0 to compensate for the automatic volume reduction during recording
+            await playMobileAudio(urlToPlay, 8.0);
+            console.log(`Recording ${recordingIndex + 1} audio played successfully with volume boost`);
           } catch (error) {
             console.error("Mobile audio playback failed, falling back to standard method:", error);
-            // Fallback to standard method
-            await playAudio(urlToPlay);
+            // Fallback to standard method with maximum volume
+            await playAudio(urlToPlay, 1.0);
           }
         }
       }
