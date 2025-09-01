@@ -1,28 +1,22 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { CameraView } from "@/components/camera-view"
 import { CameraControls } from "@/components/camera-controls"
-import { SettingsScreen } from "@/components/settings-screen"
-import { QuestionTab, AudioLanguage, TextInput, TimeLimit } from "@/components/question-tab"
+import { AudioLanguage, TextInput, TimeLimit } from "@/components/question-tab"
 import { useCamera } from "@/hooks/use-camera"
 import { useQuestionRecording } from "@/hooks/use-question-recording"
 import { useConversationRecording } from "@/hooks/use-conversation-recording"
-import { Button } from "@/components/ui/button"
 import { unlockAudio } from "@/lib/audio"
 import { initAudioContext } from "@/lib/mobile-audio"
-import PersonalDetailsCollector, { PersonalDetailField, PersonalDetailsConfig, PersonalDetailsResponse } from "@/components/personal-details-collector"
-import PersonalDetailsSettings from "@/components/personal-details-settings"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Languages, User } from "lucide-react"
+import PersonalDetailsCollector, { PersonalDetailsConfig, PersonalDetailsResponse } from "@/components/personal-details-collector"
 
 // App states
-type AppState = "settings" | "personal_details" | "recording" | "completed"
+type AppState = "personal_details" | "recording" | "completed"
 
-export function LaunchRecorderTab() {
+export default function SnipePage() {
   // State management
-  const [appState, setAppState] = useState<AppState>("settings")
+  const [appState, setAppState] = useState<AppState>("personal_details")
   const [numRecordings, setNumRecordings] = useState(3)
   const [audioLanguage, setAudioLanguage] = useState<AudioLanguage>("english")
   const [textInputs, setTextInputs] = useState<TextInput[]>([{ id: "default", value: "" }])
@@ -151,28 +145,6 @@ export function LaunchRecorderTab() {
     nextRecording,
     completeSession
   } = mode === "question" ? questionRecording : conversationRecording
-
-  // Handle launching the recorder with selected settings
-  const handleLaunch = (selectedNumRecordings: number, selectedLanguage: AudioLanguage, selectedTextInputs: TextInput[], selectedMode: "question" | "conversation", selectedTimeLimit: TimeLimit) => {
-    // Create a data object with all the settings
-    const launchData = {
-      numRecordings: selectedTextInputs.length,
-      audioLanguage: selectedLanguage,
-      textInputs: selectedTextInputs,
-      mode: selectedMode,
-      timeLimit: selectedTimeLimit,
-      personalDetailsConfig: personalDetailsConfig
-    };
-    
-    // Convert the data object to a JSON string and encode it for URL
-    const encodedData = encodeURIComponent(JSON.stringify(launchData));
-    
-    // Create the URL for the new tab
-    const url = `${window.location.origin}/snipe?data=${encodedData}`;
-
-    // Open the URL in a new tab
-    window.open(url, '_blank');
-  }
   
   // Handle completion of personal details
   const handlePersonalDetailsComplete = (responses: PersonalDetailsResponse) => {
@@ -204,117 +176,6 @@ export function LaunchRecorderTab() {
   }
 
   // Render based on current app state
-  if (appState === "settings") {
-    return (
-      <div className="p-6 h-full w-full">
-        <div className="mb-6 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Camera Recorder Settings</h1>
-            <p className="text-muted-foreground">Configure your recording session</p>
-          </div>
-          <Button 
-            onClick={() => {
-              unlockAudio(); // Unlock audio on user interaction
-              initAudioContext(); // Initialize Web Audio API context
-              handleLaunch(textInputs.length, audioLanguage, textInputs, "question", timeLimit);
-            }}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 text-lg rounded-full"
-          >
-            Create Now
-          </Button>
-        </div>
-        <div className="w-full space-y-6">
-          <Tabs defaultValue="language" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3 rounded-xl">
-              <TabsTrigger value="language" className="rounded-lg">
-                <Languages className="mr-2 h-4 w-4" />
-                Language
-              </TabsTrigger>
-              <TabsTrigger value="personal-details" className="rounded-lg">
-                <User className="mr-2 h-4 w-4" />
-                Personal Details
-              </TabsTrigger>
-              <TabsTrigger value="questions" className="rounded-lg">
-                <Languages className="mr-2 h-4 w-4" />
-                Questions
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="language" className="space-y-6">
-              <Card className="rounded-xl">
-
-                <CardContent>
-                  <div className="flex flex-col items-center gap-6">
-                    <div className="flex gap-4">
-                      <Button
-                        onClick={() => setAudioLanguage("english")}
-                        className={`px-8 py-3 rounded-full text-lg ${
-                          audioLanguage === "english" 
-                            ? "bg-blue-500 text-white" 
-                            : "bg-gray-200 text-black hover:bg-gray-300"
-                        }`}
-                      >
-                        English
-                      </Button>
-                      
-                      <Button
-                        onClick={() => setAudioLanguage("mandarin")}
-                        className={`px-8 py-3 rounded-full text-lg ${
-                          audioLanguage === "mandarin" 
-                            ? "bg-blue-500 text-white" 
-                            : "bg-gray-200 text-black hover:bg-gray-300"
-                        }`}
-                      >
-                        Mandarin
-                      </Button>
-                    </div>
-                    
-                    <div className="mt-8">
-                      <p className="text-center text-muted-foreground mb-4">
-                        Selected language: <span className="font-semibold text-foreground">{audioLanguage === "english" ? "English" : "Mandarin"}</span>
-                      </p>
-                      <p className="text-center text-sm text-muted-foreground">
-                        This language will be used for audio prompts during the recording session.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="questions" className="space-y-6">
-              <Card className="rounded-xl">
-
-                <CardContent>
-                  <div className="w-full">
-                    <QuestionTab 
-                      onLaunch={handleLaunch} 
-                      language={audioLanguage} 
-                      onLanguageChange={setAudioLanguage} 
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="personal-details" className="space-y-6">
-              <Card className="rounded-xl">
-
-                <CardContent>
-                  <PersonalDetailsSettings 
-                    config={personalDetailsConfig}
-                    onConfigChange={setPersonalDetailsConfig}
-                  />
-
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
-    )
-  }
-  
   if (appState === "personal_details") {
     return (
       <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
