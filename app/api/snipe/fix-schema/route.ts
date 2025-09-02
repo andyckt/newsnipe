@@ -22,12 +22,12 @@ export async function POST(request: Request) {
     }
     
     // Connect to the database
-    const conn = await connectToDatabase();
+    await connectToDatabase();
     
     // Get the database instance
-    const db = mongoose.connection.db;
+    const db = mongoose.connection.db as mongoose.mongo.Db;
     
-    // Drop the problematic index if it exists
+    // Drop the problematic uniqueId index if it exists
     try {
       await db.collection('snipes').dropIndex('uniqueId_1');
       console.log('Dropped existing uniqueId index');
@@ -35,12 +35,7 @@ export async function POST(request: Request) {
       console.log('No existing uniqueId index to drop or error dropping index:', error);
     }
     
-    // Create a new sparse index on uniqueId
-    await db.collection('snipes').createIndex({ uniqueId: 1 }, { 
-      unique: true, 
-      sparse: true,
-      background: true
-    });
+    // We're no longer using the uniqueId field, so we don't need to create a new index for it
     
     return NextResponse.json({
       success: true,

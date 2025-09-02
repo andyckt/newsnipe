@@ -35,9 +35,9 @@ export async function POST(request: Request) {
     await connectToDatabase();
     
     // Create a new snipe configuration in the database
+    // Omit the uniqueId field entirely to avoid duplicate key errors with null values
     const newSnipe = await Snipe.create({
       userId: session.user.id,
-      uniqueId: null, // Set explicitly to null to avoid duplicate key errors
       title: snipeConfig.title || "Untitled Snipe", // Use provided title or default
       submissions: 0, // Initialize submissions count to zero
       numRecordings: snipeConfig.numRecordings,
