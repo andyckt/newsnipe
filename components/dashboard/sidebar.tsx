@@ -51,14 +51,13 @@ export function Sidebar({ isOpen, isMobile = false, onClose, activeMenu = "dashb
 
           <div className="px-3 py-2">
             <Button
-              onClick={() => handleMenuClick("launch-recorder")}
+              onClick={() => handleMenuClick("create-snipe")}
               className="w-full rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
             >
               <Plus className="mr-2 h-4 w-4" />
-              Launch Recorder
+              Create Snipe
             </Button>
           </div>
-
 
           <ScrollArea className="flex-1 px-3 py-2">
             <div className="space-y-1">

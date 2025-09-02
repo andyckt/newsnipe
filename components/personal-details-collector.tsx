@@ -17,7 +17,7 @@ import { ArrowRight, Check } from "lucide-react"
 export interface PersonalDetailField {
   id: string
   label: string
-  type: "text" | "dropdown"
+  type: "text" | "dropdown" | "checkbox"
   required: boolean
   dropdownOptions?: string[]
   allowMultiple?: boolean
@@ -77,7 +77,9 @@ export default function PersonalDetailsCollector({ config, onComplete, onSkip }:
       setCurrentFieldIndex(prev => prev + 1)
       // Reset current response based on the next field type
       const nextField = personalFields[currentFieldIndex + 1]
-      if (nextField.type === "dropdown" && nextField.allowMultiple) {
+      if (nextField.type === "checkbox") {
+        setCurrentResponse(false)
+      } else if (nextField.type === "dropdown" && nextField.allowMultiple) {
         setCurrentResponse([])
       } else {
         setCurrentResponse("")
@@ -148,7 +150,17 @@ export default function PersonalDetailsCollector({ config, onComplete, onSkip }:
             </Select>
           )
         }
-
+      case "checkbox":
+        return (
+          <div className="flex items-center space-x-3">
+            <Checkbox
+              id="terms"
+              checked={currentResponse as boolean}
+              onCheckedChange={setCurrentResponse as (checked: boolean) => void}
+            />
+            <Label htmlFor="terms" className="text-lg">{currentField.label}</Label>
+          </div>
+        )
       default:
         return null
     }
@@ -173,21 +185,26 @@ export default function PersonalDetailsCollector({ config, onComplete, onSkip }:
           </div>
 
           <div className="flex justify-between pt-4">
-            <div>
-              {currentFieldIndex > 0 && (
-                <Button 
-                  variant="ghost"
-                  onClick={() => {
-                    setCurrentFieldIndex(prev => prev - 1)
-                    // Restore previous response
-                    const prevField = personalFields[currentFieldIndex - 1]
-                    setCurrentResponse(responses[prevField.id] || "")
-                  }}
-                >
-                  Back
-                </Button>
-              )}
-            </div>
+            {currentFieldIndex > 0 ? (
+              <Button 
+                variant="ghost"
+                onClick={() => {
+                  setCurrentFieldIndex(prev => prev - 1)
+                  // Restore previous response
+                  const prevField = personalFields[currentFieldIndex - 1]
+                  setCurrentResponse(responses[prevField.id] || "")
+                }}
+              >
+                Back
+              </Button>
+            ) : (
+              <Button 
+                variant="ghost" 
+                onClick={onSkip}
+              >
+                Skip
+              </Button>
+            )}
             
             <Button
               onClick={handleNext}

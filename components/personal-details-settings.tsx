@@ -110,7 +110,7 @@ function SortableField({
                 value={field.type}
                 onValueChange={(value) => {
                   const updates: Partial<PersonalDetailField> = { 
-                    type: value as "text" | "dropdown"
+                    type: value as "text" | "dropdown" | "checkbox"
                   }
                   
                   if (value === "dropdown" && !field.dropdownOptions) {
@@ -126,6 +126,7 @@ function SortableField({
                 <SelectContent>
                   <SelectItem value="text">Text Input</SelectItem>
                   <SelectItem value="dropdown">Dropdown</SelectItem>
+                  <SelectItem value="checkbox">Checkbox</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -350,7 +351,7 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
   return (
     <div className="w-full space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium">Collection Settings</h2>
+        <h2 className="text-xl font-semibold">Personal Details Collection</h2>
         <div className="flex items-center space-x-2">
           <Switch 
             id="include-personal-details"

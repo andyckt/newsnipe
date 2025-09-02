@@ -15,8 +15,8 @@ import { SubmissionsTab } from "./dashboard/tabs/submissions-tab"
 import { FromAndyTab } from "./dashboard/tabs/from-andy-tab"
 import { MySnipeTab } from "./dashboard/tabs/my-snipe-tab"
 import { SettingsTab } from "./dashboard/tabs/settings-tab"
-import { LaunchRecorderTab } from "./dashboard/tabs/launch-recorder-tab"
-import { CreateSnipeTab } from "./dashboard/tabs/create-snipe-tab"
+// import { LaunchRecorderTab } from "./dashboard/tabs/launch-recorder-tab"
+import CreateSnipeTab from "./dashboard/tabs/create-snipe-tab"
 
 interface CreatedSnipe {
   id: string
@@ -109,8 +109,8 @@ export function DesignaliCreative() {
         return <CreateSnipeTab />
       case "from-andy":
         return <FromAndyTab />
-      case "launch-recorder":
-        return <LaunchRecorderTab />
+      // case "launch-recorder":
+      //   return <LaunchRecorderTab />
       case "settings":
         return <SettingsTab />
       default:

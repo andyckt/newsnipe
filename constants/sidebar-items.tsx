@@ -2,11 +2,6 @@ import { LayoutDashboard, Play, Heart, Target, Video, PlusCircle } from "lucide-
 
 export const sidebarItems = [
   {
-    id: "create-snipe",
-    title: "Create Snipe",
-    icon: <PlusCircle />,
-  },
-  {
     id: "from-andy",
     title: "From Andy",
     icon: <Heart />,

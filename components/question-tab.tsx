@@ -354,7 +354,41 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
   
   return (
     <div className="w-full">
-      <div className="flex flex-col items-center mb-6 w-full">
+      <div className="flex flex-col items-center mb-8">
+        <h2 className="text-xl font-semibold mb-6">Audio Language</h2>
+        
+        <div className="flex gap-4">
+          <Button
+            onClick={() => onLanguageChange("english")}
+            className={`px-6 py-2 rounded-full ${
+              language === "english" 
+                ? "bg-blue-500 text-white" 
+                : "bg-gray-200 text-black hover:bg-gray-300"
+            }`}
+          >
+            English
+          </Button>
+          
+          <Button
+            onClick={() => onLanguageChange("mandarin")}
+            className={`px-6 py-2 rounded-full ${
+              language === "mandarin" 
+                ? "bg-blue-500 text-white" 
+                : "bg-gray-200 text-black hover:bg-gray-300"
+            }`}
+          >
+            Mandarin
+          </Button>
+        </div>
+      </div>
+      
+
+      
+
+      
+      <div className="flex flex-col items-center mb-12 w-full">
+        <h2 className="text-xl font-semibold mb-2">Custom Text Fields</h2>
+        <p className="text-sm text-gray-500 mb-6 text-center">Each text field will correspond to one recording. Drag to reorder.</p>
         
         <DndContext 
           sensors={sensors}
@@ -391,7 +425,18 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
         </DndContext>
       </div>
       
-
+      <div className="flex justify-center">
+        <Button 
+          onClick={() => {
+            unlockAudio(); // Unlock audio on user interaction
+            initAudioContext(); // Initialize Web Audio API context
+            onLaunch(textInputs.length, language, textInputs, "question", "no_limit");
+          }}
+          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-4 text-xl rounded-full"
+        >
+          Create Now
+        </Button>
+      </div>
     </div>
   )
 }
