@@ -11,8 +11,7 @@ export async function GET(
   { params }: { params: { shortId: string } }
 ) {
   try {
-    // Use params.shortId directly to avoid the Next.js warning
-    const shortId = params.shortId;
+    const { shortId } = params;
     
     if (!shortId) {
       return NextResponse.json(
