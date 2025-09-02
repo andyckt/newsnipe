@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { CameraView } from "@/components/camera-view"
 import { CameraControls } from "@/components/camera-controls"
-import { SettingsScreen } from "@/components/settings-screen"
 import { AudioLanguage, TextInput, TimeLimit } from "@/components/question-tab"
 import { useCamera } from "@/hooks/use-camera"
 import { useQuestionRecording } from "@/hooks/use-question-recording"
@@ -14,19 +13,22 @@ import { initAudioContext } from "@/lib/mobile-audio"
 import PersonalDetailsCollector, { PersonalDetailField, PersonalDetailsConfig, PersonalDetailsResponse } from "@/components/personal-details-collector"
 
 // App states
-type AppState = "settings" | "personal_details" | "recording" | "completed"
+type AppState = "loading" | "personal_details" | "recording" | "completed" | "error"
 
-export default function CameraRecorder() {
-  // Check for URL parameters on initial load
-  const [initialParamsChecked, setInitialParamsChecked] = useState(false)
-  
+interface SnipePageProps {
+  shortId?: string // For database mode
+  urlData?: string // For URL parameter mode (legacy)
+}
+
+export function SnipePage({ shortId, urlData }: SnipePageProps) {
   // State management
-  const [appState, setAppState] = useState<AppState>("settings")
+  const [appState, setAppState] = useState<AppState>("loading")
   const [numRecordings, setNumRecordings] = useState(3)
   const [audioLanguage, setAudioLanguage] = useState<AudioLanguage>("english")
   const [textInputs, setTextInputs] = useState<TextInput[]>([{ id: "default", value: "" }])
   const [mode, setMode] = useState<"question" | "conversation">("question")
   const [timeLimit, setTimeLimit] = useState<TimeLimit>("no_limit")
+  const [errorMessage, setErrorMessage] = useState<string>("")
   
   // Personal details configuration and responses
   const [personalDetailsConfig, setPersonalDetailsConfig] = useState<PersonalDetailsConfig>({
@@ -35,54 +37,67 @@ export default function CameraRecorder() {
   })
   const [personalDetailsResponses, setPersonalDetailsResponses] = useState<PersonalDetailsResponse>({})
   
-  // Parse URL parameters on initial load
+  // Load configuration data on initial load
   useEffect(() => {
-    if (typeof window !== 'undefined' && !initialParamsChecked) {
+    async function loadConfigData() {
       try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const paramsData = urlParams.get('data');
+        let configData;
         
-        if (paramsData) {
-          // Decode and parse the data
-          const decodedData = decodeURIComponent(paramsData);
-          const parsedData = JSON.parse(decodedData);
+        if (shortId) {
+          // Fetch configuration from database using shortId
+          const response = await fetch(`/api/snipe/${shortId}`);
           
-          // Apply the settings from URL parameters
-          if (parsedData.numRecordings) setNumRecordings(parsedData.numRecordings);
-          if (parsedData.audioLanguage) setAudioLanguage(parsedData.audioLanguage);
-          
-          // Handle text inputs and their audio URLs/keys
-          if (parsedData.textInputs) {
-            // Make sure we refresh presigned URLs if needed
-            const refreshedTextInputs = [...parsedData.textInputs];
-            setTextInputs(refreshedTextInputs);
-            
-            // Preload audio for better performance
-            refreshedTextInputs.forEach(input => {
-              if (input.audioUrl) {
-                import('@/lib/mobile-audio').then(({ preloadMobileAudio }) => {
-                  preloadMobileAudio(input.audioUrl!).catch(err => 
-                    console.warn(`Failed to preload audio: ${err}`)
-                  );
-                });
-              }
-            });
+          if (!response.ok) {
+            throw new Error('Failed to load configuration data');
           }
           
-          if (parsedData.mode) setMode(parsedData.mode);
-          if (parsedData.timeLimit) setTimeLimit(parsedData.timeLimit);
-          if (parsedData.personalDetailsConfig) setPersonalDetailsConfig(parsedData.personalDetailsConfig);
-          
-          // Set initial app state based on URL parameters
-          setAppState(parsedData.personalDetailsConfig?.includePersonalDetails ? "personal_details" : "recording");
+          configData = await response.json();
+        } else if (urlData) {
+          // Legacy mode: parse from URL parameter
+          const decodedData = decodeURIComponent(urlData);
+          configData = JSON.parse(decodedData);
+        } else {
+          // No configuration data available
+          throw new Error('No configuration data available');
         }
+        
+        // Apply the settings from the configuration
+        if (configData.numRecordings) setNumRecordings(configData.numRecordings);
+        if (configData.audioLanguage) setAudioLanguage(configData.audioLanguage);
+        
+        // Handle text inputs and their audio URLs/keys
+        if (configData.textInputs) {
+          // Make sure we refresh presigned URLs if needed
+          const refreshedTextInputs = [...configData.textInputs];
+          setTextInputs(refreshedTextInputs);
+          
+          // Preload audio for better performance
+          refreshedTextInputs.forEach(input => {
+            if (input.audioUrl) {
+              import('@/lib/mobile-audio').then(({ preloadMobileAudio }) => {
+                preloadMobileAudio(input.audioUrl!).catch(err => 
+                  console.warn(`Failed to preload audio: ${err}`)
+                );
+              });
+            }
+          });
+        }
+        
+        if (configData.mode) setMode(configData.mode);
+        if (configData.timeLimit) setTimeLimit(configData.timeLimit);
+        if (configData.personalDetailsConfig) setPersonalDetailsConfig(configData.personalDetailsConfig);
+        
+        // Set initial app state based on configuration
+        setAppState(configData.personalDetailsConfig?.includePersonalDetails ? "personal_details" : "recording");
       } catch (error) {
-        console.error("Error parsing URL parameters:", error);
+        console.error("Error loading configuration data:", error);
+        setErrorMessage("Failed to load recording configuration. Please try again.");
+        setAppState("error");
       }
-      
-      setInitialParamsChecked(true);
     }
-  }, [initialParamsChecked]);
+    
+    loadConfigData();
+  }, [shortId, urlData]);
   
   // Try to unlock audio on component mount and on any user interaction
   useEffect(() => {
@@ -147,50 +162,6 @@ export default function CameraRecorder() {
     completeSession
   } = mode === "question" ? questionRecording : conversationRecording
 
-  // Handle launching the recorder with selected settings
-  const handleLaunch = async (selectedNumRecordings: number, selectedLanguage: AudioLanguage, selectedTextInputs: TextInput[], selectedMode: "question" | "conversation", selectedTimeLimit: TimeLimit) => {
-    // Create a data object with all the settings
-    const launchData = {
-      numRecordings: selectedTextInputs.length,
-      audioLanguage: selectedLanguage,
-      textInputs: selectedTextInputs,
-      mode: selectedMode,
-      timeLimit: selectedTimeLimit,
-      personalDetailsConfig: personalDetailsConfig
-    };
-    
-    try {
-      // Save the configuration to the database
-      const response = await fetch('/api/snipe/save', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(launchData),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to save configuration');
-      }
-      
-      const { shortId } = await response.json();
-      
-      // Create the URL for the new tab with /snipe path using the shortId
-      const url = `${window.location.origin}/snipe/${shortId}`;
-      
-      // Open the URL in a new tab
-      window.open(url, '_blank');
-    } catch (error) {
-      console.error('Error saving snipe configuration:', error);
-      alert('Failed to create snipe link. Please try again.');
-      
-      // Fallback to the old URL-based approach if saving to database fails
-      const encodedData = encodeURIComponent(JSON.stringify(launchData));
-      const fallbackUrl = `${window.location.origin}/snipe?data=${encodedData}`;
-      window.open(fallbackUrl, '_blank');
-    }
-  }
-  
   // Handle completion of personal details
   const handlePersonalDetailsComplete = (responses: PersonalDetailsResponse) => {
     setPersonalDetailsResponses(responses)
@@ -220,21 +191,41 @@ export default function CameraRecorder() {
     }, 100)
   }
 
-  // Render based on current app state
-  if (appState === "settings") {
+  // Loading state
+  if (appState === "loading") {
     return (
       <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
-        <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen">
-          <SettingsScreen 
-            onLaunch={handleLaunch} 
-            personalDetailsConfig={personalDetailsConfig}
-            onPersonalDetailsConfigChange={setPersonalDetailsConfig}
-          />
+        <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen p-8 items-center justify-center text-center">
+          <h1 className="text-3xl font-bold mb-4">Loading...</h1>
+          <p className="text-lg">
+            Please wait while we prepare your recording session.
+          </p>
         </div>
       </div>
     )
   }
-  
+
+  // Error state
+  if (appState === "error") {
+    return (
+      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
+        <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen p-8 items-center justify-center text-center">
+          <h1 className="text-3xl font-bold mb-4">Error</h1>
+          <p className="text-lg mb-6">
+            {errorMessage || "An error occurred. Please try again."}
+          </p>
+          <Button 
+            onClick={() => window.location.href = '/'}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded-full"
+          >
+            Return to Home
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // Personal details state
   if (appState === "personal_details") {
     return (
       <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
@@ -249,6 +240,7 @@ export default function CameraRecorder() {
     )
   }
   
+  // Completed state
   if (appState === "completed") {
     return (
       <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
