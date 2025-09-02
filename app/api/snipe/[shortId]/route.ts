@@ -33,8 +33,11 @@ export async function GET(
       );
     }
     
+    // Convert to a regular object that we can safely destructure
+    const snipeData = JSON.parse(JSON.stringify(snipeConfig));
+    
     // Return the configuration data (excluding sensitive fields)
-    const { userId, _id, __v, ...configData } = snipeConfig;
+    const { userId, _id, __v, ...configData } = snipeData;
     
     return NextResponse.json(configData);
     
