@@ -30,6 +30,7 @@ interface PersonalDetailsConfig {
 // Define the Snipe document interface
 export interface ISnipe {
   shortId: string;
+  uniqueId: string; // Added to match existing database schema
   userId: mongoose.Types.ObjectId;
   numRecordings: number;
   audioLanguage: string;
@@ -49,6 +50,11 @@ const snipeSchema = new mongoose.Schema<ISnipe>(
       required: true,
       unique: true,
       default: () => nanoid(10), // Generate a short 10-character ID
+    },
+    uniqueId: {
+      type: String,
+      unique: true,
+      sparse: true, // Allow multiple null values
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
