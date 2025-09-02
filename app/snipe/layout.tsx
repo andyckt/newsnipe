@@ -4,8 +4,8 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 
 export const metadata: Metadata = {
-  title: "Camera Recorder - Recording",
-  description: "Mobile-first camera recording app",
+  title: "Snipe",
+  description: "Access Better",
   viewport: "width=device-width, initial-scale=1.0",
 }
 
