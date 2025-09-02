@@ -22,6 +22,7 @@ export default function CameraRecorder() {
   
   // State management
   const [appState, setAppState] = useState<AppState>("settings")
+  const [title, setTitle] = useState<string>("Untitled Snipe")
   const [numRecordings, setNumRecordings] = useState(3)
   const [audioLanguage, setAudioLanguage] = useState<AudioLanguage>("english")
   const [textInputs, setTextInputs] = useState<TextInput[]>([{ id: "default", value: "" }])
@@ -151,6 +152,7 @@ export default function CameraRecorder() {
   const handleLaunch = async (selectedNumRecordings: number, selectedLanguage: AudioLanguage, selectedTextInputs: TextInput[], selectedMode: "question" | "conversation", selectedTimeLimit: TimeLimit) => {
     // Create a data object with all the settings
     const launchData = {
+      title: title,
       numRecordings: selectedTextInputs.length,
       audioLanguage: selectedLanguage,
       textInputs: selectedTextInputs,
@@ -229,6 +231,8 @@ export default function CameraRecorder() {
             onLaunch={handleLaunch} 
             personalDetailsConfig={personalDetailsConfig}
             onPersonalDetailsConfigChange={setPersonalDetailsConfig}
+            title={title}
+            onTitleChange={setTitle}
           />
         </div>
       </div>

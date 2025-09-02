@@ -38,6 +38,7 @@ export async function POST(request: Request) {
     const newSnipe = await Snipe.create({
       userId: session.user.id,
       uniqueId: null, // Set explicitly to null to avoid duplicate key errors
+      title: snipeConfig.title || "Untitled Snipe", // Use provided title or default
       numRecordings: snipeConfig.numRecordings,
       audioLanguage: snipeConfig.audioLanguage,
       textInputs: snipeConfig.textInputs,
