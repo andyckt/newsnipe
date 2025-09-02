@@ -47,7 +47,9 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
           // Fetch configuration from database using shortId
           const response = await fetch(`/api/snipe/${shortId}`);
           
-          if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('Snipe not found. It may have been deleted by the creator.');
+          } else if (!response.ok) {
             throw new Error('Failed to load configuration data');
           }
           
@@ -89,9 +91,10 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
         
         // Set initial app state based on configuration
         setAppState(configData.personalDetailsConfig?.includePersonalDetails ? "personal_details" : "recording");
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error loading configuration data:", error);
-        setErrorMessage("Failed to load recording configuration. Please try again.");
+        // Use the specific error message if available
+        setErrorMessage(error.message || "Failed to load recording configuration. Please try again.");
         setAppState("error");
       }
     }
@@ -207,10 +210,13 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
 
   // Error state
   if (appState === "error") {
+    const isSnipeNotFound = errorMessage?.includes('Snipe not found');
+    
     return (
       <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
         <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen p-8 items-center justify-center text-center">
-          <h1 className="text-3xl font-bold mb-4">Error</h1>
+          <div className="text-6xl mb-4">{isSnipeNotFound ? '🔍' : '❌'}</div>
+          <h1 className="text-3xl font-bold mb-4">{isSnipeNotFound ? 'Snipe Not Found' : 'Error'}</h1>
           <p className="text-lg mb-6">
             {errorMessage || "An error occurred. Please try again."}
           </p>

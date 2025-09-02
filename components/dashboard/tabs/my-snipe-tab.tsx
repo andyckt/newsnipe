@@ -7,6 +7,16 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { toast } from "@/components/ui/use-toast"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface CreatedSnipe {
   id: string
@@ -29,6 +39,9 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
   const [snipes, setSnipes] = useState<CreatedSnipe[]>(createdSnipes)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false)
+  const [snipeToDelete, setSnipeToDelete] = useState<CreatedSnipe | null>(null)
+  const [isDeleting, setIsDeleting] = useState<boolean>(false)
   
   useEffect(() => {
     async function fetchUserSnipes() {
@@ -143,6 +156,48 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
       }
     })
   }
+  
+  const handleDeleteClick = (snipe: CreatedSnipe) => {
+    setSnipeToDelete(snipe)
+    setDeleteDialogOpen(true)
+  }
+  
+  const handleDeleteConfirm = async () => {
+    if (!snipeToDelete) return
+    
+    try {
+      setIsDeleting(true)
+      
+      const response = await fetch(`/api/snipe/${snipeToDelete.id}/delete`, {
+        method: 'DELETE',
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete snipe')
+      }
+      
+      // Remove the deleted snipe from the state
+      setSnipes(prevSnipes => prevSnipes.filter(snipe => snipe.id !== snipeToDelete.id))
+      
+      toast({
+        title: "Snipe Deleted",
+        description: `"${snipeToDelete.title}" has been deleted successfully`,
+        className: "rounded-3xl",
+      })
+    } catch (err) {
+      console.error('Error deleting snipe:', err)
+      toast({
+        title: "Delete Failed",
+        description: "Unable to delete the snipe. Please try again.",
+        variant: "destructive",
+        className: "rounded-3xl",
+      })
+    } finally {
+      setIsDeleting(false)
+      setDeleteDialogOpen(false)
+      setSnipeToDelete(null)
+    }
+  }
 
   // Loading state
   if (isLoading) {
@@ -240,7 +295,10 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
                           <Download className="h-4 w-4 mr-2" />
                           Download QR Code
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="rounded-xl text-red-600">
+                        <DropdownMenuItem 
+                          className="rounded-xl text-red-600"
+                          onClick={() => handleDeleteClick(snipe)}
+                        >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Delete
                         </DropdownMenuItem>
@@ -294,6 +352,44 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
           </motion.div>
         ))}
       </div>
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this snipe?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the snipe
+              "{snipeToDelete?.title}" and remove it from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              className="rounded-2xl" 
+              disabled={isDeleting}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="rounded-2xl bg-red-600 hover:bg-red-700"
+              onClick={(e) => {
+                e.preventDefault() // Prevent the dialog from closing automatically
+                handleDeleteConfirm()
+              }}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
