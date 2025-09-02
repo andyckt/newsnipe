@@ -32,6 +32,7 @@ export interface ISnipe {
   shortId: string;
   uniqueId: string; // Added to match existing database schema
   title: string;    // Title for the snipe configuration
+  submissions: number; // Number of submissions for this snipe
   userId: mongoose.Types.ObjectId;
   numRecordings: number;
   audioLanguage: string;
@@ -60,6 +61,10 @@ const snipeSchema = new mongoose.Schema<ISnipe>(
     title: {
       type: String,
       default: "Untitled Snipe",
+    },
+    submissions: {
+      type: Number,
+      default: 0,
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,

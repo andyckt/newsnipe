@@ -39,6 +39,7 @@ export async function POST(request: Request) {
       userId: session.user.id,
       uniqueId: null, // Set explicitly to null to avoid duplicate key errors
       title: snipeConfig.title || "Untitled Snipe", // Use provided title or default
+      submissions: 0, // Initialize submissions count to zero
       numRecordings: snipeConfig.numRecordings,
       audioLanguage: snipeConfig.audioLanguage,
       textInputs: snipeConfig.textInputs,
