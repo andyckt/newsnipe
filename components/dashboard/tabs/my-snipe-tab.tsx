@@ -1,6 +1,7 @@
 "use client"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Calendar, Globe, Languages, FileText, Play, MoreVertical, Edit, Trash2, Copy, Download } from "lucide-react"
+import { Calendar, Globe, Languages, FileText, Play, MoreVertical, Edit, Trash2, Copy, Download, Loader2 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -25,7 +26,36 @@ interface MySnipeTabProps {
 }
 
 export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
-  const displaySnipes = createdSnipes
+  const [snipes, setSnipes] = useState<CreatedSnipe[]>(createdSnipes)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
+  
+  useEffect(() => {
+    async function fetchUserSnipes() {
+      try {
+        setIsLoading(true)
+        setError(null)
+        
+        const response = await fetch('/api/snipe/user')
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch snipes')
+        }
+        
+        const data = await response.json()
+        setSnipes(data)
+      } catch (err) {
+        console.error('Error fetching snipes:', err)
+        setError('Failed to load your snipes. Please try again later.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    fetchUserSnipes()
+  }, [])
+  
+  const displaySnipes = snipes
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -71,7 +101,8 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
   }
 
   const copyToClipboard = async (url: string, title: string) => {
-    const fullUrl = `https://snipe.app/interview/${url}`
+    // Use the current origin for the URL
+    const fullUrl = `${window.location.origin}/snipe/${url}`
     try {
       await navigator.clipboard.writeText(fullUrl)
       toast({
@@ -113,6 +144,39 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
     })
   }
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <div className="text-center py-12">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-500" />
+          <h3 className="text-xl font-semibold mb-2">Loading Snipes...</h3>
+          <p className="text-muted-foreground">Please wait while we fetch your snipes</p>
+        </div>
+      </div>
+    )
+  }
+  
+  // Error state
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">❌</div>
+          <h3 className="text-xl font-semibold mb-2">Error Loading Snipes</h3>
+          <p className="text-muted-foreground mb-6">{error}</p>
+          <Button 
+            onClick={() => window.location.reload()}
+            className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+          >
+            Try Again
+          </Button>
+        </div>
+      </div>
+    )
+  }
+  
+  // Empty state
   if (displaySnipes.length === 0) {
     return (
       <div className="p-6">
@@ -120,7 +184,10 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
           <div className="text-6xl mb-4">🎯</div>
           <h3 className="text-xl font-semibold mb-2">No Snipes Created Yet</h3>
           <p className="text-muted-foreground mb-6">Create your first AI interview to get started</p>
-          <Button className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+          <Button 
+            onClick={() => window.location.href = '/dashboard?tab=create-snipe'}
+            className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+          >
             Create Your First Snipe
           </Button>
         </div>
@@ -214,6 +281,7 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
                       <Button
                         size="sm"
                         className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                        onClick={() => window.open(`/snipe/${snipe.url}`, '_blank')}
                       >
                         <Play className="h-4 w-4 mr-1" />
                         View
