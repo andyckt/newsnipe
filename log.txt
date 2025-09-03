@@ -1,3 +1,6 @@
+"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --use-fake-ui-for-media-stream --use-fake-device-for-media-stream
+
+
 commit b8db55be038c750b1288a795164c1ca804fdc296
 Author: Andy <kamtocheung1104@gmail.com>
 Date:   Sun Aug 31 15:33:44 2025 +0800
