@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { ArrowRight, Check } from "lucide-react"
+import { ArrowRight, Check, Loader2 } from "lucide-react"
 
 export interface PersonalDetailField {
   id: string
@@ -34,15 +34,18 @@ export interface PersonalDetailsResponse {
 
 interface PersonalDetailsCollectorProps {
   config: PersonalDetailsConfig
-  onComplete: (responses: PersonalDetailsResponse) => void
+  onComplete: (responses: PersonalDetailsResponse, responseId?: string) => void
   onSkip: () => void
+  shortId: string  // The shortId of the Snipe
 }
 
-export default function PersonalDetailsCollector({ config, onComplete, onSkip }: PersonalDetailsCollectorProps) {
+export default function PersonalDetailsCollector({ config, onComplete, onSkip, shortId }: PersonalDetailsCollectorProps) {
   const { includePersonalDetails, personalFields } = config
   const [currentFieldIndex, setCurrentFieldIndex] = useState(0)
   const [responses, setResponses] = useState<PersonalDetailsResponse>({})
   const [currentResponse, setCurrentResponse] = useState<string | string[] | boolean>("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [responseId, setResponseId] = useState<string | null>(null)
 
   // If personal details collection is disabled, skip immediately
   React.useEffect(() => {
@@ -59,30 +62,71 @@ export default function PersonalDetailsCollector({ config, onComplete, onSkip }:
   const isLastField = currentFieldIndex === personalFields.length - 1
   const progress = ((currentFieldIndex + 1) / personalFields.length) * 100
 
-  const handleNext = () => {
+  const handleNext = async () => {
     // Save current response
-    setResponses(prev => ({
-      ...prev,
+    const updatedResponses = {
+      ...responses,
       [currentField.id]: currentResponse
-    }))
+    };
+    
+    setResponses(updatedResponses);
 
     if (isLastField) {
-      // Complete the form
-      onComplete({
-        ...responses,
-        [currentField.id]: currentResponse
-      })
+      try {
+        setIsSubmitting(true);
+        
+        // Submit personal details to the API
+        const response = await fetch('/api/snipe/response', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            snipeShortId: shortId,
+            personalDetails: {
+              ...updatedResponses,
+              [currentField.id]: currentResponse
+            }
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to save personal details');
+        }
+        
+        const data = await response.json();
+        setResponseId(data.responseId);
+        
+        // Complete the form and pass the responses and responseId to the parent component
+        onComplete(
+          {
+            ...updatedResponses,
+            [currentField.id]: currentResponse
+          },
+          data.responseId
+        );
+      } catch (error) {
+        console.error('Error saving personal details:', error);
+        // Even if there's an error, we'll still proceed to the next stage
+        // but we'll log the error
+        onComplete({
+          ...updatedResponses,
+          [currentField.id]: currentResponse
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
       // Move to next field
-      setCurrentFieldIndex(prev => prev + 1)
+      setCurrentFieldIndex(prev => prev + 1);
       // Reset current response based on the next field type
-      const nextField = personalFields[currentFieldIndex + 1]
+      const nextField = personalFields[currentFieldIndex + 1];
       if (nextField.type === "checkbox") {
-        setCurrentResponse(false)
+        setCurrentResponse(false);
       } else if (nextField.type === "dropdown" && nextField.allowMultiple) {
-        setCurrentResponse([])
+        setCurrentResponse([]);
       } else {
-        setCurrentResponse("")
+        setCurrentResponse("");
       }
     }
   }
@@ -208,10 +252,14 @@ export default function PersonalDetailsCollector({ config, onComplete, onSkip }:
             
             <Button
               onClick={handleNext}
-              disabled={isNextDisabled()}
+              disabled={isNextDisabled() || isSubmitting}
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full"
             >
-              {isLastField ? (
+              {isSubmitting ? (
+                <>
+                  Saving <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                </>
+              ) : isLastField ? (
                 <>
                   Complete <Check className="ml-2 h-4 w-4" />
                 </>

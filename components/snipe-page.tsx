@@ -29,6 +29,7 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
   const [mode, setMode] = useState<"question" | "conversation">("question")
   const [timeLimit, setTimeLimit] = useState<TimeLimit>("no_limit")
   const [errorMessage, setErrorMessage] = useState<string>("")
+  const [responseId, setResponseId] = useState<string | null>(null)
   
   // Personal details configuration and responses
   const [personalDetailsConfig, setPersonalDetailsConfig] = useState<PersonalDetailsConfig>({
@@ -166,8 +167,11 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
   } = mode === "question" ? questionRecording : conversationRecording
 
   // Handle completion of personal details
-  const handlePersonalDetailsComplete = (responses: PersonalDetailsResponse) => {
+  const handlePersonalDetailsComplete = (responses: PersonalDetailsResponse, submittedResponseId?: string) => {
     setPersonalDetailsResponses(responses)
+    if (submittedResponseId) {
+      setResponseId(submittedResponseId)
+    }
     setAppState("recording")
   }
   
@@ -186,13 +190,36 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
   }
 
   // Handle session completion
-  if (isSessionComplete) {
-    // Stop the camera and transition to completed state
-    setTimeout(() => {
-      stopCamera() // Stop the camera when recordings are complete
-      setAppState("completed")
-    }, 100)
-  }
+  useEffect(() => {
+    if (isSessionComplete) {
+      // Update the response status to completed if we have a responseId
+      const updateResponseStatus = async () => {
+        if (responseId) {
+          try {
+            await fetch('/api/snipe/response', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                responseId,
+                status: 'completed'
+              }),
+            });
+            console.log('Response marked as completed');
+          } catch (error) {
+            console.error('Error updating response status:', error);
+          }
+        }
+        
+        // Stop the camera and transition to completed state
+        stopCamera(); // Stop the camera when recordings are complete
+        setAppState("completed");
+      };
+      
+      setTimeout(updateResponseStatus, 100);
+    }
+  }, [isSessionComplete, responseId, stopCamera]);
 
   // Loading state
   if (appState === "loading") {
@@ -240,6 +267,7 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
             config={personalDetailsConfig}
             onComplete={handlePersonalDetailsComplete}
             onSkip={handlePersonalDetailsSkip}
+            shortId={shortId || ""}
           />
         </div>
       </div>
