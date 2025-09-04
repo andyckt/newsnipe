@@ -104,7 +104,57 @@ export async function PUT(request: Request) {
     const updateData: any = {};
     
     if (recordings) {
-      updateData.recordings = recordings;
+      // Log incoming recordings
+      console.log(`Received ${recordings.length} recordings for response ${responseId}:`);
+      recordings.forEach((rec: any, index: number) => {
+        console.log(`Recording ${index + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}`);
+      });
+      
+      // Merge recordings with existing ones based on questionId and recordingIndex
+      // This prevents duplicate recordings and ensures all recordings are saved
+      const existingRecordings = response.recordings || [];
+      
+      // Log existing recordings
+      console.log(`Found ${existingRecordings.length} existing recordings for response ${responseId}:`);
+      existingRecordings.forEach((rec: any, index: number) => {
+        console.log(`Existing Recording ${index + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}`);
+      });
+      
+      // Create a map of existing recordings by questionId and recordingIndex
+      const recordingMap = new Map();
+      existingRecordings.forEach((rec: any) => {
+        // Use both questionId and recordingIndex to create a unique key
+        const key = `${rec.questionId}:${rec.recordingIndex}`;
+        console.log(`Adding existing recording to map with key: ${key}`);
+        recordingMap.set(key, rec);
+      });
+      
+      // Add or update recordings
+      recordings.forEach((newRec: any) => {
+        // Use both questionId and recordingIndex to create a unique key
+        const key = `${newRec.questionId}:${newRec.recordingIndex}`;
+        console.log(`Processing new recording with key: ${key}`);
+        
+        const existingRec = recordingMap.get(key);
+        if (existingRec) {
+          console.log(`Updating existing recording with key: ${key}`);
+        } else {
+          console.log(`Adding new recording with key: ${key}`);
+        }
+        
+        recordingMap.set(key, {
+          ...existingRec,
+          ...newRec
+        });
+      });
+      
+      // Convert map back to array
+      updateData.recordings = Array.from(recordingMap.values());
+      
+      console.log(`Updating recordings for response ${responseId}. Total recordings: ${updateData.recordings.length}`);
+      updateData.recordings.forEach((rec: any, index: number) => {
+        console.log(`Final Recording ${index + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}`);
+      });
     }
     
     if (status) {

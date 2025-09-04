@@ -49,6 +49,12 @@ export function useConversationRecording(streamRef: React.RefObject<MediaStream 
     duration?: number;
   }>>([])
   
+  // Track pending uploads
+  const pendingUploadsRef = useRef<Promise<any>[]>([])
+  
+  // Track the next unique recording index to use
+  const nextUniqueIndexRef = useRef<number>(0)
+  
   // Function to handle recording completion - either upload to S3 or download as fallback
   const handleRecordingComplete = async (responseId: string | null) => {
     if (recordedChunksRef.current.length === 0) return
@@ -61,44 +67,55 @@ export function useConversationRecording(streamRef: React.RefObject<MediaStream 
     // Create a blob from the recorded chunks
     const blob = new Blob(recordedChunksRef.current, { type: mimeType })
     
-    // Generate a question ID for conversation mode
-    const questionId = `conversation-${currentRecordingIndex + 1}`
+    // Get a unique recording index for this recording
+    const uniqueIndex = nextUniqueIndexRef.current++;
+    
+    // Generate a question ID for conversation mode - ensure it's unique with uniqueIndex
+    const questionId = `conversation-${uniqueIndex}`
       
     // If we have a responseId, try to upload to S3
     if (responseId) {
-      try {
-        // Import the uploadVideoRecording function
-        const { uploadVideoRecording } = await import('@/lib/api-service')
-        
-        // Upload the video and get the URLs and keys
-        const { videoKey, videoUrl, thumbnailKey, thumbnailUrl } = await uploadVideoRecording(
-          blob,
-          responseId,
-          questionId,
-          currentRecordingIndex
-        )
-        
-        console.log(`Recording ${currentRecordingIndex + 1} uploaded to S3:`, { videoKey, thumbnailKey })
-        
-        // Store the recording metadata
-        recordingsRef.current.push({
-          questionId,
-          recordingIndex: currentRecordingIndex,
-          videoKey,
-          videoUrl,
-          thumbnailKey,
-          thumbnailUrl,
-          duration: blob.size > 0 ? 0 : undefined // We don't know the duration yet
-        })
-        
-      } catch (error) {
-        console.error('Error uploading recording to S3:', error)
-        // Fall back to downloading the file
-        downloadRecordingFallback(blob, questionId)
-      }
+      // Create a promise for this upload and add it to pending uploads
+      const uploadPromise = (async () => {
+        try {
+          // Import the uploadVideoRecording function
+          const { uploadVideoRecording } = await import('@/lib/api-service')
+          
+          // Upload the video and get the URLs and keys
+          const { videoKey, videoUrl, thumbnailKey, thumbnailUrl } = await uploadVideoRecording(
+            blob,
+            responseId,
+            questionId,
+            currentRecordingIndex
+          )
+          
+          console.log(`Recording ${currentRecordingIndex + 1} uploaded to S3:`, { videoKey, thumbnailKey })
+          
+          // Store the recording metadata
+          recordingsRef.current.push({
+            questionId,
+            recordingIndex: uniqueIndex, // Use uniqueIndex instead of currentRecordingIndex
+            videoKey,
+            videoUrl,
+            thumbnailKey,
+            thumbnailUrl,
+            duration: blob.size > 0 ? 0 : undefined // We don't know the duration yet
+          })
+          
+          return { success: true, recordingIndex: currentRecordingIndex }
+        } catch (error) {
+          console.error('Error uploading recording to S3:', error)
+          // Fall back to downloading the file
+          downloadRecordingFallback(blob, questionId, uniqueIndex)
+          return { success: false, recordingIndex: currentRecordingIndex }
+        }
+      })()
+      
+      // Add to pending uploads
+      pendingUploadsRef.current.push(uploadPromise)
     } else {
       // No responseId, so fall back to downloading
-      downloadRecordingFallback(blob, questionId)
+      downloadRecordingFallback(blob, questionId, uniqueIndex)
     }
     
     // Clear chunks for next recording
@@ -106,7 +123,7 @@ export function useConversationRecording(streamRef: React.RefObject<MediaStream 
   }
   
   // Fallback function to download recording if S3 upload fails
-  const downloadRecordingFallback = (blob: Blob, questionId: string) => {
+  const downloadRecordingFallback = (blob: Blob, questionId: string, uniqueIndex: number) => {
     const fileExtension = "webm"
     
     // Create a download link for the recorded video
@@ -127,7 +144,7 @@ export function useConversationRecording(streamRef: React.RefObject<MediaStream 
     // Store minimal recording metadata
     recordingsRef.current.push({
       questionId,
-      recordingIndex: currentRecordingIndex
+      recordingIndex: uniqueIndex // Use uniqueIndex instead of currentRecordingIndex
     })
   }
 
@@ -206,7 +223,10 @@ export function useConversationRecording(streamRef: React.RefObject<MediaStream 
     
     // Check if we've reached the end of the session
     if (nextIndex >= totalRecordings) {
-      setIsSessionComplete(true)
+      // Wait a bit to ensure the current recording is processed before marking complete
+      setTimeout(() => {
+        setIsSessionComplete(true)
+      }, 1000)
     } else {
       // Start the next recording with a small delay to ensure the previous one is processed
       setTimeout(() => {
@@ -217,16 +237,38 @@ export function useConversationRecording(streamRef: React.RefObject<MediaStream 
   
   const completeSession = () => {
     stopRecording()
-    setIsSessionComplete(true)
+    
+    // Wait a bit to ensure the current recording is processed before marking complete
+    setTimeout(() => {
+      setIsSessionComplete(true)
+    }, 1000)
   }
 
   // Function to submit all recordings to the database
   const submitRecordings = async (responseId: string | null) => {
-    if (!responseId || recordingsRef.current.length === 0) {
+    if (!responseId) {
       return false
     }
     
     try {
+      // Wait for all pending uploads to complete
+      console.log(`Waiting for ${pendingUploadsRef.current.length} pending uploads to complete...`)
+      if (pendingUploadsRef.current.length > 0) {
+        await Promise.all(pendingUploadsRef.current)
+        console.log('All uploads completed')
+      }
+      
+      // Check if we have any recordings to submit
+      if (recordingsRef.current.length === 0) {
+        console.warn('No recordings to submit')
+        return false
+      }
+      
+      console.log(`Submitting ${recordingsRef.current.length} recordings to the database:`)
+      recordingsRef.current.forEach((rec, i) => {
+        console.log(`Recording ${i + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}`)
+      })
+      
       // Submit the recordings to the API
       const response = await fetch('/api/snipe/response', {
         method: 'PUT',
@@ -243,6 +285,9 @@ export function useConversationRecording(streamRef: React.RefObject<MediaStream 
       if (!response.ok) {
         throw new Error('Failed to submit recordings')
       }
+      
+      // Clear pending uploads after successful submission
+      pendingUploadsRef.current = []
       
       return true
     } catch (error) {

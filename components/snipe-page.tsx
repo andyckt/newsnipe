@@ -193,13 +193,23 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
     await startRecording()
   }
 
+  // Flag to track if submission is in progress
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   // Handle session completion
   useEffect(() => {
-    if (isSessionComplete) {
+    if (isSessionComplete && !isSubmitting) {
       // Update the response status to completed if we have a responseId
       const updateResponseStatus = async () => {
         if (responseId) {
           try {
+            // Prevent multiple submissions
+            setIsSubmitting(true);
+            
+            // Add a delay to ensure all recordings are processed
+            console.log('Waiting for all recordings to be processed...');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
             // Submit all recordings to the database
             const success = await submitRecordings(responseId);
             
@@ -232,9 +242,9 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
         setAppState("completed");
       };
       
-      setTimeout(updateResponseStatus, 100);
+      updateResponseStatus();
     }
-  }, [isSessionComplete, responseId, stopCamera, submitRecordings]);
+  }, [isSessionComplete, responseId, stopCamera, submitRecordings, isSubmitting]);
 
   // Loading state
   if (appState === "loading") {
