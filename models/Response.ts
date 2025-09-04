@@ -12,8 +12,11 @@ export interface IResponse {
   };
   recordings: Array<{
     questionId: string;
-    recordingUrl?: string;
-    recordingKey?: string;
+    recordingIndex: number;
+    videoKey?: string;
+    videoUrl?: string;
+    thumbnailKey?: string;
+    thumbnailUrl?: string;
     duration?: number;
     transcription?: string;
   }>;
@@ -55,8 +58,11 @@ const responseSchema = new mongoose.Schema<IResponse>(
     },
     recordings: [{
       questionId: String,
-      recordingUrl: String,
-      recordingKey: String,
+      recordingIndex: Number,
+      videoKey: String,
+      videoUrl: String,
+      thumbnailKey: String,
+      thumbnailUrl: String,
       duration: Number,
       transcription: String,
     }],

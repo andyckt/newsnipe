@@ -29,7 +29,7 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
   const [mode, setMode] = useState<"question" | "conversation">("question")
   const [timeLimit, setTimeLimit] = useState<TimeLimit>("no_limit")
   const [errorMessage, setErrorMessage] = useState<string>("")
-  const [responseId, setResponseId] = useState<string | null>(null)
+  const [responseId, setResponseIdState] = useState<string | null>(null)
   
   // Personal details configuration and responses
   const [personalDetailsConfig, setPersonalDetailsConfig] = useState<PersonalDetailsConfig>({
@@ -136,7 +136,7 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
     };
   }, [])
   
-  const { videoRef, streamRef, hasPermission, showPermissionButton, requestPermissions, stopCamera } = useCamera()
+  const { videoRef, streamRef, hasPermission, showPermissionButton, requestPermissions, stopCamera, setResponseId } = useCamera()
 
   // Use the appropriate recording hook based on the selected mode
   const questionRecording = useQuestionRecording(streamRef, { 
@@ -163,13 +163,17 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
     recordingTimeLeft,
     startRecording, 
     nextRecording,
-    completeSession
+    completeSession,
+    recordings,
+    submitRecordings
   } = mode === "question" ? questionRecording : conversationRecording
 
   // Handle completion of personal details
   const handlePersonalDetailsComplete = (responses: PersonalDetailsResponse, submittedResponseId?: string) => {
     setPersonalDetailsResponses(responses)
     if (submittedResponseId) {
+      setResponseIdState(submittedResponseId)
+      // Pass the responseId to the camera hook
       setResponseId(submittedResponseId)
     }
     setAppState("recording")
@@ -196,16 +200,27 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
       const updateResponseStatus = async () => {
         if (responseId) {
           try {
-            await fetch('/api/snipe/response', {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                responseId,
-                status: 'completed'
-              }),
-            });
+            // Submit all recordings to the database
+            const success = await submitRecordings(responseId);
+            
+            if (success) {
+              console.log('Recordings submitted successfully');
+            } else {
+              console.warn('Failed to submit recordings, falling back to status update only');
+              
+              // Fallback: just update the status
+              await fetch('/api/snipe/response', {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  responseId,
+                  status: 'completed'
+                }),
+              });
+            }
+            
             console.log('Response marked as completed');
           } catch (error) {
             console.error('Error updating response status:', error);
@@ -219,7 +234,7 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
       
       setTimeout(updateResponseStatus, 100);
     }
-  }, [isSessionComplete, responseId, stopCamera]);
+  }, [isSessionComplete, responseId, stopCamera, submitRecordings]);
 
   // Loading state
   if (appState === "loading") {

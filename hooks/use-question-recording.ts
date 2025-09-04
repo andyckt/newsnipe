@@ -68,17 +68,78 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
     setIsCountingDown(false)
   }
 
-  const downloadRecording = () => {
+  // Reference to store recording metadata for API submission
+  const recordingsRef = useRef<Array<{
+    questionId: string;
+    recordingIndex: number;
+    videoKey?: string;
+    videoUrl?: string;
+    thumbnailKey?: string;
+    thumbnailUrl?: string;
+    duration?: number;
+  }>>([])
+  
+  // Function to handle recording completion - either upload to S3 or download as fallback
+  const handleRecordingComplete = async (responseId: string | null) => {
     if (recordedChunksRef.current.length === 0) return
 
     const mediaRecorder = mediaRecorderRef.current
     if (!mediaRecorder) return
 
     const mimeType = mediaRecorder.mimeType
-    const fileExtension = mimeType.includes("mp4") ? "mp4" : "webm"
     
     // Create a blob from the recorded chunks
     const blob = new Blob(recordedChunksRef.current, { type: mimeType })
+    
+    // Get the current question ID
+    const questionId = textInputsRef.current.length > currentRecordingIndex 
+      ? textInputsRef.current[currentRecordingIndex].id 
+      : `question-${currentRecordingIndex + 1}`
+      
+    // If we have a responseId, try to upload to S3
+    if (responseId) {
+      try {
+        // Import the uploadVideoRecording function
+        const { uploadVideoRecording } = await import('@/lib/api-service')
+        
+        // Upload the video and get the URLs and keys
+        const { videoKey, videoUrl, thumbnailKey, thumbnailUrl } = await uploadVideoRecording(
+          blob,
+          responseId,
+          questionId,
+          currentRecordingIndex
+        )
+        
+        console.log(`Recording ${currentRecordingIndex + 1} uploaded to S3:`, { videoKey, thumbnailKey })
+        
+        // Store the recording metadata
+        recordingsRef.current.push({
+          questionId,
+          recordingIndex: currentRecordingIndex,
+          videoKey,
+          videoUrl,
+          thumbnailKey,
+          thumbnailUrl,
+          duration: blob.size > 0 ? 0 : undefined // We don't know the duration yet
+        })
+        
+      } catch (error) {
+        console.error('Error uploading recording to S3:', error)
+        // Fall back to downloading the file
+        downloadRecordingFallback(blob, questionId)
+      }
+    } else {
+      // No responseId, so fall back to downloading
+      downloadRecordingFallback(blob, questionId)
+    }
+    
+    // Clear chunks for next recording
+    recordedChunksRef.current = []
+  }
+  
+  // Fallback function to download recording if S3 upload fails
+  const downloadRecordingFallback = (blob: Blob, questionId: string) => {
+    const fileExtension = "webm"
     
     // Create a download link for the recorded video
     const url = URL.createObjectURL(blob)
@@ -95,8 +156,11 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
       window.URL.revokeObjectURL(url)
     }, 100)
     
-    // Clear chunks for next recording
-    recordedChunksRef.current = []
+    // Store minimal recording metadata
+    recordingsRef.current.push({
+      questionId,
+      recordingIndex: currentRecordingIndex
+    })
   }
 
   // Helper function to play the appropriate audio for a specific recording index
@@ -224,7 +288,9 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
       }
 
       mediaRecorder.onstop = () => {
-        downloadRecording()
+        // We'll pass responseId as a parameter when we call startRecording
+        const responseId = (streamRef.current as any)?.getResponseId?.() || null
+        handleRecordingComplete(responseId)
         setIsRecording(false)
       }
 
@@ -340,6 +406,37 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
     setIsSessionComplete(true)
   }
 
+  // Function to submit all recordings to the database
+  const submitRecordings = async (responseId: string | null) => {
+    if (!responseId || recordingsRef.current.length === 0) {
+      return false
+    }
+    
+    try {
+      // Submit the recordings to the API
+      const response = await fetch('/api/snipe/response', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          responseId,
+          recordings: recordingsRef.current,
+          status: 'completed'
+        }),
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to submit recordings')
+      }
+      
+      return true
+    } catch (error) {
+      console.error('Error submitting recordings:', error)
+      return false
+    }
+  }
+
   return {
     isRecording,
     isCountingDown,
@@ -352,6 +449,8 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
     startRecording,
     stopRecording,
     nextRecording,
-    completeSession
+    completeSession,
+    recordings: recordingsRef.current,
+    submitRecordings
   }
 }

@@ -2,11 +2,16 @@
 
 import { useEffect, useRef, useState } from "react"
 
+interface ExtendedMediaStream extends MediaStream {
+  getResponseId?: () => string | null;
+}
+
 export function useCamera() {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const streamRef = useRef<MediaStream | null>(null)
+  const streamRef = useRef<ExtendedMediaStream | null>(null)
   const [hasPermission, setHasPermission] = useState(false)
   const [showPermissionButton, setShowPermissionButton] = useState(true)
+  const [responseId, setResponseId] = useState<string | null>(null)
 
   // Check permissions on mount
   useEffect(() => {
@@ -114,6 +119,16 @@ export function useCamera() {
     }
   }
 
+  // Set the responseId for the stream
+  const setStreamResponseId = (id: string | null) => {
+    setResponseId(id)
+    
+    // Add a method to the stream to get the responseId
+    if (streamRef.current) {
+      streamRef.current.getResponseId = () => id
+    }
+  }
+
   return {
     videoRef,
     streamRef,
@@ -121,5 +136,7 @@ export function useCamera() {
     showPermissionButton,
     requestPermissions,
     stopCamera,
+    setResponseId: setStreamResponseId,
+    responseId,
   }
 }

@@ -102,3 +102,57 @@ export const playAudio = (audioUrl: string): void => {
     });
   });
 };
+
+/**
+ * Uploads a video recording to S3 with a thumbnail
+ * @param videoBlob - The video blob to upload
+ * @param responseId - The response ID to associate with the video
+ * @param questionId - The question ID associated with the recording
+ * @param recordingIndex - The index of the recording
+ * @returns Promise with the URLs and keys of the uploaded files
+ */
+export async function uploadVideoRecording(
+  videoBlob: Blob,
+  responseId: string,
+  questionId: string,
+  recordingIndex: number
+): Promise<{
+  videoKey: string;
+  videoUrl: string;
+  thumbnailKey: string;
+  thumbnailUrl: string;
+}> {
+  try {
+    // First, generate a thumbnail from the video
+    const thumbnailBlob = await import('@/lib/s3-service').then(({ createThumbnail }) => {
+      return createThumbnail(videoBlob);
+    });
+
+    // Create a FormData object to upload both files
+    const formData = new FormData();
+    formData.append('video', videoBlob, 'recording.webm');
+    formData.append('thumbnail', thumbnailBlob, 'thumbnail.jpg');
+    formData.append('responseId', responseId);
+    formData.append('questionId', questionId);
+    formData.append('recordingIndex', recordingIndex.toString());
+
+    // Upload the files to S3
+    const uploadResponse = await fetch('/api/s3-video-upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!uploadResponse.ok) {
+      const errorData = await uploadResponse.json().catch(() => ({}));
+      throw new Error(`S3 upload error: ${uploadResponse.status} ${JSON.stringify(errorData)}`);
+    }
+
+    // Get the S3 URLs and keys from the response
+    const { videoKey, videoUrl, thumbnailKey, thumbnailUrl } = await uploadResponse.json();
+
+    return { videoKey, videoUrl, thumbnailKey, thumbnailUrl };
+  } catch (error) {
+    console.error('Error in uploadVideoRecording:', error);
+    throw error;
+  }
+}
