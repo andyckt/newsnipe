@@ -91,10 +91,13 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
     // Create a blob from the recorded chunks
     const blob = new Blob(recordedChunksRef.current, { type: mimeType })
     
-    // Get the current question ID
-    const questionId = textInputsRef.current.length > currentRecordingIndex 
+    // Get the base question ID
+    const baseQuestionId = textInputsRef.current.length > currentRecordingIndex 
       ? textInputsRef.current[currentRecordingIndex].id 
       : `question-${currentRecordingIndex + 1}`
+      
+    // Create a unique questionId by appending the recording index
+    const questionId = `${baseQuestionId}-${currentRecordingIndex}`
       
     // If we have a responseId, try to upload to S3
     if (responseId) {

@@ -61,8 +61,11 @@ export function useConversationRecording(streamRef: React.RefObject<MediaStream 
     // Create a blob from the recorded chunks
     const blob = new Blob(recordedChunksRef.current, { type: mimeType })
     
-    // Generate a question ID for conversation mode
-    const questionId = `conversation-${currentRecordingIndex + 1}`
+    // Generate a base question ID for conversation mode
+    const baseQuestionId = `conversation-${currentRecordingIndex + 1}`
+    
+    // Create a unique questionId by appending the recording index
+    const questionId = `${baseQuestionId}-${currentRecordingIndex}`
       
     // If we have a responseId, try to upload to S3
     if (responseId) {
