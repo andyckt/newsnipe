@@ -1,0 +1,231 @@
+Debug Logs
+View and filter logs from mobile devices and API calls
+
+All sources
+100
+
+
+Auto-refresh ON
+upload-fail
+2:36:13 PM
+Upload failed
+{
+  "method": "alternative",
+  "recordingIndex": 0,
+  "error": "Upload failed: 413 - Request Entity Too Large\n\nFUNCTION_PAYLOAD_TOO_LARGE\n\nhkg1::j2p2m-1757054171855-967cce651f18\n"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:36:13 PM
+Added minimal recording metadata
+{
+  "questionId": "00b8c682-6abe-4d20-a2b3-ad83ce5f9af9-0",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:36:12 PM
+Created blob
+{
+  "size": 16636145,
+  "type": "video/mp4"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:36:12 PM
+Device detection
+{
+  "isMobile": true,
+  "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+Showing 4 logs
+
+
+Debug Logs
+View and filter logs from mobile devices and API calls
+
+All sources
+100
+
+
+Auto-refresh ON
+mobile-error
+2:36:13 PM
+ERROR: Alternative upload failed
+{
+  "error": "Upload failed: 413 - Request Entity Too Large\n\nFUNCTION_PAYLOAD_TOO_LARGE\n\nhkg1::j2p2m-1757054171855-967cce651f18\n",
+  "stack": "@https://newsnipe.vercel.app/_next/static/chunks/165-940dc571294985e2.js:1:11598\nasyncFunctionResume@[native code]\n@[native code]\npromiseReactionJobWithoutPromise@[native code]"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+Showing 1 logs
+
+Debug Logs
+View and filter logs from mobile devices and API calls
+
+All sources
+100
+
+
+Auto-refresh ON
+mobile-error
+2:36:25 PM
+ERROR: Fetch operation failed
+{
+  "error": "Upload failed: 413 - Request Entity Too Large\n\nFUNCTION_PAYLOAD_TOO_LARGE\n\nhkg1::68hr4-1757054184804-954e6ca161eb\n",
+  "stack": "@https://newsnipe.vercel.app/_next/static/chunks/165-940dc571294985e2.js:1:11598\nasyncFunctionResume@[native code]\n@[native code]\npromiseReactionJobWithoutPromise@[native code]\npromiseReactionJob@[native code]"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+upload-start
+2:36:24 PM
+Upload started
+{
+  "method": "alternative",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+Showing 2 logs
+
+
+Debug Logs
+View and filter logs from mobile devices and API calls
+
+All sources
+100
+
+
+Auto-refresh ON
+mobile-error
+2:36:25 PM
+ERROR: Fetch operation failed
+{
+  "error": "Upload failed: 413 - Request Entity Too Large\n\nFUNCTION_PAYLOAD_TOO_LARGE\n\nhkg1::68hr4-1757054184804-954e6ca161eb\n",
+  "stack": "@https://newsnipe.vercel.app/_next/static/chunks/165-940dc571294985e2.js:1:11598\nasyncFunctionResume@[native code]\n@[native code]\npromiseReactionJobWithoutPromise@[native code]\npromiseReactionJob@[native code]"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+upload-start
+2:36:24 PM
+Upload started
+{
+  "method": "alternative",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+Showing 2 logs
+
+Debug Logs
+View and filter logs from mobile devices and API calls
+
+All sources
+100
+
+
+Auto-refresh ON
+mobile-error
+2:36:37 PM
+ERROR: Alternative upload failed: 413
+{
+  "errorText": "Request Entity Too Large\n\nFUNCTION_PAYLOAD_TOO_LARGE\n\nhkg1::pgdhl-1757054196342-ae3b718302d2\n"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:36:37 PM
+Fetch response received
+{
+  "status": 413
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile-error
+2:36:37 PM
+ERROR: Fetch operation failed
+{
+  "error": "Upload failed: 413 - Request Entity Too Large\n\nFUNCTION_PAYLOAD_TOO_LARGE\n\nhkg1::pgdhl-1757054196342-ae3b718302d2\n",
+  "stack": "@https://newsnipe.vercel.app/_next/static/chunks/165-940dc571294985e2.js:1:11598\nasyncFunctionResume@[native code]\n@[native code]\npromiseReactionJobWithoutPromise@[native code]"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile-warn
+2:36:36 PM
+WARNING: No responseId available, falling back to download
+{
+  "questionId": "2e1fdc09-b925-434f-b004-7d2eca7537fe-2"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:36:36 PM
+Starting fetch request to /api/s3-video-upload
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:36:36 PM
+Recording complete
+{
+  "mimeType": "video/mp4",
+  "recordingIndex": 1
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile-error
+2:36:25 PM
+ERROR: Fetch operation failed
+{
+  "error": "Upload failed: 413 - Request Entity Too Large\n\nFUNCTION_PAYLOAD_TOO_LARGE\n\nhkg1::68hr4-1757054184804-954e6ca161eb\n",
+  "stack": "@https://newsnipe.vercel.app/_next/static/chunks/165-940dc571294985e2.js:1:11598\nasyncFunctionResume@[native code]\n@[native code]\npromiseReactionJobWithoutPromise@[native code]\npromiseReactionJob@[native code]"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+upload-start
+2:36:24 PM
+Upload started
+{
+  "method": "alternative",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+Showing 8 logs
+
+Debug Logs
+View and filter logs from mobile devices and API calls
+
+All sources
+100
+
+
+Auto-refresh ON
+mobile
+2:36:36 PM
+Video blob details
+{
+  "type": "video/mp4",
+  "size": 10205090,
+  "extension": "mp4"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:36:36 PM
+Using responseId from window object:
+RhmvIRz0wA
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:36:24 PM
+FormData created for alternative upload
+{
+  "hasVideo": true,
+  "responseId": "RhmvIRz0wA",
+  "questionId": "00b8c682-6abe-4d20-a2b3-ad83ce5f9af9-1",
+  "recordingIndex": 1
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:36:24 PM
+Device detection
+{
+  "isMobile": true,
+  "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile-error
+2:36:13 PM
+ERROR: Alternative upload failed
+{
+  "error": "Upload failed: 413 - Request Entity Too Large\n\nFUNCTION_PAYLOAD_TOO_LARGE\n\nhkg1::j2p2m-1757054171855-967cce651f18\n",
+  "stack": "@https://newsnipe.vercel.app/_next/static/chunks/165-940dc571294985e2.js:1:11598\nasyncFunctionResume@[native code]\n@[native code]\npromiseReactionJobWithoutPromise@[native code]"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+Showing 5 logs

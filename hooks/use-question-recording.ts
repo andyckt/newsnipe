@@ -285,31 +285,91 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
         responseId: currentResponseId
       });
       
-                  // Create a simple FormData with just the video
-            const formData = new FormData();
-            // Use the correct extension based on the mime type
-            const extension = blob.type.includes('mp4') ? 'mp4' : 'webm';
-            formData.append('video', blob, `recording.${extension}`);
-            formData.append('responseId', currentResponseId);
-            formData.append('questionId', questionId);
-            formData.append('recordingIndex', uniqueIndex.toString());
-            
-            // Log the blob details
-            mobileLogger.log("Video blob details", {
-              type: blob.type,
-              size: blob.size,
-              extension
-            });
+      // Log the blob details
+      mobileLogger.log("Video blob details", {
+        type: blob.type,
+        size: blob.size,
+        extension: blob.type.includes('mp4') ? 'mp4' : 'webm'
+      });
       
-      mobileLogger.log("FormData created for alternative upload", {
+      uploadLogger.start({ method: "direct", recordingIndex: currentRecordingIndex });
+      
+      // For large files (over 3MB), use direct upload to S3
+      if (blob.size > 3 * 1024 * 1024) {
+        mobileLogger.log("File is large, using direct upload to S3");
+        
+        try {
+          // Import the directUpload function and createThumbnail
+          const directUploadModule = await import('@/lib/direct-upload');
+          const s3ServiceModule = await import('@/lib/s3-service');
+          
+          const directUpload = directUploadModule.directUpload;
+          const createThumbnail = s3ServiceModule.createThumbnail;
+          
+          // Create a thumbnail for the video
+          let thumbnailBlob = null;
+          try {
+            thumbnailBlob = await createThumbnail(blob);
+            mobileLogger.log("Thumbnail created", { size: thumbnailBlob.size });
+          } catch (thumbnailError) {
+            mobileLogger.error("Failed to create thumbnail", { error: String(thumbnailError) });
+            // Continue without thumbnail
+          }
+          
+          // Upload directly to S3
+          const { videoKey, thumbnailKey } = await directUpload(
+            blob,
+            thumbnailBlob,
+            currentResponseId,
+            questionId,
+            uniqueIndex
+          );
+          
+          mobileLogger.log("Direct upload successful", { videoKey, thumbnailKey });
+          
+          // Store the recording metadata
+          recordingsRef.current.push({
+            questionId,
+            recordingIndex: uniqueIndex,
+            videoKey,
+            thumbnailKey
+          });
+          
+          uploadLogger.complete({
+            method: "direct",
+            recordingIndex: currentRecordingIndex,
+            videoKey,
+            thumbnailKey
+          });
+          
+          mobileLogger.log(`Mobile recording ${currentRecordingIndex + 1} uploaded via direct method`);
+          return true;
+        } catch (directUploadError) {
+          mobileLogger.error("Direct upload failed", { 
+            error: directUploadError instanceof Error ? directUploadError.message : String(directUploadError) 
+          });
+          // Fall through to try the API method
+        }
+      }
+      
+      // For smaller files or if direct upload failed, try the API method
+      mobileLogger.log("Using API upload method");
+      
+      // Create a simple FormData with just the video
+      const formData = new FormData();
+      // Use the correct extension based on the mime type
+      const extension = blob.type.includes('mp4') ? 'mp4' : 'webm';
+      formData.append('video', blob, `recording.${extension}`);
+      formData.append('responseId', currentResponseId);
+      formData.append('questionId', questionId);
+      formData.append('recordingIndex', uniqueIndex.toString());
+      
+      mobileLogger.log("FormData created for API upload", {
         hasVideo: true,
         responseId: currentResponseId,
         questionId,
         recordingIndex: uniqueIndex
       });
-      
-      // Directly upload to our API without thumbnail generation
-      uploadLogger.start({ method: "alternative", recordingIndex: currentRecordingIndex });
       
       let responseData;
       let responseObj;
@@ -325,7 +385,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
         
         if (!responseObj.ok) {
           const errorText = await responseObj.text().catch(() => "Could not read error response");
-          mobileLogger.error(`Alternative upload failed: ${responseObj.status}`, { errorText });
+          mobileLogger.error(`API upload failed: ${responseObj.status}`, { errorText });
           throw new Error(`Upload failed: ${responseObj.status} - ${errorText}`);
         }
         
@@ -339,7 +399,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
         throw fetchError;
       }
       
-      mobileLogger.log("Alternative upload response", {
+      mobileLogger.log("API upload response", {
         status: responseObj.status,
         hasVideoKey: !!responseData.videoKey,
         hasThumbnailKey: !!responseData.thumbnailKey
@@ -356,13 +416,13 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
       });
       
       uploadLogger.complete({
-        method: "alternative",
+        method: "api",
         recordingIndex: currentRecordingIndex,
         videoKey: responseData.videoKey,
         thumbnailKey: responseData.thumbnailKey
       });
       
-      mobileLogger.log(`Mobile recording ${currentRecordingIndex + 1} uploaded via alternative method`);
+      mobileLogger.log(`Mobile recording ${currentRecordingIndex + 1} uploaded via API method`);
       return true;
     } catch (error) {
       uploadLogger.fail({

@@ -1,15 +1,11 @@
 import mongoose from 'mongoose';
 import { nanoid } from 'nanoid';
 
-// Define the response document interface
 export interface IResponse {
   shortId: string;
-  snipeId: mongoose.Types.ObjectId;
   snipeShortId: string;
-  userId?: mongoose.Types.ObjectId; // Optional - if the user is authenticated
-  personalDetails: {
-    [key: string]: string | string[] | boolean;
-  };
+  userId?: mongoose.Types.ObjectId;
+  personalDetails: { [key: string]: string | string[] | boolean; };
   recordings: Array<{
     questionId: string;
     recordingIndex: number;
@@ -28,33 +24,27 @@ export interface IResponse {
   updatedAt: Date;
 }
 
-// Create the schema
 const responseSchema = new mongoose.Schema<IResponse>(
   {
-    shortId: {
-      type: String,
-      required: true,
-      unique: true,
-      default: () => nanoid(10), // Generate a short 10-character ID
+    shortId: { 
+      type: String, 
+      required: true, 
+      unique: true, 
+      default: () => nanoid(10),
     },
-    snipeId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Snipe',
+    snipeShortId: { 
+      type: String, 
       required: true,
+      index: true
     },
-    snipeShortId: {
-      type: String,
-      required: true,
-      index: true, // Add index for faster queries
-    },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
+    userId: { 
+      type: mongoose.Schema.Types.ObjectId, 
       ref: 'User',
-      required: false,
+      index: true
     },
     personalDetails: {
-      type: mongoose.Schema.Types.Mixed,
-      default: {},
+      type: Object,
+      default: {}
     },
     recordings: [{
       questionId: String,
@@ -71,12 +61,12 @@ const responseSchema = new mongoose.Schema<IResponse>(
     status: {
       type: String,
       enum: ['in_progress', 'completed', 'abandoned'],
-      default: 'in_progress',
+      default: 'in_progress'
     },
-    completedAt: Date,
-  },
+    completedAt: Date
+  }, 
   { timestamps: true }
 );
 
-// Create and export the model
-export default mongoose.models.Response || mongoose.model<IResponse>('Response', responseSchema);
+// Use existing model if it exists, or create a new one
+export const Response = mongoose.models.Response || mongoose.model<IResponse>('Response', responseSchema);
