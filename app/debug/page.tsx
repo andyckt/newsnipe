@@ -21,7 +21,7 @@ interface Log {
 export default function DebugPage() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [loading, setLoading] = useState(false);
-  const [source, setSource] = useState<string>('');
+  const [source, setSource] = useState<string>('all');
   const [limit, setLimit] = useState(100);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [sources, setSources] = useState<string[]>([]);
@@ -30,7 +30,7 @@ export default function DebugPage() {
     setLoading(true);
     try {
       const queryParams = new URLSearchParams();
-      if (source) queryParams.append('source', source);
+      if (source && source !== 'all') queryParams.append('source', source);
       queryParams.append('limit', limit.toString());
       
       const response = await fetch(`/api/debug-log?${queryParams.toString()}`);
@@ -127,7 +127,7 @@ export default function DebugPage() {
                   <SelectValue placeholder="Filter by source" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All sources</SelectItem>
+                  <SelectItem value="all">All sources</SelectItem>
                   {sources.map((s) => (
                     <SelectItem key={s} value={s}>{s}</SelectItem>
                   ))}
