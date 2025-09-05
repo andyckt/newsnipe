@@ -183,15 +183,33 @@ export function useConversationRecording(streamRef: React.RefObject<MediaStream 
   
   // Function to try an alternative upload approach for mobile devices
   const tryAlternativeUpload = async (blob: Blob, questionId: string, uniqueIndex: number) => {
-    if (!responseId) throw new Error("No responseId available");
+    // Get the responseId from the stream
+    let currentResponseId = (streamRef.current as any)?.getResponseId?.();
+    
+    // If responseId is not available in the stream, try to get it from the window object
+    if (!currentResponseId && window && (window as any).snipeResponseId) {
+      currentResponseId = (window as any).snipeResponseId;
+      console.log("Using responseId from window object:", currentResponseId);
+    }
+    
+    if (!currentResponseId) throw new Error("No responseId available");
     
     try {
       // Create a simple FormData with just the video
       const formData = new FormData();
-      formData.append('video', blob, 'recording.webm');
-      formData.append('responseId', responseId);
+      // Use the correct extension based on the mime type
+      const extension = blob.type.includes('mp4') ? 'mp4' : 'webm';
+      formData.append('video', blob, `recording.${extension}`);
+      formData.append('responseId', currentResponseId);
       formData.append('questionId', questionId);
       formData.append('recordingIndex', uniqueIndex.toString());
+      
+      // Log the blob details
+      console.log("Video blob details", {
+        type: blob.type,
+        size: blob.size,
+        extension
+      });
       
       // Directly upload to our API without thumbnail generation
       const response = await fetch('/api/s3-video-upload', {
@@ -225,7 +243,17 @@ export function useConversationRecording(streamRef: React.RefObject<MediaStream 
   
   // Last resort - download to device
   const downloadToDevice = (blob: Blob, questionId: string, uniqueIndex: number) => {
-    const fileExtension = "webm"
+    // Determine the correct file extension based on the mime type
+    const fileExtension = blob.type.includes('mp4') ? 'mp4' : 'webm';
+    
+    console.log("Falling back to device download", {
+      recordingIndex: currentRecordingIndex,
+      questionId,
+      uniqueIndex,
+      blobSize: blob.size,
+      blobType: blob.type,
+      fileExtension
+    });
     
     // Create a download link for the recorded video
     const url = URL.createObjectURL(blob)

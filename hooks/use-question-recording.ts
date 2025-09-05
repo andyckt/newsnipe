@@ -263,7 +263,13 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
   // Function to try an alternative upload approach for mobile devices
   const tryAlternativeUpload = async (blob: Blob, questionId: string, uniqueIndex: number) => {
     // Get the responseId from the stream
-    const currentResponseId = (streamRef.current as any)?.getResponseId?.();
+    let currentResponseId = (streamRef.current as any)?.getResponseId?.();
+    
+    // If responseId is not available in the stream, try to get it from the component state
+    if (!currentResponseId && window && (window as any).snipeResponseId) {
+      currentResponseId = (window as any).snipeResponseId;
+      mobileLogger.log("Using responseId from window object:", currentResponseId);
+    }
     
     if (!currentResponseId) {
       mobileLogger.error("No responseId available for alternative upload");

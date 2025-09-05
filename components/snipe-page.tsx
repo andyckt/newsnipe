@@ -172,9 +172,26 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
   const handlePersonalDetailsComplete = (responses: PersonalDetailsResponse, submittedResponseId?: string) => {
     setPersonalDetailsResponses(responses)
     if (submittedResponseId) {
+      console.log("Received responseId from personal details:", submittedResponseId);
       setResponseIdState(submittedResponseId)
+      
+      // Store responseId in window object for mobile devices
+      if (typeof window !== 'undefined') {
+        (window as any).snipeResponseId = submittedResponseId;
+        console.log("Stored responseId in window object:", submittedResponseId);
+      }
+      
       // Pass the responseId to the camera hook
       setResponseId(submittedResponseId)
+      console.log("Set responseId in camera hook:", submittedResponseId);
+      
+      // Verify the responseId is set in the camera hook
+      setTimeout(() => {
+        const streamResponseId = (streamRef.current as any)?.getResponseId?.();
+        console.log("Verified responseId in stream:", streamResponseId);
+      }, 500);
+    } else {
+      console.warn("No responseId received from personal details collection!");
     }
     setAppState("recording")
   }

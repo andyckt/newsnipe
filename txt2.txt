@@ -1,0 +1,147 @@
+mobile-error
+2:24:10 PM
+ERROR: No responseId available for alternative upload
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+
+Debug Logs
+View and filter logs from mobile devices and API calls
+
+All sources
+100
+
+
+Auto-refresh ON
+mobile-warn
+2:24:10 PM
+WARNING: No responseId available, falling back to download
+{
+  "questionId": "00b8c682-6abe-4d20-a2b3-ad83ce5f9af9-0"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:24:09 PM
+Device detection
+{
+  "isMobile": true,
+  "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:24:09 PM
+Recording complete
+{
+  "mimeType": "video/mp4",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+Showing 3 logs
+
+Debug Logs
+View and filter logs from mobile devices and API calls
+
+All sources
+100
+
+
+Auto-refresh ON
+mobile
+2:24:29 PM
+Recording complete
+{
+  "mimeType": "video/mp4",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile-warn
+2:24:10 PM
+WARNING: No responseId available, falling back to download
+{
+  "questionId": "00b8c682-6abe-4d20-a2b3-ad83ce5f9af9-0"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:24:09 PM
+Device detection
+{
+  "isMobile": true,
+  "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:24:09 PM
+Recording complete
+{
+  "mimeType": "video/mp4",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+Showing 4 logs
+
+Debug Logs
+View and filter logs from mobile devices and API calls
+
+All sources
+100
+
+
+Auto-refresh ON
+mobile
+2:24:48 PM
+Submission response received
+{
+  "status": 200,
+  "data": {
+    "message": "Response updated successfully"
+  }
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:24:45 PM
+Recording 3 details:
+{
+  "questionId": "2e1fdc09-b925-434f-b004-7d2eca7537fe-2",
+  "recordingIndex": 2,
+  "hasVideoKey": false,
+  "hasThumbnailKey": false
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:24:42 PM
+Recording complete
+{
+  "mimeType": "video/mp4",
+  "recordingIndex": 1
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:24:29 PM
+Recording complete
+{
+  "mimeType": "video/mp4",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile-warn
+2:24:10 PM
+WARNING: No responseId available, falling back to download
+{
+  "questionId": "00b8c682-6abe-4d20-a2b3-ad83ce5f9af9-0"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:24:09 PM
+Device detection
+{
+  "isMobile": true,
+  "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:24:09 PM
+Recording complete
+{
+  "mimeType": "video/mp4",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+Showing 7 logs
