@@ -11,6 +11,7 @@ import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { preloadAudio, playAudio } from "@/lib/audio"
 import { initAudioContext, playMobileAudio, preloadMobileAudio } from "@/lib/mobile-audio"
+import { mobileLogger, uploadLogger } from "@/lib/debug-logger"
 import { TextInput, TimeLimit } from "@/components/question-tab"
 
 interface RecordingOptions {
@@ -87,15 +88,23 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
   
   // Function to handle recording completion - either upload to S3 or download as fallback
   const handleRecordingComplete = async (responseId: string | null) => {
-    if (recordedChunksRef.current.length === 0) return
+    if (recordedChunksRef.current.length === 0) {
+      mobileLogger.warn("No recorded chunks available");
+      return;
+    }
 
     const mediaRecorder = mediaRecorderRef.current
-    if (!mediaRecorder) return
+    if (!mediaRecorder) {
+      mobileLogger.error("No media recorder available");
+      return;
+    }
 
     const mimeType = mediaRecorder.mimeType
+    mobileLogger.log("Recording complete", { mimeType, recordingIndex: currentRecordingIndex });
     
     // Create a blob from the recorded chunks
     const blob = new Blob(recordedChunksRef.current, { type: mimeType })
+    mobileLogger.log("Created blob", { size: blob.size, type: blob.type });
     
     // Get a unique recording index for this recording
     const uniqueIndex = nextUniqueIndexRef.current++;
@@ -110,15 +119,19 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
     
     // Check if we're on a mobile device
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    mobileLogger.log("Device detection", { isMobile, userAgent: navigator.userAgent });
       
     // If we have a responseId, try to upload to S3
     if (responseId) {
+      mobileLogger.log("Starting upload process", { responseId, questionId, uniqueIndex });
+      
       // Create a promise for this upload and add it to pending uploads
       const uploadPromise = (async () => {
         try {
           // For mobile devices, use the alternative upload method directly
           if (isMobile) {
-            console.log(`Mobile device detected, using direct upload for recording ${currentRecordingIndex + 1}`);
+            mobileLogger.log(`Mobile device detected, using direct upload for recording ${currentRecordingIndex + 1}`);
+            uploadLogger.start({ recordingIndex: currentRecordingIndex, questionId, blobSize: blob.size });
             
             // Create a simple FormData with just the video
             const formData = new FormData();
@@ -128,16 +141,32 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
             formData.append('recordingIndex', uniqueIndex.toString());
             
             // Directly upload to our API without thumbnail generation
+            mobileLogger.log("Sending form data to API", { 
+              endpoint: '/api/s3-video-upload',
+              hasVideo: !!blob,
+              videoSize: blob.size,
+              responseId,
+              questionId,
+              recordingIndex: uniqueIndex
+            });
+            
             const response = await fetch('/api/s3-video-upload', {
               method: 'POST',
               body: formData,
             });
             
             if (!response.ok) {
-              throw new Error(`Upload failed: ${response.status}`);
+              const errorText = await response.text().catch(() => "Could not read error response");
+              mobileLogger.error(`Upload failed with status ${response.status}`, { errorText });
+              throw new Error(`Upload failed: ${response.status} - ${errorText}`);
             }
             
             const data = await response.json();
+            mobileLogger.log("Upload response received", { 
+              status: response.status,
+              hasVideoKey: !!data.videoKey,
+              hasThumbnailKey: !!data.thumbnailKey
+            });
             
             // Store the recording metadata
             recordingsRef.current.push({
@@ -150,10 +179,16 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
               duration: blob.size > 0 ? 0 : undefined
             });
             
-            console.log(`Mobile recording ${currentRecordingIndex + 1} uploaded directly`);
+            uploadLogger.complete({ 
+              recordingIndex: currentRecordingIndex,
+              videoKey: data.videoKey,
+              thumbnailKey: data.thumbnailKey
+            });
+            
             return { success: true, recordingIndex: currentRecordingIndex };
           } else {
             // For desktop, use the normal upload method with client-side thumbnail generation
+            uploadLogger.start({ recordingIndex: currentRecordingIndex, questionId, blobSize: blob.size });
             const { uploadVideoRecording } = await import('@/lib/api-service');
             
             // Upload the video and get the URLs and keys
@@ -164,7 +199,11 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
               currentRecordingIndex
             );
             
-            console.log(`Recording ${currentRecordingIndex + 1} uploaded to S3:`, { videoKey, thumbnailKey });
+            uploadLogger.complete({ 
+              recordingIndex: currentRecordingIndex,
+              videoKey,
+              thumbnailKey
+            });
             
             // Store the recording metadata
             recordingsRef.current.push({
@@ -180,7 +219,11 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
             return { success: true, recordingIndex: currentRecordingIndex };
           }
         } catch (error) {
-          console.error('Error uploading recording to S3:', error);
+          uploadLogger.fail({ 
+            recordingIndex: currentRecordingIndex,
+            error: error instanceof Error ? error.message : String(error)
+          });
+          
           // Fall back to downloading the file
           downloadRecordingFallback(blob, questionId, uniqueIndex);
           return { success: false, recordingIndex: currentRecordingIndex };
@@ -191,6 +234,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
       pendingUploadsRef.current.push(uploadPromise);
     } else {
       // No responseId, so fall back to downloading
+      mobileLogger.warn("No responseId available, falling back to download", { questionId });
       downloadRecordingFallback(blob, questionId, uniqueIndex);
     }
     
@@ -218,27 +262,57 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
   
   // Function to try an alternative upload approach for mobile devices
   const tryAlternativeUpload = async (blob: Blob, questionId: string, uniqueIndex: number) => {
-    if (!responseId) throw new Error("No responseId available");
+    // Get the responseId from the stream
+    const currentResponseId = (streamRef.current as any)?.getResponseId?.();
+    
+    if (!currentResponseId) {
+      mobileLogger.error("No responseId available for alternative upload");
+      throw new Error("No responseId available");
+    }
     
     try {
+      mobileLogger.log("Attempting alternative upload", {
+        blobSize: blob.size,
+        blobType: blob.type,
+        questionId,
+        uniqueIndex,
+        responseId: currentResponseId
+      });
+      
       // Create a simple FormData with just the video
       const formData = new FormData();
       formData.append('video', blob, 'recording.webm');
-      formData.append('responseId', responseId);
+      formData.append('responseId', currentResponseId);
       formData.append('questionId', questionId);
       formData.append('recordingIndex', uniqueIndex.toString());
       
+      mobileLogger.log("FormData created for alternative upload", {
+        hasVideo: true,
+        responseId: currentResponseId,
+        questionId,
+        recordingIndex: uniqueIndex
+      });
+      
       // Directly upload to our API without thumbnail generation
+      uploadLogger.start({ method: "alternative", recordingIndex: currentRecordingIndex });
+      
       const response = await fetch('/api/s3-video-upload', {
         method: 'POST',
         body: formData,
       });
       
       if (!response.ok) {
-        throw new Error(`Upload failed: ${response.status}`);
+        const errorText = await response.text().catch(() => "Could not read error response");
+        mobileLogger.error(`Alternative upload failed: ${response.status}`, { errorText });
+        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
       }
       
       const data = await response.json();
+      mobileLogger.log("Alternative upload response", {
+        status: response.status,
+        hasVideoKey: !!data.videoKey,
+        hasThumbnailKey: !!data.thumbnailKey
+      });
       
       // Store the recording metadata
       recordingsRef.current.push({
@@ -250,10 +324,26 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
         thumbnailUrl: data.thumbnailUrl,
       });
       
-      console.log(`Mobile recording ${currentRecordingIndex + 1} uploaded via alternative method`);
+      uploadLogger.complete({
+        method: "alternative",
+        recordingIndex: currentRecordingIndex,
+        videoKey: data.videoKey,
+        thumbnailKey: data.thumbnailKey
+      });
+      
+      mobileLogger.log(`Mobile recording ${currentRecordingIndex + 1} uploaded via alternative method`);
       return true;
     } catch (error) {
-      console.error("Alternative upload failed:", error);
+      uploadLogger.fail({
+        method: "alternative",
+        recordingIndex: currentRecordingIndex,
+        error: error instanceof Error ? error.message : String(error)
+      });
+      
+      mobileLogger.error("Alternative upload failed", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       throw error;
     }
   }
@@ -262,26 +352,48 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
   const downloadToDevice = (blob: Blob, questionId: string, uniqueIndex: number) => {
     const fileExtension = "webm"
     
-    // Create a download link for the recorded video
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.style.display = "none"
-    a.href = url
-    a.download = `question-recording-${currentRecordingIndex + 1}.${fileExtension}`
-    document.body.appendChild(a)
-    a.click()
-
-    // Clean up
-    setTimeout(() => {
-      document.body.removeChild(a)
-      window.URL.revokeObjectURL(url)
-    }, 100)
+    mobileLogger.warn("Falling back to device download", {
+      recordingIndex: currentRecordingIndex,
+      questionId,
+      uniqueIndex,
+      blobSize: blob.size
+    });
+    
+    try {
+      // Create a download link for the recorded video
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.style.display = "none"
+      a.href = url
+      a.download = `question-recording-${currentRecordingIndex + 1}.${fileExtension}`
+      document.body.appendChild(a)
+      a.click()
+  
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(a)
+        window.URL.revokeObjectURL(url)
+      }, 100)
+      
+      mobileLogger.log("Download initiated", {
+        filename: `question-recording-${currentRecordingIndex + 1}.${fileExtension}`
+      });
+    } catch (error) {
+      mobileLogger.error("Error during download", {
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
     
     // Store minimal recording metadata
     recordingsRef.current.push({
       questionId,
       recordingIndex: uniqueIndex // Use uniqueIndex instead of currentRecordingIndex
-    })
+    });
+    
+    mobileLogger.log("Added minimal recording metadata", {
+      questionId,
+      recordingIndex: uniqueIndex
+    });
   }
 
   // Helper function to play the appropriate audio for a specific recording index
@@ -537,52 +649,86 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
   // Function to submit all recordings to the database
   const submitRecordings = async (responseId: string | null) => {
     if (!responseId) {
-      return false
+      mobileLogger.error("No responseId provided for submitRecordings");
+      return false;
     }
     
     try {
       // Wait for all pending uploads to complete
-      console.log(`Waiting for ${pendingUploadsRef.current.length} pending uploads to complete...`)
+      mobileLogger.log(`Waiting for ${pendingUploadsRef.current.length} pending uploads to complete...`, {
+        pendingUploads: pendingUploadsRef.current.length
+      });
+      
       if (pendingUploadsRef.current.length > 0) {
-        await Promise.all(pendingUploadsRef.current)
-        console.log('All uploads completed')
+        await Promise.all(pendingUploadsRef.current);
+        mobileLogger.log('All uploads completed');
       }
       
       // Check if we have any recordings to submit
       if (recordingsRef.current.length === 0) {
-        console.warn('No recordings to submit')
-        return false
+        mobileLogger.warn('No recordings to submit');
+        return false;
       }
       
-      console.log(`Submitting ${recordingsRef.current.length} recordings to the database:`)
-      recordingsRef.current.forEach((rec, i) => {
-        console.log(`Recording ${i + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}`)
-      })
+      // Log the recordings that will be submitted
+      mobileLogger.log(`Submitting ${recordingsRef.current.length} recordings to the database:`, {
+        responseId,
+        recordingsCount: recordingsRef.current.length
+      });
       
-      // Submit the recordings to the API
+      recordingsRef.current.forEach((recording, index) => {
+        mobileLogger.log(`Recording ${index + 1} details:`, {
+          questionId: recording.questionId,
+          recordingIndex: recording.recordingIndex,
+          hasVideoKey: !!recording.videoKey,
+          hasThumbnailKey: !!recording.thumbnailKey
+        });
+      });
+      
+      // Submit all recordings to the API
+      const requestBody = {
+        responseId,
+        recordings: recordingsRef.current,
+        status: 'completed'
+      };
+      
+      mobileLogger.log("Sending PUT request to /api/snipe/response", {
+        method: 'PUT',
+        responseId,
+        recordingsCount: recordingsRef.current.length
+      });
+      
       const response = await fetch('/api/snipe/response', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          responseId,
-          recordings: recordingsRef.current,
-          status: 'completed'
-        }),
-      })
+        body: JSON.stringify(requestBody),
+      });
       
       if (!response.ok) {
-        throw new Error('Failed to submit recordings')
+        const errorText = await response.text().catch(() => "Could not read error response");
+        mobileLogger.error(`Failed to submit recordings: ${response.status}`, { errorText });
+        throw new Error(`Failed to submit recordings: ${response.status} - ${errorText}`);
       }
       
-      // Clear pending uploads after successful submission
-      pendingUploadsRef.current = []
+      const responseData = await response.json().catch(() => ({}));
+      mobileLogger.log("Submission response received", { 
+        status: response.status,
+        data: responseData
+      });
       
-      return true
+      // Clear pending uploads after successful submission
+      pendingUploadsRef.current = [];
+      
+      return true;
     } catch (error) {
-      console.error('Error submitting recordings:', error)
-      return false
+      mobileLogger.error('Error submitting recordings', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        responseId
+      });
+      return false;
     }
   }
 

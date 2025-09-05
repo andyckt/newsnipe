@@ -33,6 +33,17 @@ html {
         <SessionProvider>
           {children}
           <Toaster />
+          {/* Debug link - only visible in development */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="fixed bottom-4 right-4 z-50">
+              <a 
+                href="/debug" 
+                className="bg-black text-white px-3 py-1 rounded-md text-sm opacity-50 hover:opacity-100 transition-opacity"
+              >
+                Debug Logs
+              </a>
+            </div>
+          )}
         </SessionProvider>
       </body>
     </html>
