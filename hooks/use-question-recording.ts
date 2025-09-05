@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from "react"
 import { preloadAudio, playAudio } from "@/lib/audio"
 import { initAudioContext, playMobileAudio, preloadMobileAudio } from "@/lib/mobile-audio"
 import { mobileLogger, uploadLogger } from "@/lib/debug-logger"
+import { getResponseIdFromAllSources } from "@/lib/global-state"
 import { TextInput, TimeLimit } from "@/components/question-tab"
 
 interface RecordingOptions {
@@ -262,13 +263,16 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
   
   // Function to try an alternative upload approach for mobile devices
   const tryAlternativeUpload = async (blob: Blob, questionId: string, uniqueIndex: number) => {
-    // Get the responseId from the stream
+    // Get the responseId from all possible sources
     let currentResponseId = (streamRef.current as any)?.getResponseId?.();
+    mobileLogger.log("Initial responseId check from stream:", { hasResponseId: !!currentResponseId });
     
-    // If responseId is not available in the stream, try to get it from the component state
-    if (!currentResponseId && window && (window as any).snipeResponseId) {
-      currentResponseId = (window as any).snipeResponseId;
-      mobileLogger.log("Using responseId from window object:", currentResponseId);
+    // If responseId is not available in the stream, try our global state helper
+    if (!currentResponseId) {
+      currentResponseId = getResponseIdFromAllSources();
+      if (currentResponseId) {
+        mobileLogger.log("Using responseId from global state:", currentResponseId);
+      }
     }
     
     if (!currentResponseId) {

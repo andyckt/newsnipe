@@ -10,6 +10,7 @@ import type React from "react"
 
 import { useRef, useState } from "react"
 import { TimeLimit } from "@/components/question-tab"
+import { getResponseIdFromAllSources } from "@/lib/global-state"
 
 interface RecordingOptions {
   totalRecordings?: number
@@ -183,13 +184,16 @@ export function useConversationRecording(streamRef: React.RefObject<MediaStream 
   
   // Function to try an alternative upload approach for mobile devices
   const tryAlternativeUpload = async (blob: Blob, questionId: string, uniqueIndex: number) => {
-    // Get the responseId from the stream
+    // Get the responseId from all possible sources
     let currentResponseId = (streamRef.current as any)?.getResponseId?.();
+    console.log("Initial responseId check from stream:", { hasResponseId: !!currentResponseId });
     
-    // If responseId is not available in the stream, try to get it from the window object
-    if (!currentResponseId && window && (window as any).snipeResponseId) {
-      currentResponseId = (window as any).snipeResponseId;
-      console.log("Using responseId from window object:", currentResponseId);
+    // If responseId is not available in the stream, try our global state helper
+    if (!currentResponseId) {
+      currentResponseId = getResponseIdFromAllSources();
+      if (currentResponseId) {
+        console.log("Using responseId from global state:", currentResponseId);
+      }
     }
     
     if (!currentResponseId) throw new Error("No responseId available");

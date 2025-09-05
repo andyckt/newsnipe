@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { unlockAudio } from "@/lib/audio"
 import { initAudioContext } from "@/lib/mobile-audio"
 import PersonalDetailsCollector, { PersonalDetailField, PersonalDetailsConfig, PersonalDetailsResponse } from "@/components/personal-details-collector"
+import { setResponseId as setGlobalResponseId } from "@/lib/global-state"
 
 // App states
 type AppState = "loading" | "personal_details" | "recording" | "completed" | "error"
@@ -175,11 +176,9 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
       console.log("Received responseId from personal details:", submittedResponseId);
       setResponseIdState(submittedResponseId)
       
-      // Store responseId in window object for mobile devices
-      if (typeof window !== 'undefined') {
-        (window as any).snipeResponseId = submittedResponseId;
-        console.log("Stored responseId in window object:", submittedResponseId);
-      }
+      // Store responseId in global state (which will handle all storage methods)
+      setGlobalResponseId(submittedResponseId);
+      console.log("Stored responseId in global state:", submittedResponseId);
       
       // Pass the responseId to the camera hook
       setResponseId(submittedResponseId)
