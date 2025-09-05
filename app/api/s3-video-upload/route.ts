@@ -165,7 +165,14 @@ export async function POST(request: Request) {
     
     // Generate unique filenames
     const videoId = uuid();
-    const videoFilename = `videos/${responseId}/${videoId}.webm`;
+    // Determine the correct file extension based on the content type
+    const fileExtension = videoFile.type.includes('mp4') ? 'mp4' : 'webm';
+    apiLogger.log("Determined file extension", { 
+      contentType: videoFile.type, 
+      extension: fileExtension 
+    });
+    
+    const videoFilename = `videos/${responseId}/${videoId}.${fileExtension}`;
     const thumbnailFilename = `thumbnails/${responseId}/${videoId}.jpg`;
     
     // Convert video File to ArrayBuffer

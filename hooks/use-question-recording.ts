@@ -279,12 +279,21 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
         responseId: currentResponseId
       });
       
-      // Create a simple FormData with just the video
-      const formData = new FormData();
-      formData.append('video', blob, 'recording.webm');
-      formData.append('responseId', currentResponseId);
-      formData.append('questionId', questionId);
-      formData.append('recordingIndex', uniqueIndex.toString());
+                  // Create a simple FormData with just the video
+            const formData = new FormData();
+            // Use the correct extension based on the mime type
+            const extension = blob.type.includes('mp4') ? 'mp4' : 'webm';
+            formData.append('video', blob, `recording.${extension}`);
+            formData.append('responseId', currentResponseId);
+            formData.append('questionId', questionId);
+            formData.append('recordingIndex', uniqueIndex.toString());
+            
+            // Log the blob details
+            mobileLogger.log("Video blob details", {
+              type: blob.type,
+              size: blob.size,
+              extension
+            });
       
       mobileLogger.log("FormData created for alternative upload", {
         hasVideo: true,
@@ -296,39 +305,55 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
       // Directly upload to our API without thumbnail generation
       uploadLogger.start({ method: "alternative", recordingIndex: currentRecordingIndex });
       
-      const response = await fetch('/api/s3-video-upload', {
-        method: 'POST',
-        body: formData,
-      });
+      let responseData;
+      let responseObj;
       
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => "Could not read error response");
-        mobileLogger.error(`Alternative upload failed: ${response.status}`, { errorText });
-        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+      try {
+        mobileLogger.log("Starting fetch request to /api/s3-video-upload");
+        responseObj = await fetch('/api/s3-video-upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        mobileLogger.log("Fetch response received", { status: responseObj.status });
+        
+        if (!responseObj.ok) {
+          const errorText = await responseObj.text().catch(() => "Could not read error response");
+          mobileLogger.error(`Alternative upload failed: ${responseObj.status}`, { errorText });
+          throw new Error(`Upload failed: ${responseObj.status} - ${errorText}`);
+        }
+        
+        mobileLogger.log("Response is OK, parsing JSON");
+        responseData = await responseObj.json();
+      } catch (fetchError) {
+        mobileLogger.error("Fetch operation failed", { 
+          error: fetchError instanceof Error ? fetchError.message : String(fetchError),
+          stack: fetchError instanceof Error ? fetchError.stack : undefined
+        });
+        throw fetchError;
       }
       
-      const data = await response.json();
       mobileLogger.log("Alternative upload response", {
-        status: response.status,
-        hasVideoKey: !!data.videoKey,
-        hasThumbnailKey: !!data.thumbnailKey
+        status: responseObj.status,
+        hasVideoKey: !!responseData.videoKey,
+        hasThumbnailKey: !!responseData.thumbnailKey
       });
       
       // Store the recording metadata
       recordingsRef.current.push({
         questionId,
         recordingIndex: uniqueIndex,
-        videoKey: data.videoKey,
-        videoUrl: data.videoUrl,
-        thumbnailKey: data.thumbnailKey,
-        thumbnailUrl: data.thumbnailUrl,
+        videoKey: responseData.videoKey,
+        videoUrl: responseData.videoUrl,
+        thumbnailKey: responseData.thumbnailKey,
+        thumbnailUrl: responseData.thumbnailUrl,
       });
       
       uploadLogger.complete({
         method: "alternative",
         recordingIndex: currentRecordingIndex,
-        videoKey: data.videoKey,
-        thumbnailKey: data.thumbnailKey
+        videoKey: responseData.videoKey,
+        thumbnailKey: responseData.thumbnailKey
       });
       
       mobileLogger.log(`Mobile recording ${currentRecordingIndex + 1} uploaded via alternative method`);
@@ -350,13 +375,16 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
   
   // Last resort - download to device
   const downloadToDevice = (blob: Blob, questionId: string, uniqueIndex: number) => {
-    const fileExtension = "webm"
+    // Determine the correct file extension based on the mime type
+    const fileExtension = blob.type.includes('mp4') ? 'mp4' : 'webm';
     
     mobileLogger.warn("Falling back to device download", {
       recordingIndex: currentRecordingIndex,
       questionId,
       uniqueIndex,
-      blobSize: blob.size
+      blobSize: blob.size,
+      blobType: blob.type,
+      fileExtension
     });
     
     try {

@@ -1,0 +1,225 @@
+mobile
+2:14:27 PM
+Submission response received
+{
+  "status": 200,
+  "data": {
+    "message": "Response updated successfully"
+  }
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:14:03 PM
+Recording complete
+{
+  "mimeType": "video/mp4",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+
+
+mobile
+2:15:59 PM
+Added minimal recording metadata
+{
+  "questionId": "00b8c682-6abe-4d20-a2b3-ad83ce5f9af9-0",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+
+mobile
+2:16:14 PM
+Added minimal recording metadata
+{
+  "questionId": "00b8c682-6abe-4d20-a2b3-ad83ce5f9af9-1",
+  "recordingIndex": 1
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:16:14 PM
+Device detection
+{
+  "isMobile": true,
+  "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:15:59 PM
+Download initiated
+{
+  "filename": "question-recording-1.webm"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:15:59 PM
+Recording complete
+{
+  "mimeType": "video/mp4",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:14:27 PM
+Submission response received
+{
+  "status": 200,
+  "data": {
+    "message": "Response updated successfully"
+  }
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:14:03 PM
+Recording complete
+{
+  "mimeType": "video/mp4",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+
+Debug Logs
+View and filter logs from mobile devices and API calls
+
+All sources
+100
+
+
+Auto-refresh ON
+mobile
+2:16:30 PM
+Submission response received
+{
+  "status": 200,
+  "data": {
+    "message": "Response updated successfully"
+  }
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:16:26 PM
+Recording complete
+{
+  "mimeType": "video/mp4",
+  "recordingIndex": 1
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:16:14 PM
+Added minimal recording metadata
+{
+  "questionId": "00b8c682-6abe-4d20-a2b3-ad83ce5f9af9-1",
+  "recordingIndex": 1
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:16:14 PM
+Device detection
+{
+  "isMobile": true,
+  "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:15:59 PM
+Download initiated
+{
+  "filename": "question-recording-1.webm"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:15:59 PM
+Recording complete
+{
+  "mimeType": "video/mp4",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:14:27 PM
+Submission response received
+{
+  "status": 200,
+  "data": {
+    "message": "Response updated successfully"
+  }
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:14:03 PM
+Recording complete
+{
+  "mimeType": "video/mp4",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+Showing 8 logs
+
+
+
+mobile
+2:16:30 PM
+Submission response received
+{
+  "status": 200,
+  "data": {
+    "message": "Response updated successfully"
+  }
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:16:26 PM
+Recording complete
+{
+  "mimeType": "video/mp4",
+  "recordingIndex": 1
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:16:14 PM
+Added minimal recording metadata
+{
+  "questionId": "00b8c682-6abe-4d20-a2b3-ad83ce5f9af9-1",
+  "recordingIndex": 1
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:16:14 PM
+Device detection
+{
+  "isMobile": true,
+  "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:15:59 PM
+Download initiated
+{
+  "filename": "question-recording-1.webm"
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:15:59 PM
+Recording complete
+{
+  "mimeType": "video/mp4",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:14:27 PM
+Submission response received
+{
+  "status": 200,
+  "data": {
+    "message": "Response updated successfully"
+  }
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
+mobile
+2:14:03 PM
+Recording complete
+{
+  "mimeType": "video/mp4",
+  "recordingIndex": 0
+}
+Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.7 Mobile/15E148 Safari/604.1
