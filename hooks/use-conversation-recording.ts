@@ -72,58 +72,159 @@ export function useConversationRecording(streamRef: React.RefObject<MediaStream 
     
     // Generate a question ID for conversation mode - ensure it's unique with uniqueIndex
     const questionId = `conversation-${uniqueIndex}`
+    
+    // Check if we're on a mobile device
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       
     // If we have a responseId, try to upload to S3
     if (responseId) {
       // Create a promise for this upload and add it to pending uploads
       const uploadPromise = (async () => {
         try {
-          // Import the uploadVideoRecording function
-          const { uploadVideoRecording } = await import('@/lib/api-service')
-          
-          // Upload the video and get the URLs and keys
-          const { videoKey, videoUrl, thumbnailKey, thumbnailUrl } = await uploadVideoRecording(
-            blob,
-            responseId,
-            questionId,
-            currentRecordingIndex
-          )
-          
-          console.log(`Recording ${currentRecordingIndex + 1} uploaded to S3:`, { videoKey, thumbnailKey })
-          
-          // Store the recording metadata
-          recordingsRef.current.push({
-            questionId,
-            recordingIndex: uniqueIndex, // Use uniqueIndex instead of currentRecordingIndex
-            videoKey,
-            videoUrl,
-            thumbnailKey,
-            thumbnailUrl,
-            duration: blob.size > 0 ? 0 : undefined // We don't know the duration yet
-          })
-          
-          return { success: true, recordingIndex: currentRecordingIndex }
+          // For mobile devices, use the alternative upload method directly
+          if (isMobile) {
+            console.log(`Mobile device detected, using direct upload for recording ${currentRecordingIndex + 1}`);
+            
+            // Create a simple FormData with just the video
+            const formData = new FormData();
+            formData.append('video', blob, 'recording.webm');
+            formData.append('responseId', responseId);
+            formData.append('questionId', questionId);
+            formData.append('recordingIndex', uniqueIndex.toString());
+            
+            // Directly upload to our API without thumbnail generation
+            const response = await fetch('/api/s3-video-upload', {
+              method: 'POST',
+              body: formData,
+            });
+            
+            if (!response.ok) {
+              throw new Error(`Upload failed: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            // Store the recording metadata
+            recordingsRef.current.push({
+              questionId,
+              recordingIndex: uniqueIndex,
+              videoKey: data.videoKey,
+              videoUrl: data.videoUrl,
+              thumbnailKey: data.thumbnailKey,
+              thumbnailUrl: data.thumbnailUrl,
+              duration: blob.size > 0 ? 0 : undefined
+            });
+            
+            console.log(`Mobile recording ${currentRecordingIndex + 1} uploaded directly`);
+            return { success: true, recordingIndex: currentRecordingIndex };
+          } else {
+            // For desktop, use the normal upload method with client-side thumbnail generation
+            const { uploadVideoRecording } = await import('@/lib/api-service');
+            
+            // Upload the video and get the URLs and keys
+            const { videoKey, videoUrl, thumbnailKey, thumbnailUrl } = await uploadVideoRecording(
+              blob,
+              responseId,
+              questionId,
+              currentRecordingIndex
+            );
+            
+            console.log(`Recording ${currentRecordingIndex + 1} uploaded to S3:`, { videoKey, thumbnailKey });
+            
+            // Store the recording metadata
+            recordingsRef.current.push({
+              questionId,
+              recordingIndex: uniqueIndex, // Use uniqueIndex instead of currentRecordingIndex
+              videoKey,
+              videoUrl,
+              thumbnailKey,
+              thumbnailUrl,
+              duration: blob.size > 0 ? 0 : undefined // We don't know the duration yet
+            });
+            
+            return { success: true, recordingIndex: currentRecordingIndex };
+          }
         } catch (error) {
-          console.error('Error uploading recording to S3:', error)
+          console.error('Error uploading recording to S3:', error);
           // Fall back to downloading the file
-          downloadRecordingFallback(blob, questionId, uniqueIndex)
-          return { success: false, recordingIndex: currentRecordingIndex }
+          downloadRecordingFallback(blob, questionId, uniqueIndex);
+          return { success: false, recordingIndex: currentRecordingIndex };
         }
-      })()
+      })();
       
       // Add to pending uploads
-      pendingUploadsRef.current.push(uploadPromise)
+      pendingUploadsRef.current.push(uploadPromise);
     } else {
       // No responseId, so fall back to downloading
-      downloadRecordingFallback(blob, questionId, uniqueIndex)
+      downloadRecordingFallback(blob, questionId, uniqueIndex);
     }
     
     // Clear chunks for next recording
     recordedChunksRef.current = []
   }
   
-  // Fallback function to download recording if S3 upload fails
+  // Fallback function when S3 upload fails - try again with a simpler approach
   const downloadRecordingFallback = (blob: Blob, questionId: string, uniqueIndex: number) => {
+    // For mobile devices, try a simpler upload approach first
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      console.log("Mobile device detected, trying alternative upload method");
+      
+      // Try a simpler upload approach for mobile
+      tryAlternativeUpload(blob, questionId, uniqueIndex).catch(error => {
+        console.error("Alternative upload failed:", error);
+        // If that fails too, then fall back to download
+        downloadToDevice(blob, questionId, uniqueIndex);
+      });
+    } else {
+      // For desktop, just download
+      downloadToDevice(blob, questionId, uniqueIndex);
+    }
+  }
+  
+  // Function to try an alternative upload approach for mobile devices
+  const tryAlternativeUpload = async (blob: Blob, questionId: string, uniqueIndex: number) => {
+    if (!responseId) throw new Error("No responseId available");
+    
+    try {
+      // Create a simple FormData with just the video
+      const formData = new FormData();
+      formData.append('video', blob, 'recording.webm');
+      formData.append('responseId', responseId);
+      formData.append('questionId', questionId);
+      formData.append('recordingIndex', uniqueIndex.toString());
+      
+      // Directly upload to our API without thumbnail generation
+      const response = await fetch('/api/s3-video-upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Store the recording metadata
+      recordingsRef.current.push({
+        questionId,
+        recordingIndex: uniqueIndex,
+        videoKey: data.videoKey,
+        videoUrl: data.videoUrl,
+        thumbnailKey: data.thumbnailKey,
+        thumbnailUrl: data.thumbnailUrl,
+      });
+      
+      console.log(`Mobile recording ${currentRecordingIndex + 1} uploaded via alternative method`);
+      return true;
+    } catch (error) {
+      console.error("Alternative upload failed:", error);
+      throw error;
+    }
+  }
+  
+  // Last resort - download to device
+  const downloadToDevice = (blob: Blob, questionId: string, uniqueIndex: number) => {
     const fileExtension = "webm"
     
     // Create a download link for the recorded video

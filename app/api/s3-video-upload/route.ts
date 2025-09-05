@@ -55,11 +55,55 @@ export async function POST(request: Request) {
       );
     }
     
+    // For mobile devices, we may not have a thumbnail file
+    // In that case, we'll create a simple placeholder thumbnail
+    let thumbnailArrayBuffer: ArrayBuffer;
+    
     if (!thumbnailFile) {
-      return NextResponse.json(
-        { error: 'Thumbnail file is required' },
-        { status: 400 }
-      );
+      console.log("No thumbnail provided, creating placeholder");
+      
+      // Create a simple placeholder thumbnail for mobile devices
+      const canvas = new OffscreenCanvas(320, 240);
+      const ctx = canvas.getContext('2d');
+      
+      if (ctx) {
+        // Fill with a blue background
+        ctx.fillStyle = '#4a90e2';
+        ctx.fillRect(0, 0, 320, 240);
+        
+        // Add a play button icon
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.beginPath();
+        ctx.moveTo(320 / 2 + 30, 240 / 2);
+        ctx.lineTo(320 / 2 - 15, 240 / 2 + 25);
+        ctx.lineTo(320 / 2 - 15, 240 / 2 - 25);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Convert to blob
+        const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.7 });
+        thumbnailArrayBuffer = await blob.arrayBuffer();
+      } else {
+        // If OffscreenCanvas is not available, create a minimal placeholder
+        const minimalPlaceholder = new Uint8Array([
+          0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01,
+          0x01, 0x01, 0x00, 0x48, 0x00, 0x48, 0x00, 0x00, 0xFF, 0xDB, 0x00, 0x43,
+          0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+          0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+          0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+          0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+          0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+          0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xC0, 0x00, 0x0B, 0x08, 0x00, 0x01, 0x00,
+          0x01, 0x01, 0x01, 0x11, 0x00, 0xFF, 0xC4, 0x00, 0x14, 0x00, 0x01, 0x00,
+          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+          0x00, 0x00, 0x00, 0xFF, 0xDA, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3F,
+          0x00, 0xD2, 0xCF, 0x20, 0xFF, 0xD9
+        ]).buffer;
+        thumbnailArrayBuffer = minimalPlaceholder;
+      }
+    } else {
+      // Use the provided thumbnail
+      thumbnailArrayBuffer = await thumbnailFile.arrayBuffer();
     }
     
     // Generate unique filenames
@@ -67,16 +111,16 @@ export async function POST(request: Request) {
     const videoFilename = `videos/${responseId}/${videoId}.webm`;
     const thumbnailFilename = `thumbnails/${responseId}/${videoId}.jpg`;
     
-    // Convert Files to ArrayBuffer
+    // Convert video File to ArrayBuffer
     const videoArrayBuffer = await videoFile.arrayBuffer();
-    const thumbnailArrayBuffer = await thumbnailFile.arrayBuffer();
+    // thumbnailArrayBuffer is now handled in the code above
     
     // Upload video to S3
     const uploadVideoCommand = new PutObjectCommand({
       Bucket: BUCKET_NAME,
       Key: videoFilename,
       Body: Buffer.from(videoArrayBuffer),
-      ContentType: videoFile.type
+      ContentType: videoFile.type || 'video/webm'
     });
     
     await s3Client.send(uploadVideoCommand);

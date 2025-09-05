@@ -25,64 +25,223 @@ const BUCKET_NAME = process.env.NEXT_PUBLIC_AWS_S3_BUCKET || 'camera-recorder-au
 export const createThumbnail = async (videoBlob: Blob): Promise<Blob> => {
   return new Promise((resolve, reject) => {
     try {
-      // Create video element
-      const video = document.createElement('video')
-      video.autoplay = false
-      video.muted = true
-      video.playsInline = true
+      // Check if we're on a mobile device
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       
-      // Create canvas for thumbnail
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        reject(new Error('Could not get canvas context'))
-        return
-      }
-      
-      // Set up video event listeners
-      video.onloadedmetadata = () => {
-        // Set canvas size to video dimensions
-        canvas.width = video.videoWidth
-        canvas.height = video.videoHeight
+      // For mobile devices, create a simple colored thumbnail instead of trying to extract from video
+      if (isMobile) {
+        console.log("Mobile device detected, creating placeholder thumbnail");
         
-        // Seek to 1 second or video duration if shorter
-        const seekTime = Math.min(1.0, video.duration / 2)
-        video.currentTime = seekTime
-      }
-      
-      video.onseeked = () => {
-        // Draw video frame to canvas
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        // Create a canvas for the placeholder thumbnail
+        const canvas = document.createElement('canvas');
+        canvas.width = 320;
+        canvas.height = 240;
+        const ctx = canvas.getContext('2d');
+        
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
+        
+        // Draw a gradient background
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, '#4a90e2');
+        gradient.addColorStop(1, '#63b3ed');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Add a play button icon
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.beginPath();
+        ctx.moveTo(canvas.width / 2 + 30, canvas.height / 2);
+        ctx.lineTo(canvas.width / 2 - 15, canvas.height / 2 + 25);
+        ctx.lineTo(canvas.width / 2 - 15, canvas.height / 2 - 25);
+        ctx.closePath();
+        ctx.fill();
         
         // Convert canvas to blob
         canvas.toBlob(
           (blob) => {
             if (blob) {
-              resolve(blob)
+              resolve(blob);
             } else {
-              reject(new Error('Failed to create thumbnail blob'))
+              reject(new Error('Failed to create thumbnail blob'));
             }
-            
-            // Clean up
-            URL.revokeObjectURL(video.src)
           },
           'image/jpeg',
           0.7 // JPEG quality
-        )
+        );
+        
+        return;
       }
+      
+      // For desktop, try to extract a frame from the video
+      // Create video element
+      const video = document.createElement('video');
+      video.autoplay = false;
+      video.muted = true;
+      video.playsInline = true;
+      
+      // Create canvas for thumbnail
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'));
+        return;
+      }
+      
+      // Set up video event listeners
+      video.onloadedmetadata = () => {
+        // Set canvas size to video dimensions
+        canvas.width = video.videoWidth || 320;
+        canvas.height = video.videoHeight || 240;
+        
+        // Seek to 1 second or video duration if shorter
+        const seekTime = Math.min(1.0, video.duration / 2);
+        video.currentTime = seekTime;
+      };
+      
+      video.onseeked = () => {
+        try {
+          // Draw video frame to canvas
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          
+          // Convert canvas to blob
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                reject(new Error('Failed to create thumbnail blob'));
+              }
+              
+              // Clean up
+              URL.revokeObjectURL(video.src);
+            },
+            'image/jpeg',
+            0.7 // JPEG quality
+          );
+        } catch (err) {
+          console.error('Error drawing video to canvas:', err);
+          
+          // Fallback to colored thumbnail
+          ctx.fillStyle = '#4a90e2';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                reject(new Error('Failed to create fallback thumbnail blob'));
+              }
+              
+              // Clean up
+              URL.revokeObjectURL(video.src);
+            },
+            'image/jpeg',
+            0.7 // JPEG quality
+          );
+        }
+      };
       
       // Handle errors
       video.onerror = () => {
-        reject(new Error('Error loading video for thumbnail generation'))
-        URL.revokeObjectURL(video.src)
-      }
+        console.error('Error loading video for thumbnail generation, using fallback');
+        
+        // Create a fallback colored thumbnail
+        const canvas = document.createElement('canvas');
+        canvas.width = 320;
+        canvas.height = 240;
+        const ctx = canvas.getContext('2d');
+        
+        if (!ctx) {
+          reject(new Error('Could not get canvas context for fallback'));
+          return;
+        }
+        
+        ctx.fillStyle = '#4a90e2';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error('Failed to create fallback thumbnail blob'));
+            }
+          },
+          'image/jpeg',
+          0.7 // JPEG quality
+        );
+        
+        URL.revokeObjectURL(video.src);
+      };
       
       // Load the video blob
-      video.src = URL.createObjectURL(videoBlob)
+      video.src = URL.createObjectURL(videoBlob);
+      
+      // Set a timeout in case seeking doesn't work (common on mobile)
+      setTimeout(() => {
+        if (!canvas.toDataURL().includes('data:image/jpeg;base64,/9j/')) {
+          console.log('Thumbnail generation timed out, using fallback');
+          
+          // Create a fallback colored thumbnail
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.fillStyle = '#4a90e2';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            canvas.toBlob(
+              (blob) => {
+                if (blob) {
+                  resolve(blob);
+                } else {
+                  reject(new Error('Failed to create timeout fallback thumbnail blob'));
+                }
+                
+                // Clean up
+                URL.revokeObjectURL(video.src);
+              },
+              'image/jpeg',
+              0.7 // JPEG quality
+            );
+          }
+        }
+      }, 3000); // 3 second timeout
     } catch (error) {
-      reject(error)
+      console.error('Error in createThumbnail:', error);
+      
+      // Final fallback - create a simple colored blob
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 320;
+        canvas.height = 240;
+        const ctx = canvas.getContext('2d');
+        
+        if (ctx) {
+          ctx.fillStyle = '#ff0000'; // Red for error
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                reject(new Error('Failed to create error fallback thumbnail blob'));
+              }
+            },
+            'image/jpeg',
+            0.7 // JPEG quality
+          );
+        } else {
+          reject(error);
+        }
+      } catch (finalError) {
+        reject(finalError);
+      }
     }
-  })
+  });
 }
 
 /**
