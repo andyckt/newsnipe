@@ -36,37 +36,14 @@ export function SettingsTab() {
               <CardDescription>Update your personal information and profile settings</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex items-center gap-6">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src="/placeholder.svg?height=80&width=80" alt="Profile" />
-                  <AvatarFallback className="text-lg">JD</AvatarFallback>
-                </Avatar>
+              <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
-                  <Button variant="outline" className="rounded-2xl bg-transparent">
-                    Change Photo
-                  </Button>
-                  <Button variant="ghost" size="sm" className="rounded-2xl text-destructive">
-                    Remove
-                  </Button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" defaultValue="John" className="rounded-2xl" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" defaultValue="Doe" className="rounded-2xl" />
+                  <Label htmlFor="nickname">Nickname</Label>
+                  <Input id="nickname" defaultValue="JohnD" className="rounded-2xl" placeholder="Enter your preferred nickname" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input id="email" type="email" defaultValue="john.doe@example.com" className="rounded-2xl" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" defaultValue="+1 (555) 123-4567" className="rounded-2xl" />
                 </div>
               </div>
 

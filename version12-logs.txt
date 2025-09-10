@@ -1,0 +1,281 @@
+commit ffea8cea1eb84156a8880d26f39fed98dbdd23e8
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Fri Sep 5 14:57:38 2025 +0800
+
+    fix more
+
+commit 5b92ef03c9455be949cfbed237742385e83f197f
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Fri Sep 5 14:47:46 2025 +0800
+
+    further fix fix file size error, we use direct API now
+
+commit f63dba8c419277a73bf6faa803e8a0b6030d45c6
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Fri Sep 5 14:32:42 2025 +0800
+
+    further fix
+
+commit 580dbe5fde30ab0e198fcddfb0ec795467fa7ff4
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Fri Sep 5 14:21:11 2025 +0800
+
+    fixed iphone
+
+commit f87ba4710df4769cc34e9a631bf27a6200fcd7be
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Fri Sep 5 14:10:29 2025 +0800
+
+    fix debug page
+
+commit 69a3b34accf017e7a1ceb2b43d7cd9ae77565189
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Fri Sep 5 13:55:58 2025 +0800
+
+    try debugging
+
+commit a4be4866c4656655656b549191b18dba9f56e867
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Fri Sep 5 13:04:37 2025 +0800
+
+    try fixing mobile device issue
+
+commit 9d1207d66e69b50c4959d172e98c595ddd68c151
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Sep 4 12:07:57 2025 +0800
+
+    sucess for aws video recordings
+
+commit 3906d86ac3f5799439072d1c4f0c8c23064d518e
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Sep 4 10:37:57 2025 +0800
+
+    try AWS storing
+
+commit c5352e514fb7b2d28d53ca7b009cb71fb7214a2a
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Sep 4 10:17:51 2025 +0800
+
+    Storing the personal details answers to MongoDB Atlas
+
+commit 0bf57c30b78984803b2f49875142e2cdd8e71ebf
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 23:48:48 2025 +0800
+
+    start now in the next commit
+
+commit 2fc5428927d844c1d05cc8f598995f0b5aa29468
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 23:14:20 2025 +0800
+
+    start working on submission from now on
+
+commit 3abd14ae48bd81bae10145942800063a88c05617
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 02:07:56 2025 +0800
+
+    fixed more bugs
+
+commit 88de599e3d02930913981d25f86b0083425e2247
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 01:44:36 2025 +0800
+
+    change some metadata
+
+commit 61ec1dc33efb187a8423cb65acc674abb47f1779
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 01:20:16 2025 +0800
+
+    added delete snipe feature
+
+commit eb06c12aedfbdeaf4bdfb5c22681dd2e4063d120
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 01:06:35 2025 +0800
+
+    added my snipe tab backend funcionality
+
+commit e9de2a0bc43b7132ca96d3472ce889319dd5b236
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 00:54:40 2025 +0800
+
+    added submission field
+
+commit 4f8e7ea4fd2a014f2ac28a9d4601f6f04f7b551c
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 00:49:10 2025 +0800
+
+    added title field
+
+commit 58084a32274317ef3c8a13143b9ce51d9e3c52db
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 00:34:32 2025 +0800
+
+    fixed some bugs
+
+commit 7b6e44837efc20a9cc331d9e4ba2474615489a7f
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 00:26:20 2025 +0800
+
+    finish working on storing json config in database
+
+commit 9d24b79c4ef066ce2f79de1b7ac76682f1de009e
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 00:25:02 2025 +0800
+
+    ignore
+
+commit db7d2ac7366a42f6c60bf1dbb466dac1b99c586f
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Tue Sep 2 23:59:56 2025 +0800
+
+    first attempt
+
+commit d5d68003b98fcda79032de2e428cf20f35005d23
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Tue Sep 2 12:24:27 2025 +0800
+
+    moved all the files for new feature
+
+commit 898840b41caef888c511ea6bb5bc56f0d320c26f
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Tue Sep 2 12:08:03 2025 +0800
+
+    try importing new feature
+
+commit 12e1e618a9195687963793fa09080c7a13c7f8f5
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Tue Sep 2 11:28:36 2025 +0800
+
+    added empty create snipe tab
+
+commit f14a23cd97072a33523608e5cbb02a8c653fc37a
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 1 10:24:59 2025 +0800
+
+    8.0 louder
+
+commit fe67b74145acbcde71a298313b75b7ca3975143f
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 23:35:19 2025 +0800
+
+    finsih working on user auth
+
+commit 66c70300d4280fa06b0b2e3fa9c8e2692e1b63a7
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 23:28:05 2025 +0800
+
+    implement remember me, if checked, stay for 30 days, if not, stay logged in for 3 days
+
+commit 522dd1bf9c3f7d9b53cbe998f032882d254f3225
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 23:16:01 2025 +0800
+
+    bring them to /auth page when signout
+
+commit 151ff721e8656948bef2f8d896e0062b410c8974
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 23:11:48 2025 +0800
+
+    works first test
+
+commit 1632602a03a51a61c6f5f577f73c1d432f75964f
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 22:55:48 2025 +0800
+
+    delete auth form and password strenght file
+
+commit 7788825e7f74c1396e4d0cbccdb708e6f9751853
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 22:42:50 2025 +0800
+
+    comment out social login UI
+
+commit 024362c3e117d4b4d9d0bc1b6712d23f5952e456
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 22:31:06 2025 +0800
+
+    added auth fils
+
+commit a787e910b28360de8179b26c9149a1c346563120
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 22:23:28 2025 +0800
+
+    added auth page.tsx
+
+commit ddff6ceb1a66fe00a97d89506568034a50e46916
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 22:12:12 2025 +0800
+
+    continue
+
+commit 3bd7880d72a03175e505859800f06984225812c5
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 18:27:48 2025 +0800
+
+    remove create snipe tab, and move Launch Recorder to it
+
+commit 7219de8204f3a78f435d3e9f0c9f86e55cb47c0a
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 16:36:33 2025 +0800
+
+    added logo to public
+
+commit 3d9f81fe898e43981c199337fa91214105afe095
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 16:34:23 2025 +0800
+
+    removed checkbox
+
+commit 085d667b2596b61c83644983442af982dacf2b35
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Aug 28 23:41:06 2025 +0800
+
+    removed skip button
+
+commit 071e11ec4d3274d638fa5717a2c572f45ea7f295
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Aug 28 23:30:53 2025 +0800
+
+    Placed Launch recorder button at the top right
+
+commit 30d8cf14425c8a8a8a27c3beabda4a752b1f862d
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Aug 28 16:32:40 2025 +0800
+
+    improved launch recorder tab interface
+
+commit c3d9564b41074250e9cf49818dfaaab31e19a158
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 23:57:22 2025 +0800
+
+    correct order in launch recorder
+
+commit fff8d6c8012aaeb64006787a61afd753d1bcc342
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 23:00:59 2025 +0800
+
+    pnpm install more packages
+
+commit 9a849275f0e0dfe5f2e00e386a37939c093c0be8
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 22:51:23 2025 +0800
+
+    added launch recorder tab, working
+
+commit bca5a2e0a646ba45af8a61176eb505e71fd9120c
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 20:27:22 2025 +0800
+
+    added launch recorder tab
+
+commit a7d039c6529d610bbe9fe8fd47167830be7c5d66
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 19:58:52 2025 +0800
+
+    add launch recorder button
+
+commit eaf463e111802fc16b2344473409702f7e4438de
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 19:02:25 2025 +0800
+
+    first commit with sound icon
