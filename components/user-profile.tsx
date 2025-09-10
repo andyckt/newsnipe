@@ -70,7 +70,12 @@ export default function UserProfile() {
             <User className="mr-2 h-4 w-4" />
             <span>Profile</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push('/settings')}>
+          <DropdownMenuItem onClick={() => {
+            // Find the parent component that has setActiveMenu
+            // This is a custom event to communicate with the parent DesignaliCreative component
+            const event = new CustomEvent('setActiveMenu', { detail: 'settings' });
+            window.dispatchEvent(event);
+          }}>
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
           </DropdownMenuItem>

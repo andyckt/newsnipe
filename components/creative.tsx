@@ -51,6 +51,19 @@ export function DesignaliCreative() {
     const timer = setTimeout(() => setProgress(100), 1000)
     return () => clearTimeout(timer)
   }, [])
+  
+  // Listen for custom setActiveMenu event from UserProfile component
+  useEffect(() => {
+    const handleSetActiveMenu = (event: CustomEvent) => {
+      setActiveMenu(event.detail);
+    };
+    
+    window.addEventListener('setActiveMenu', handleSetActiveMenu as EventListener);
+    
+    return () => {
+      window.removeEventListener('setActiveMenu', handleSetActiveMenu as EventListener);
+    };
+  }, [])
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) => ({
