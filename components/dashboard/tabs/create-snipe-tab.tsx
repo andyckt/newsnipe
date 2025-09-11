@@ -225,7 +225,7 @@ export default function CameraRecorder() {
   // Render based on current app state
   if (appState === "settings") {
     return (
-      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
+      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:items-center md:justify-center">
         <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen">
           <SettingsScreen 
             onLaunch={handleLaunch} 
@@ -241,7 +241,7 @@ export default function CameraRecorder() {
   
   if (appState === "personal_details") {
     return (
-      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
+      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:items-center md:justify-center">
         <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen">
           <PersonalDetailsCollector 
             config={personalDetailsConfig}
@@ -255,7 +255,7 @@ export default function CameraRecorder() {
   
   if (appState === "completed") {
     return (
-      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
+      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:items-center md:justify-center">
         <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen p-8 items-center justify-center text-center">
           <h1 className="text-3xl font-bold mb-4">Thank You!</h1>
           <p className="text-lg">
@@ -268,7 +268,7 @@ export default function CameraRecorder() {
 
   // Recording state
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
+    <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:items-center md:justify-center">
       <div className="flex flex-col h-full w-full bg-black md:max-w-sm md:h-screen">
         <CameraView videoRef={videoRef} countdown={countdown} recordingTimeLeft={recordingTimeLeft} />
 
