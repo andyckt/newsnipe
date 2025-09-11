@@ -16,7 +16,7 @@ interface SettingsScreenProps {
 }
 
 export function SettingsScreen({ onLaunch, personalDetailsConfig, onPersonalDetailsConfigChange, title = "Untitled Snipe", onTitleChange }: SettingsScreenProps) {
-  const [activeTab, setActiveTab] = useState<"question" | "conversation" | "personal_details">("question")
+  const [activeTab, setActiveTab] = useState<"question" | "conversation" | "personal_details">("personal_details")
   const [language, setLanguage] = useState<AudioLanguage>("english")
   const [snipeTitle, setSnipeTitle] = useState<string>(title)
   
@@ -33,7 +33,6 @@ export function SettingsScreen({ onLaunch, personalDetailsConfig, onPersonalDeta
   
   return (
     <div className="flex flex-col h-full w-full bg-white p-8 items-center justify-center">
-      <h1 className="text-3xl font-bold mb-4">Camera Recorder Settings</h1>
       
       <div className="w-full max-w-md mb-6">
         <label htmlFor="snipe-title" className="block text-sm font-medium text-gray-700 mb-1">
@@ -50,15 +49,15 @@ export function SettingsScreen({ onLaunch, personalDetailsConfig, onPersonalDeta
       </div>
       
       <Tabs 
-        defaultValue="question" 
+        defaultValue="personal_details" 
         className="w-full max-w-md mb-8"
         onValueChange={(value) => setActiveTab(value as "question" | "conversation" | "personal_details")}
       >
         <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsTrigger value="personal_details">Personal Details</TabsTrigger>
           <TabsTrigger value="question">By Question</TabsTrigger>
           {/* Conversation mode temporarily disabled until future implementation */}
           {/* <TabsTrigger value="conversation">By Conversation</TabsTrigger> */}
-          <TabsTrigger value="personal_details">Personal Details</TabsTrigger>
         </TabsList>
         
         <TabsContent value="question" className="w-full">
