@@ -120,32 +120,52 @@ export async function PUT(request: Request) {
         console.log(`Existing Recording ${index + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}`);
       });
       
-      // Create a map of existing recordings by questionId and recordingIndex
+      // Create a map to track recordings by videoKey (to avoid duplicates)
+      // and by questionId (to ensure we have one recording per question)
+      const videoKeyMap = new Map();
       const recordingMap = new Map();
-      existingRecordings.forEach((rec: any) => {
-        // Use both questionId and recordingIndex to create a unique key
-        const key = `${rec.questionId}:${rec.recordingIndex}`;
-        console.log(`Adding existing recording to map with key: ${key}`);
-        recordingMap.set(key, rec);
-      });
       
-      // Add or update recordings
-      recordings.forEach((newRec: any) => {
-        // Use both questionId and recordingIndex to create a unique key
-        const key = `${newRec.questionId}:${newRec.recordingIndex}`;
-        console.log(`Processing new recording with key: ${key}`);
-        
-        const existingRec = recordingMap.get(key);
-        if (existingRec) {
-          console.log(`Updating existing recording with key: ${key}`);
-        } else {
-          console.log(`Adding new recording with key: ${key}`);
+      // First, add existing recordings to our maps
+      existingRecordings.forEach((rec: any) => {
+        // Track by videoKey if available
+        if (rec.videoKey) {
+          videoKeyMap.set(rec.videoKey, rec);
         }
         
-        recordingMap.set(key, {
-          ...existingRec,
-          ...newRec
-        });
+        // Also track by questionId (without the uniqueIndex suffix)
+        const baseQuestionId = rec.questionId.split('-').slice(0, -1).join('-');
+        console.log(`Adding existing recording to map with baseQuestionId: ${baseQuestionId}`);
+        
+        // If we already have a recording for this question, keep the one with the higher recordingIndex
+        const existing = recordingMap.get(baseQuestionId);
+        if (!existing || (existing.recordingIndex < rec.recordingIndex)) {
+          recordingMap.set(baseQuestionId, rec);
+        }
+      });
+      
+      // Now process new recordings
+      recordings.forEach((newRec: any) => {
+        // Skip if we already have this exact video
+        if (newRec.videoKey && videoKeyMap.has(newRec.videoKey)) {
+          console.log(`Skipping duplicate video with key: ${newRec.videoKey}`);
+          return;
+        }
+        
+        // Track by videoKey if available
+        if (newRec.videoKey) {
+          videoKeyMap.set(newRec.videoKey, newRec);
+        }
+        
+        // Get the base questionId without the uniqueIndex suffix
+        const baseQuestionId = newRec.questionId.split('-').slice(0, -1).join('-');
+        console.log(`Processing new recording with baseQuestionId: ${baseQuestionId}`);
+        
+        // If we already have a recording for this question, keep the one with the higher recordingIndex
+        const existing = recordingMap.get(baseQuestionId);
+        if (!existing || (existing.recordingIndex < newRec.recordingIndex)) {
+          console.log(`Adding/updating recording for question: ${baseQuestionId}`);
+          recordingMap.set(baseQuestionId, newRec);
+        }
       });
       
       // Convert map back to array

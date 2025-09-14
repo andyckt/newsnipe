@@ -477,8 +477,14 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
         return false
       }
       
-      console.log(`Submitting ${recordingsRef.current.length} recordings to the database:`)
-      recordingsRef.current.forEach((rec, i) => {
+      // Deduplicate recordings by questionId before submitting
+      // This ensures we don't have multiple entries for the same recording
+      const uniqueRecordings = Array.from(
+        new Map(recordingsRef.current.map(rec => [rec.questionId, rec])).values()
+      );
+      
+      console.log(`Submitting ${uniqueRecordings.length} recordings to the database:`)
+      uniqueRecordings.forEach((rec, i) => {
         console.log(`Recording ${i + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}`)
       })
       
@@ -490,7 +496,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
         },
         body: JSON.stringify({
           responseId,
-          recordings: recordingsRef.current,
+          recordings: uniqueRecordings,
           status: 'completed'
         }),
       })
