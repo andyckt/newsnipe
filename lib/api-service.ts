@@ -104,7 +104,140 @@ export const playAudio = (audioUrl: string): void => {
 };
 
 /**
- * Uploads a video recording to S3 with a thumbnail
+ * Gets a presigned URL for direct upload to S3
+ * @param responseId - The response ID to associate with the file
+ * @param fileType - The type of file ('video' or 'thumbnail')
+ * @param contentType - The MIME type of the file
+ * @param questionId - The question ID associated with the recording
+ * @param recordingIndex - The index of the recording
+ * @returns Promise with the presigned URL and key
+ */
+export async function getPresignedUploadUrl(
+  responseId: string,
+  fileType: 'video' | 'thumbnail',
+  contentType: string,
+  questionId: string,
+  recordingIndex: number
+): Promise<{
+  presignedUrl: string;
+  key: string;
+  fileId: string;
+}> {
+  try {
+    console.log(`Getting presigned URL for ${fileType} upload, contentType: ${contentType}`);
+    
+    const response = await fetch('/api/s3-presigned-upload-url', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        responseId,
+        fileType,
+        contentType,
+        questionId,
+        recordingIndex
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`API error: ${response.status} ${JSON.stringify(errorData)}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error getting presigned upload URL:', error);
+    throw error;
+  }
+}
+
+/**
+ * Uploads a file directly to S3 using a presigned URL
+ * @param presignedUrl - The presigned URL for upload
+ * @param blob - The file blob to upload
+ * @returns Promise that resolves when the upload is complete
+ */
+export async function uploadToS3WithPresignedUrl(
+  presignedUrl: string,
+  blob: Blob
+): Promise<void> {
+  try {
+    console.log(`Uploading file of type ${blob.type} and size ${blob.size} bytes directly to S3`);
+    
+    const response = await fetch(presignedUrl, {
+      method: 'PUT',
+      body: blob,
+      headers: {
+        'Content-Type': blob.type
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`S3 direct upload error: ${response.status}`);
+    }
+    
+    console.log('Direct S3 upload completed successfully');
+  } catch (error) {
+    console.error('Error uploading to S3 with presigned URL:', error);
+    throw error;
+  }
+}
+
+/**
+ * Notifies the server that a direct S3 upload is complete
+ * @param responseId - The response ID associated with the upload
+ * @param videoKey - The S3 key of the uploaded video
+ * @param thumbnailKey - The S3 key of the uploaded thumbnail (optional)
+ * @param questionId - The question ID associated with the recording
+ * @param recordingIndex - The index of the recording
+ * @returns Promise with the URLs of the uploaded files
+ */
+export async function notifyUploadComplete(
+  responseId: string,
+  videoKey: string,
+  thumbnailKey: string | null,
+  questionId: string,
+  recordingIndex: number
+): Promise<{
+  videoUrl: string;
+  thumbnailUrl: string | null;
+}> {
+  try {
+    console.log(`Notifying upload completion for responseId: ${responseId}, videoKey: ${videoKey}`);
+    
+    const response = await fetch('/api/s3-upload-complete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        responseId,
+        videoKey,
+        thumbnailKey,
+        questionId,
+        recordingIndex
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`API error: ${response.status} ${JSON.stringify(errorData)}`);
+    }
+
+    const data = await response.json();
+    return {
+      videoUrl: data.videoUrl,
+      thumbnailUrl: data.thumbnailUrl
+    };
+  } catch (error) {
+    console.error('Error notifying upload completion:', error);
+    throw error;
+  }
+}
+
+/**
+ * Uploads a video recording to S3 with a thumbnail using the legacy method
  * @param videoBlob - The video blob to upload
  * @param responseId - The response ID to associate with the video
  * @param questionId - The question ID associated with the recording
@@ -123,34 +256,56 @@ export async function uploadVideoRecording(
   thumbnailUrl: string;
 }> {
   try {
+    console.log(`Starting direct S3 upload for video of size ${videoBlob.size} bytes`);
+    
     // First, generate a thumbnail from the video
     const thumbnailBlob = await import('@/lib/s3-service').then(({ createThumbnail }) => {
       return createThumbnail(videoBlob);
     });
+    console.log('Thumbnail generated successfully');
 
-    // Create a FormData object to upload both files
-    const formData = new FormData();
-    formData.append('video', videoBlob, 'recording.webm');
-    formData.append('thumbnail', thumbnailBlob, 'thumbnail.jpg');
-    formData.append('responseId', responseId);
-    formData.append('questionId', questionId);
-    formData.append('recordingIndex', recordingIndex.toString());
-
-    // Upload the files to S3
-    const uploadResponse = await fetch('/api/s3-video-upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!uploadResponse.ok) {
-      const errorData = await uploadResponse.json().catch(() => ({}));
-      throw new Error(`S3 upload error: ${uploadResponse.status} ${JSON.stringify(errorData)}`);
-    }
-
-    // Get the S3 URLs and keys from the response
-    const { videoKey, videoUrl, thumbnailKey, thumbnailUrl } = await uploadResponse.json();
-
-    return { videoKey, videoUrl, thumbnailKey, thumbnailUrl };
+    // Get presigned URL for video upload
+    const videoUploadData = await getPresignedUploadUrl(
+      responseId,
+      'video',
+      videoBlob.type,
+      questionId,
+      recordingIndex
+    );
+    
+    // Get presigned URL for thumbnail upload
+    const thumbnailUploadData = await getPresignedUploadUrl(
+      responseId,
+      'thumbnail',
+      'image/jpeg',
+      questionId,
+      recordingIndex
+    );
+    
+    // Upload video directly to S3
+    console.log('Uploading video directly to S3...');
+    await uploadToS3WithPresignedUrl(videoUploadData.presignedUrl, videoBlob);
+    
+    // Upload thumbnail directly to S3
+    console.log('Uploading thumbnail directly to S3...');
+    await uploadToS3WithPresignedUrl(thumbnailUploadData.presignedUrl, thumbnailBlob);
+    
+    // Notify server that uploads are complete
+    console.log('Notifying server of completed uploads...');
+    const { videoUrl, thumbnailUrl } = await notifyUploadComplete(
+      responseId,
+      videoUploadData.key,
+      thumbnailUploadData.key,
+      questionId,
+      recordingIndex
+    );
+    
+    return {
+      videoKey: videoUploadData.key,
+      videoUrl,
+      thumbnailKey: thumbnailUploadData.key,
+      thumbnailUrl: thumbnailUrl || ''
+    };
   } catch (error) {
     console.error('Error in uploadVideoRecording:', error);
     throw error;

@@ -96,6 +96,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
     
     // Create a blob from the recorded chunks
     const blob = new Blob(recordedChunksRef.current, { type: mimeType })
+    console.log(`Created blob of type ${mimeType} and size ${blob.size} bytes`);
     
     // Get a unique recording index for this recording
     const uniqueIndex = nextUniqueIndexRef.current++;
@@ -107,19 +108,35 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
       
     // Ensure questionId is unique by appending the uniqueIndex
     questionId = `${questionId}-${uniqueIndex}`
+    
+    // Try to get responseId from window object if not provided
+    let effectiveResponseId = responseId;
+    if (!effectiveResponseId && typeof window !== 'undefined') {
+      // Try to get from localStorage
+      effectiveResponseId = localStorage.getItem('snipe_response_id');
+      
+      if (effectiveResponseId) {
+        console.log(`Using responseId from localStorage: ${effectiveResponseId}`);
+      } else if ((window as any).snipeResponseId) {
+        effectiveResponseId = (window as any).snipeResponseId;
+        console.log(`Using responseId from window object: ${effectiveResponseId}`);
+      }
+    }
       
     // If we have a responseId, try to upload to S3
-    if (responseId) {
+    if (effectiveResponseId) {
       // Create a promise for this upload and add it to pending uploads
       const uploadPromise = (async () => {
         try {
+          console.log(`Starting upload for recording ${currentRecordingIndex + 1} with responseId: ${effectiveResponseId}`);
+          
           // Import the uploadVideoRecording function
           const { uploadVideoRecording } = await import('@/lib/api-service')
           
           // Upload the video and get the URLs and keys
           const { videoKey, videoUrl, thumbnailKey, thumbnailUrl } = await uploadVideoRecording(
             blob,
-            responseId,
+            effectiveResponseId!,
             questionId,
             currentRecordingIndex
           )
@@ -140,6 +157,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
           return { success: true, recordingIndex: currentRecordingIndex }
         } catch (error) {
           console.error('Error uploading recording to S3:', error)
+          console.warn(`No responseId available, falling back to download`, { questionId });
           // Fall back to downloading the file
           downloadRecordingFallback(blob, questionId, uniqueIndex)
           return { success: false, recordingIndex: currentRecordingIndex }
@@ -150,6 +168,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
       pendingUploadsRef.current.push(uploadPromise)
     } else {
       // No responseId, so fall back to downloading
+      console.warn(`No responseId available, falling back to download`, { questionId });
       downloadRecordingFallback(blob, questionId, uniqueIndex)
     }
     
@@ -159,7 +178,12 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
   
   // Fallback function to download recording if S3 upload fails
   const downloadRecordingFallback = (blob: Blob, questionId: string, uniqueIndex: number) => {
-    const fileExtension = "webm"
+    // Determine the correct file extension based on MIME type
+    let fileExtension = "webm";
+    if (blob.type.includes('mp4')) fileExtension = "mp4";
+    if (blob.type.includes('quicktime')) fileExtension = "mov";
+    
+    console.log(`Download initiated`, { filename: `question-recording-${currentRecordingIndex + 1}.${fileExtension}` });
     
     // Create a download link for the recorded video
     const url = URL.createObjectURL(blob)

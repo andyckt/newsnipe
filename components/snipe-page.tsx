@@ -172,9 +172,21 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
   const handlePersonalDetailsComplete = (responses: PersonalDetailsResponse, submittedResponseId?: string) => {
     setPersonalDetailsResponses(responses)
     if (submittedResponseId) {
+      // Store responseId in state
       setResponseIdState(submittedResponseId)
+      
       // Pass the responseId to the camera hook
       setResponseId(submittedResponseId)
+      
+      // Store in localStorage for persistence
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('snipe_response_id', submittedResponseId)
+        
+        // Also store in window object for easy access
+        ;(window as any).snipeResponseId = submittedResponseId
+        
+        console.log(`ResponseId stored: ${submittedResponseId}`)
+      }
     }
     setAppState("recording")
   }
