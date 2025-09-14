@@ -477,11 +477,21 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
         return false
       }
       
-      // Deduplicate recordings by questionId before submitting
-      // This ensures we don't have multiple entries for the same recording
-      const uniqueRecordings = Array.from(
-        new Map(recordingsRef.current.map(rec => [rec.questionId, rec])).values()
-      );
+      // We want to keep all recordings, so we'll just ensure there are no exact duplicates
+      // by videoKey (if available)
+      const uniqueRecordings = recordingsRef.current.reduce((acc: any[], rec) => {
+        // If this recording has a videoKey, check if we already have it in our result array
+        if (rec.videoKey) {
+          const exists = acc.some(existing => existing.videoKey === rec.videoKey);
+          if (!exists) {
+            acc.push(rec);
+          }
+        } else {
+          // If no videoKey, always add it
+          acc.push(rec);
+        }
+        return acc;
+      }, []);
       
       console.log(`Submitting ${uniqueRecordings.length} recordings to the database:`)
       uniqueRecordings.forEach((rec, i) => {

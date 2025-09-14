@@ -83,48 +83,30 @@ export async function POST(request: Request) {
       recordingData.thumbnailUrl = thumbnailUrl;
     }
     
-    // Update the response with the new recording
+    // Get existing recordings
     const existingRecordings = response.recordings || [];
     
     // Log the existing recordings for debugging
     console.log(`Found ${existingRecordings.length} existing recordings for response ${responseId}`);
     existingRecordings.forEach((rec: any, idx: number) => {
-      console.log(`Existing Recording ${idx + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}, videoKey=${rec.videoKey}`);
+      console.log(`Existing Recording ${idx + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}, videoKey=${rec.videoKey || 'none'}`);
     });
     
     // Check if this exact videoKey already exists in the recordings
-    const videoKeyExists = existingRecordings.some((rec: any) => rec.videoKey === videoKey);
+    const existingRecordingIndex = existingRecordings.findIndex((rec: any) => rec.videoKey === videoKey);
     
-    if (videoKeyExists) {
-      console.log(`Video key ${videoKey} already exists in recordings, skipping duplicate`);
+    if (existingRecordingIndex >= 0) {
+      console.log(`Video key ${videoKey} already exists in recordings, updating existing record`);
       
-      // Return success response without modifying the database
-      return NextResponse.json({
-        success: true,
-        videoUrl,
-        thumbnailUrl,
-        message: 'Recording already exists, skipping duplicate'
-      });
-    }
-    
-    // Check if we need to update an existing recording or add a new one
-    // We'll use the videoKey as the unique identifier, not just questionId and recordingIndex
-    const existingIndex = existingRecordings.findIndex(
-      (rec: any) => rec.questionId === questionId && rec.recordingIndex === parseInt(recordingIndex.toString(), 10)
-    );
-    
-    if (existingIndex >= 0) {
-      console.log(`Updating existing recording at index ${existingIndex} with videoKey ${videoKey}`);
-      
-      // Update existing recording
-      existingRecordings[existingIndex] = {
-        ...existingRecordings[existingIndex],
+      // Update the existing recording with any new information
+      existingRecordings[existingRecordingIndex] = {
+        ...existingRecordings[existingRecordingIndex],
         ...recordingData
       };
     } else {
       console.log(`Adding new recording with questionId=${questionId}, recordingIndex=${recordingIndex}, videoKey=${videoKey}`);
       
-      // Add new recording
+      // Add as a new recording
       existingRecordings.push(recordingData);
     }
     
@@ -135,7 +117,7 @@ export async function POST(request: Request) {
     // Log the updated recordings for debugging
     console.log(`Updated recordings array now has ${response.recordings.length} items`);
     response.recordings.forEach((rec: any, idx: number) => {
-      console.log(`Updated Recording ${idx + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}, videoKey=${rec.videoKey}`);
+      console.log(`Updated Recording ${idx + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}, videoKey=${rec.videoKey || 'none'}`);
     });
     
     // Return success response
