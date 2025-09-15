@@ -19,8 +19,8 @@ interface PersonalDetail {
 
 interface SnipeVideo {
   id: number;
-  title: string;
-  candidate: string;
+  title?: string;
+  candidate?: string;
   thumbnail: string;
   videos: Video[];
   aspectRatio: string;

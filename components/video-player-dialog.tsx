@@ -21,8 +21,8 @@ interface VideoPlayerDialogProps {
   videos: Video[]
   selectedVideoIndex: number
   onVideoChange: (index: number) => void
-  title: string
-  candidate: string
+  title?: string
+  candidate?: string
   date?: string
   personalDetails?: PersonalDetail[]
 }
