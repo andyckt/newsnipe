@@ -13,7 +13,7 @@ import { initAudioContext } from "@/lib/mobile-audio"
 import PersonalDetailsCollector, { PersonalDetailField, PersonalDetailsConfig, PersonalDetailsResponse } from "@/components/personal-details-collector"
 
 // App states
-type AppState = "loading" | "personal_details" | "recording" | "completed" | "error"
+type AppState = "loading" | "personal_details" | "recording" | "processing" | "completed" | "error"
 
 interface SnipePageProps {
   shortId?: string // For database mode
@@ -211,6 +211,9 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
   // Handle session completion
   useEffect(() => {
     if (isSessionComplete && !isSubmitting) {
+      // First transition to processing state immediately
+      setAppState("processing");
+      
       // Update the response status to completed if we have a responseId
       const updateResponseStatus = async () => {
         if (responseId) {
@@ -218,11 +221,11 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
             // Prevent multiple submissions
             setIsSubmitting(true);
             
-            // Add a delay to ensure all recordings are processed
-            console.log('Waiting for all recordings to be processed...');
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Stop the camera immediately for better user experience
+            stopCamera();
             
             // Submit all recordings to the database
+            console.log('Submitting recordings to the database...');
             const success = await submitRecordings(responseId);
             
             if (success) {
@@ -246,12 +249,14 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
             console.log('Response marked as completed');
           } catch (error) {
             console.error('Error updating response status:', error);
+          } finally {
+            // Always transition to completed state, even if there was an error
+            setAppState("completed");
           }
+        } else {
+          // No responseId, just transition to completed state
+          setAppState("completed");
         }
-        
-        // Stop the camera and transition to completed state
-        stopCamera(); // Stop the camera when recordings are complete
-        setAppState("completed");
       };
       
       updateResponseStatus();
@@ -311,14 +316,30 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
     )
   }
   
+  // Processing state
+  if (appState === "processing") {
+    return (
+      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
+        <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen p-8 items-center justify-center text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mb-6"></div>
+          <h1 className="text-3xl font-bold mb-4">Processing...</h1>
+          <p className="text-lg">
+            Your recordings are being processed. This will only take a moment.
+          </p>
+        </div>
+      </div>
+    )
+  }
+  
   // Completed state
   if (appState === "completed") {
     return (
       <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
         <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen p-8 items-center justify-center text-center">
+          <div className="text-6xl mb-4">✅</div>
           <h1 className="text-3xl font-bold mb-4">Thank You!</h1>
-          <p className="text-lg">
-            All {numRecordings} recordings have been completed and downloaded.
+          <p className="text-lg mb-6">
+            All {numRecordings} recordings have been completed successfully.
           </p>
         </div>
       </div>

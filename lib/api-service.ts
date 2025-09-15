@@ -237,7 +237,7 @@ export async function notifyUploadComplete(
 }
 
 /**
- * Uploads a video recording to S3 with a thumbnail using the legacy method
+ * Uploads a video recording to S3 and uses Cloudinary for thumbnail generation
  * @param videoBlob - The video blob to upload
  * @param responseId - The response ID to associate with the video
  * @param questionId - The question ID associated with the recording
@@ -256,15 +256,9 @@ export async function uploadVideoRecording(
   thumbnailUrl: string;
 }> {
   try {
-    console.log(`Starting direct S3 upload for video of size ${videoBlob.size} bytes`);
+    console.log(`Starting upload process for video of size ${videoBlob.size} bytes`);
     
-    // First, generate a thumbnail from the video
-    const thumbnailBlob = await import('@/lib/s3-service').then(({ createThumbnail }) => {
-      return createThumbnail(videoBlob);
-    });
-    console.log('Thumbnail generated successfully');
-
-    // Get presigned URL for video upload
+    // Get presigned URL for video upload to S3
     const videoUploadData = await getPresignedUploadUrl(
       responseId,
       'video',
@@ -273,38 +267,46 @@ export async function uploadVideoRecording(
       recordingIndex
     );
     
-    // Get presigned URL for thumbnail upload
-    const thumbnailUploadData = await getPresignedUploadUrl(
-      responseId,
-      'thumbnail',
-      'image/jpeg',
-      questionId,
-      recordingIndex
-    );
-    
     // Upload video directly to S3
     console.log('Uploading video directly to S3...');
     await uploadToS3WithPresignedUrl(videoUploadData.presignedUrl, videoBlob);
     
-    // Upload thumbnail directly to S3
-    console.log('Uploading thumbnail directly to S3...');
-    await uploadToS3WithPresignedUrl(thumbnailUploadData.presignedUrl, thumbnailBlob);
+    // Upload to Cloudinary for thumbnail generation
+    console.log('Uploading to Cloudinary for thumbnail generation...');
+    const { uploadVideoToCloudinary, generateThumbnailUrl } = await import('@/lib/cloudinary-service');
+    
+    // Upload to Cloudinary with folder structure based on responseId
+    const cloudinaryResult = await uploadVideoToCloudinary(
+      videoBlob,
+      `video-recordings/${responseId}`
+    );
+    
+    // Generate thumbnail URL using Cloudinary's API
+    const thumbnailUrl = generateThumbnailUrl(cloudinaryResult.publicId, {
+      width: 320,
+      height: 240,
+      quality: 80,
+      timestamp: 1 // Get thumbnail from 1 second into the video
+    });
+    
+    // Store Cloudinary reference as the thumbnail key
+    const thumbnailKey = `cloudinary:${cloudinaryResult.publicId}`;
     
     // Notify server that uploads are complete
     console.log('Notifying server of completed uploads...');
-    const { videoUrl, thumbnailUrl } = await notifyUploadComplete(
+    await notifyUploadComplete(
       responseId,
       videoUploadData.key,
-      thumbnailUploadData.key,
+      thumbnailKey,
       questionId,
       recordingIndex
     );
     
     return {
       videoKey: videoUploadData.key,
-      videoUrl,
-      thumbnailKey: thumbnailUploadData.key,
-      thumbnailUrl: thumbnailUrl || ''
+      videoUrl: videoUploadData.presignedUrl, // This will be a temporary URL
+      thumbnailKey: thumbnailKey,
+      thumbnailUrl: thumbnailUrl
     };
   } catch (error) {
     console.error('Error in uploadVideoRecording:', error);

@@ -77,97 +77,14 @@ const createPlaceholderThumbnail = async (): Promise<Blob> => {
   })
 }
 
-// Utility function to create a thumbnail from a video
-export const createThumbnail = async (videoBlob: Blob): Promise<Blob> => {
-  // Check if we're on a mobile device
-  const isMobile = isMobileDevice()
+// Utility function to prepare for Cloudinary thumbnail generation
+// Instead of generating thumbnails client-side, we'll use Cloudinary's API
+export const prepareForCloudinaryThumbnail = async (videoBlob: Blob): Promise<Blob> => {
+  console.log('Preparing for Cloudinary thumbnail generation');
   
-  // For mobile devices, use a placeholder thumbnail to avoid issues
-  if (isMobile) {
-    console.log('Using placeholder thumbnail for mobile device');
-    return createPlaceholderThumbnail()
-  }
-  
-  return new Promise((resolve, reject) => {
-    try {
-      // Create video element
-      const video = document.createElement('video')
-      video.autoplay = false
-      video.muted = true
-      video.playsInline = true
-      
-      // Create canvas for thumbnail
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        reject(new Error('Could not get canvas context'))
-        return
-      }
-      
-      // Set up video event listeners
-      video.onloadedmetadata = () => {
-        // Set canvas size to video dimensions
-        canvas.width = video.videoWidth || 320
-        canvas.height = video.videoHeight || 240
-        
-        // Seek to 1 second or video duration if shorter
-        const seekTime = Math.min(1.0, video.duration / 2)
-        video.currentTime = seekTime
-      }
-      
-      video.onseeked = () => {
-        try {
-          // Draw video frame to canvas
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-          
-          // Convert canvas to blob
-          canvas.toBlob(
-            (blob) => {
-              if (blob) {
-                resolve(blob)
-              } else {
-                console.warn('Failed to create thumbnail blob, using placeholder instead')
-                createPlaceholderThumbnail().then(resolve).catch(reject)
-              }
-              
-              // Clean up
-              URL.revokeObjectURL(video.src)
-            },
-            'image/jpeg',
-            0.7 // JPEG quality
-          )
-        } catch (error) {
-          console.error('Error drawing video to canvas:', error)
-          createPlaceholderThumbnail().then(resolve).catch(reject)
-        }
-      }
-      
-      // Handle errors
-      video.onerror = (e) => {
-        console.error('Error loading video for thumbnail generation:', e)
-        URL.revokeObjectURL(video.src)
-        createPlaceholderThumbnail().then(resolve).catch(reject)
-      }
-      
-      // Set a timeout in case the video loading hangs
-      const timeoutId = setTimeout(() => {
-        console.warn('Thumbnail generation timed out, using placeholder')
-        URL.revokeObjectURL(video.src)
-        createPlaceholderThumbnail().then(resolve).catch(reject)
-      }, 5000)
-      
-      // Load the video blob
-      video.src = URL.createObjectURL(videoBlob)
-      
-      // Add event listener to clear timeout when loaded
-      video.onloadeddata = () => {
-        clearTimeout(timeoutId)
-      }
-    } catch (error) {
-      console.error('Error in thumbnail generation:', error)
-      createPlaceholderThumbnail().then(resolve).catch(reject)
-    }
-  })
+  // We'll just return a small placeholder blob that will be replaced by Cloudinary
+  // This is just to maintain the API compatibility while we transition to Cloudinary
+  return new Blob([new Uint8Array(1)], { type: 'image/jpeg' });
 }
 
 /**

@@ -50,11 +50,20 @@ export async function POST(request: Request) {
     
     // If thumbnail was also uploaded, generate a presigned URL for it
     if (thumbnailKey) {
-      const getThumbnailCommand = new GetObjectCommand({
-        Bucket: BUCKET_NAME,
-        Key: thumbnailKey
-      });
-      thumbnailUrl = await getSignedUrl(s3Client, getThumbnailCommand, { expiresIn: 3600 * 24 }); // 24 hours
+      if (thumbnailKey.startsWith('cloudinary:')) {
+        // For Cloudinary thumbnails, extract the public ID and generate a URL
+        const publicId = thumbnailKey.replace('cloudinary:', '');
+        const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'your-cloud-name';
+        thumbnailUrl = `https://res.cloudinary.com/${cloudName}/video/upload/v1/${publicId}.jpg`;
+        console.log(`Using Cloudinary thumbnail URL: ${thumbnailUrl}`);
+      } else {
+        // For S3 thumbnails, generate a presigned URL
+        const getThumbnailCommand = new GetObjectCommand({
+          Bucket: BUCKET_NAME,
+          Key: thumbnailKey
+        });
+        thumbnailUrl = await getSignedUrl(s3Client, getThumbnailCommand, { expiresIn: 3600 * 24 }); // 24 hours
+      }
     }
     
     // Connect to the database
