@@ -49,6 +49,7 @@ export function SettingsScreen({ onLaunch, personalDetailsConfig, onPersonalDeta
       </div>
       
       <Tabs 
+        value={activeTab}
         defaultValue="personal_details" 
         className="w-full"
         onValueChange={(value) => setActiveTab(value as "question" | "conversation" | "personal_details")}
