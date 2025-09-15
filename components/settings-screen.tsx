@@ -83,7 +83,7 @@ export function SettingsScreen({ onLaunch, personalDetailsConfig, onPersonalDeta
             />
           </div>
           
-          <div className="flex justify-center">
+          <div className="flex justify-end">
             <button 
               onClick={() => setActiveTab("question")}
               className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-4 text-xl rounded-full"
