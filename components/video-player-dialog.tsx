@@ -191,10 +191,6 @@ export function VideoPlayerDialog({
                 </div>
                 
                 {/* Current video info */}
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">Duration</h4>
-                  <p className="text-gray-900">{currentVideo.duration || "N/A"}</p>
-                </div>
                 
                 <div>
                   <h4 className="text-sm font-medium text-gray-500">Recorded on</h4>
