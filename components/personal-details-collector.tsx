@@ -35,11 +35,10 @@ export interface PersonalDetailsResponse {
 interface PersonalDetailsCollectorProps {
   config: PersonalDetailsConfig
   onComplete: (responses: PersonalDetailsResponse, responseId?: string) => void
-  onSkip: () => void
   shortId: string  // The shortId of the Snipe
 }
 
-export default function PersonalDetailsCollector({ config, onComplete, onSkip, shortId }: PersonalDetailsCollectorProps) {
+export default function PersonalDetailsCollector({ config, onComplete, shortId }: PersonalDetailsCollectorProps) {
   const { includePersonalDetails, personalFields } = config
   const [currentFieldIndex, setCurrentFieldIndex] = useState(0)
   const [responses, setResponses] = useState<PersonalDetailsResponse>({})
@@ -47,12 +46,13 @@ export default function PersonalDetailsCollector({ config, onComplete, onSkip, s
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [responseId, setResponseId] = useState<string | null>(null)
 
-  // If personal details collection is disabled, skip immediately
+  // If personal details collection is disabled, complete with empty data
   React.useEffect(() => {
     if (!includePersonalDetails || personalFields.length === 0) {
-      onSkip()
+      // Complete with empty data instead of skipping
+      onComplete({})
     }
-  }, [includePersonalDetails, personalFields, onSkip])
+  }, [includePersonalDetails, personalFields, onComplete])
 
   if (!includePersonalDetails || personalFields.length === 0) {
     return null
@@ -242,12 +242,7 @@ export default function PersonalDetailsCollector({ config, onComplete, onSkip, s
                 Back
               </Button>
             ) : (
-              <Button 
-                variant="ghost" 
-                onClick={onSkip}
-              >
-                Skip
-              </Button>
+              <div>{/* Empty div to maintain layout */}</div>
             )}
             
             <Button

@@ -190,11 +190,6 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
     }
     setAppState("recording")
   }
-  
-  // Handle skipping personal details
-  const handlePersonalDetailsSkip = () => {
-    setAppState("recording")
-  }
 
   // Handle starting a recording
   const handleStartRecording = async () => {
@@ -308,7 +303,6 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
           <PersonalDetailsCollector 
             config={personalDetailsConfig}
             onComplete={handlePersonalDetailsComplete}
-            onSkip={handlePersonalDetailsSkip}
             shortId={shortId || ""}
           />
         </div>
