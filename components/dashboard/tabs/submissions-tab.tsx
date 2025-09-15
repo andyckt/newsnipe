@@ -4,13 +4,24 @@ import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Play } from "lucide-react"
 
-const snipeVideos = [
+interface SnipeVideo {
+  id: number;
+  title: string;
+  candidate: string;
+  thumbnail: string;
+  aspectRatio: string;
+  duration: string;
+  status: string;
+  date: string;
+}
+
+const snipeVideos: SnipeVideo[] = [
   {
     id: 1,
     title: "Exchange Program Interview - Sarah Chen",
     candidate: "Sarah Chen",
-    thumbnail: "/placeholder.svg?height=320&width=180",
-    aspectRatio: "9/16", // Added 9:16 aspect ratio
+    thumbnail: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
+    aspectRatio: "9/16",
     duration: "12:34",
     status: "completed",
     date: "2024-01-15",
@@ -19,8 +30,8 @@ const snipeVideos = [
     id: 2,
     title: "Teaching Position Assessment - Michael Rodriguez",
     candidate: "Michael Rodriguez",
-    thumbnail: "/placeholder.svg?height=240&width=320",
-    aspectRatio: "4/3", // Added 4:3 aspect ratio
+    thumbnail: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80",
+    aspectRatio: "4/3",
     duration: "8:45",
     status: "completed",
     date: "2024-01-14",
@@ -29,8 +40,8 @@ const snipeVideos = [
     id: 3,
     title: "Graduate Admission Interview - Emma Thompson",
     candidate: "Emma Thompson",
-    thumbnail: "/placeholder.svg?height=300&width=300",
-    aspectRatio: "1/1", // Added square aspect ratio
+    thumbnail: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+    aspectRatio: "1/1",
     duration: "15:22",
     status: "completed",
     date: "2024-01-13",
@@ -39,8 +50,8 @@ const snipeVideos = [
     id: 4,
     title: "Physics Assessment - David Kim",
     candidate: "David Kim",
-    thumbnail: "/placeholder.svg?height=320&width=180",
-    aspectRatio: "9/16", // Added 9:16 aspect ratio
+    thumbnail: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
+    aspectRatio: "9/16",
     duration: "10:18",
     status: "completed",
     date: "2024-01-12",
@@ -49,8 +60,8 @@ const snipeVideos = [
     id: 5,
     title: "Leadership Program - Lisa Wang",
     candidate: "Lisa Wang",
-    thumbnail: "/placeholder.svg?height=240&width=320",
-    aspectRatio: "4/3", // Added 4:3 aspect ratio
+    thumbnail: "https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80",
+    aspectRatio: "4/3",
     duration: "14:07",
     status: "completed",
     date: "2024-01-11",
@@ -59,8 +70,8 @@ const snipeVideos = [
     id: 6,
     title: "Research Position - James Miller",
     candidate: "James Miller",
-    thumbnail: "/placeholder.svg?height=300&width=300",
-    aspectRatio: "1/1", // Added square aspect ratio
+    thumbnail: "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+    aspectRatio: "1/1",
     duration: "11:33",
     status: "completed",
     date: "2024-01-10",
@@ -69,8 +80,8 @@ const snipeVideos = [
     id: 7,
     title: "Study Abroad Program - Maria Garcia",
     candidate: "Maria Garcia",
-    thumbnail: "/placeholder.svg?height=320&width=180",
-    aspectRatio: "9/16", // Added 9:16 aspect ratio
+    thumbnail: "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
+    aspectRatio: "9/16",
     duration: "9:28",
     status: "completed",
     date: "2024-01-09",
@@ -79,8 +90,8 @@ const snipeVideos = [
     id: 8,
     title: "Internship Assessment - Alex Johnson",
     candidate: "Alex Johnson",
-    thumbnail: "/placeholder.svg?height=240&width=320",
-    aspectRatio: "4/3", // Added 4:3 aspect ratio
+    thumbnail: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80",
+    aspectRatio: "4/3",
     duration: "13:15",
     status: "completed",
     date: "2024-01-08",
@@ -97,25 +108,40 @@ export function SubmissionsTab() {
         transition={{ delay: 0.2 }}
         className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6"
       >
-        {snipeVideos.map((video, index) => (
+        {snipeVideos.map((video: SnipeVideo, index: number) => (
           <motion.div
             key={video.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            whileTap={{ scale: 0.98 }}
             className="mb-6 break-inside-avoid"
           >
-            <Card className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 rounded-3xl border-0 bg-white group">
+            <Card 
+              className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 rounded-3xl border-0 bg-white group"
+              onClick={() => {}}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'scale(0.98)';
+                e.currentTarget.style.transition = 'transform 0.2s';
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.transition = 'transform 0.2s';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.transition = 'transform 0.2s';
+              }}
+            >
               {/* Thumbnail Container */}
               <div
                 className="relative bg-gray-100 overflow-hidden"
-                style={{ aspectRatio: video.aspectRatio }} // Use specific aspect ratio instead of random
+                style={{ aspectRatio: video.aspectRatio }}
               >
                 <img
                   src={video.thumbnail || "/placeholder.svg"}
                   alt={video.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  loading="lazy"
                 />
 
                 {/* Play Button Overlay */}
