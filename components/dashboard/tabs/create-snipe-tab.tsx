@@ -31,8 +31,35 @@ export default function CameraRecorder() {
   
   // Personal details configuration and responses
   const [personalDetailsConfig, setPersonalDetailsConfig] = useState<PersonalDetailsConfig>({
-    includePersonalDetails: false,
-    personalFields: []
+    includePersonalDetails: true,
+    personalFields: [
+      {
+        id: crypto.randomUUID(),
+        label: "What is your full name?",
+        type: "text",
+        required: true
+      },
+      {
+        id: crypto.randomUUID(),
+        label: "What is your email address?",
+        type: "text",
+        required: true
+      },
+      {
+        id: crypto.randomUUID(),
+        label: "What is your phone number?",
+        type: "text",
+        required: false
+      },
+      {
+        id: crypto.randomUUID(),
+        label: "What is your current role?",
+        type: "dropdown",
+        required: true,
+        dropdownOptions: ["Student", "Professional", "Job Seeker", "Other"],
+        allowMultiple: false
+      }
+    ]
   })
   const [personalDetailsResponses, setPersonalDetailsResponses] = useState<PersonalDetailsResponse>({})
   
