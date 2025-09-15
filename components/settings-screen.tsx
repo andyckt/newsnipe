@@ -32,9 +32,9 @@ export function SettingsScreen({ onLaunch, personalDetailsConfig, onPersonalDeta
   }
   
   return (
-    <div className="flex flex-col h-full w-full bg-white p-8 items-center justify-center">
+    <div className="flex flex-col w-full">
       
-      <div className="w-full max-w-md mb-6">
+      <div className="w-full mb-6 max-w-2xl">
         <label htmlFor="snipe-title" className="block text-sm font-medium text-gray-700 mb-1">
           Title
         </label>
@@ -50,7 +50,7 @@ export function SettingsScreen({ onLaunch, personalDetailsConfig, onPersonalDeta
       
       <Tabs 
         defaultValue="personal_details" 
-        className="w-full max-w-md mb-8"
+        className="w-full"
         onValueChange={(value) => setActiveTab(value as "question" | "conversation" | "personal_details")}
       >
         <TabsList className="grid w-full grid-cols-2 mb-8">

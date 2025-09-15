@@ -354,7 +354,7 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
   
   return (
     <div className="w-full">
-      <div className="flex flex-col items-center mb-8">
+      <div className="flex flex-col mb-8">
         <h2 className="text-xl font-semibold mb-6">Audio Language</h2>
         
         <div className="flex gap-4">
@@ -386,9 +386,9 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
       
 
       
-      <div className="flex flex-col items-center mb-12 w-full">
+      <div className="flex flex-col mb-12 w-full">
         <h2 className="text-xl font-semibold mb-2">Custom Text Fields</h2>
-        <p className="text-sm text-gray-500 mb-6 text-center">Each text field will correspond to one recording. Drag to reorder.</p>
+        <p className="text-sm text-gray-500 mb-6">Each text field will correspond to one recording. Drag to reorder.</p>
         
         <DndContext 
           sensors={sensors}
@@ -425,7 +425,7 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
         </DndContext>
       </div>
       
-      <div className="flex justify-center">
+      <div className="flex justify-end">
         <Button 
           onClick={() => {
             unlockAudio(); // Unlock audio on user interaction
