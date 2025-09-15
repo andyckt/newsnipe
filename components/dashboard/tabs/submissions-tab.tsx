@@ -247,10 +247,12 @@ export function SubmissionsTab() {
               </div>
 
               {/* Title and Candidate - Below Thumbnail */}
+              {/* Commented out as requested
               <div className="p-4">
                 <h3 className="font-semibold text-gray-900 text-lg mb-1 line-clamp-2 leading-tight">{video.title}</h3>
                 <p className="text-gray-600 text-sm font-medium">{video.candidate}</p>
               </div>
+              */}
             </Card>
           </motion.div>
         ))}
