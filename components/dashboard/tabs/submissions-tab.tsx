@@ -1,14 +1,17 @@
 "use client"
 
+import { useState } from "react"
 import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Play } from "lucide-react"
+import { VideoPlayerDialog } from "@/components/video-player-dialog"
 
 interface SnipeVideo {
   id: number;
   title: string;
   candidate: string;
   thumbnail: string;
+  videoUrl: string;
   aspectRatio: string;
   duration: string;
   status: string;
@@ -21,6 +24,7 @@ const snipeVideos: SnipeVideo[] = [
     title: "Exchange Program Interview - Sarah Chen",
     candidate: "Sarah Chen",
     thumbnail: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
+    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
     aspectRatio: "9/16",
     duration: "12:34",
     status: "completed",
@@ -31,6 +35,7 @@ const snipeVideos: SnipeVideo[] = [
     title: "Teaching Position Assessment - Michael Rodriguez",
     candidate: "Michael Rodriguez",
     thumbnail: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80",
+    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     aspectRatio: "4/3",
     duration: "8:45",
     status: "completed",
@@ -41,6 +46,7 @@ const snipeVideos: SnipeVideo[] = [
     title: "Graduate Admission Interview - Emma Thompson",
     candidate: "Emma Thompson",
     thumbnail: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
     aspectRatio: "1/1",
     duration: "15:22",
     status: "completed",
@@ -51,6 +57,7 @@ const snipeVideos: SnipeVideo[] = [
     title: "Physics Assessment - David Kim",
     candidate: "David Kim",
     thumbnail: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
+    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
     aspectRatio: "9/16",
     duration: "10:18",
     status: "completed",
@@ -61,6 +68,7 @@ const snipeVideos: SnipeVideo[] = [
     title: "Leadership Program - Lisa Wang",
     candidate: "Lisa Wang",
     thumbnail: "https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80",
+    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
     aspectRatio: "4/3",
     duration: "14:07",
     status: "completed",
@@ -71,6 +79,7 @@ const snipeVideos: SnipeVideo[] = [
     title: "Research Position - James Miller",
     candidate: "James Miller",
     thumbnail: "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
     aspectRatio: "1/1",
     duration: "11:33",
     status: "completed",
@@ -81,6 +90,7 @@ const snipeVideos: SnipeVideo[] = [
     title: "Study Abroad Program - Maria Garcia",
     candidate: "Maria Garcia",
     thumbnail: "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
+    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
     aspectRatio: "9/16",
     duration: "9:28",
     status: "completed",
@@ -91,6 +101,7 @@ const snipeVideos: SnipeVideo[] = [
     title: "Internship Assessment - Alex Johnson",
     candidate: "Alex Johnson",
     thumbnail: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80",
+    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
     aspectRatio: "4/3",
     duration: "13:15",
     status: "completed",
@@ -99,8 +110,33 @@ const snipeVideos: SnipeVideo[] = [
 ]
 
 export function SubmissionsTab() {
+  const [selectedVideo, setSelectedVideo] = useState<SnipeVideo | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  
+  const openVideoDialog = (video: SnipeVideo) => {
+    setSelectedVideo(video)
+    setIsDialogOpen(true)
+  }
+  
+  const closeVideoDialog = () => {
+    setIsDialogOpen(false)
+  }
+
   return (
     <div className="space-y-6">
+      {/* Video Player Dialog */}
+      {selectedVideo && (
+        <VideoPlayerDialog
+          isOpen={isDialogOpen}
+          onClose={closeVideoDialog}
+          videoUrl={selectedVideo.videoUrl}
+          title={selectedVideo.title}
+          candidate={selectedVideo.candidate}
+          duration={selectedVideo.duration}
+          date={selectedVideo.date}
+        />
+      )}
+      
       {/* Masonry Grid */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -118,7 +154,7 @@ export function SubmissionsTab() {
           >
             <Card 
               className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 rounded-3xl border-0 bg-white group"
-              onClick={() => {}}
+              onClick={() => openVideoDialog(video)}
               onMouseDown={(e) => {
                 e.currentTarget.style.transform = 'scale(0.98)';
                 e.currentTarget.style.transition = 'transform 0.2s';
