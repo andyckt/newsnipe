@@ -194,6 +194,8 @@ export default function PersonalDetailsCollector({ config, onComplete, shortId }
             </Select>
           )
         }
+      /* Checkbox option temporarily disabled - may be added back in future version
+         The checkbox is primarily used for terms acceptance, but we're simplifying the UI for now */
       case "checkbox":
         return (
           <div className="flex items-center space-x-3">

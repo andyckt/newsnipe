@@ -126,7 +126,9 @@ function SortableField({
                 <SelectContent>
                   <SelectItem value="text">Text Input</SelectItem>
                   <SelectItem value="dropdown">Dropdown</SelectItem>
-                  <SelectItem value="checkbox">Checkbox</SelectItem>
+                  {/* Checkbox option temporarily disabled - may be added back in future version
+                      The checkbox is primarily used for terms acceptance, but we're simplifying the UI for now */}
+                  {/* <SelectItem value="checkbox">Checkbox</SelectItem> */}
                 </SelectContent>
               </Select>
             </div>
