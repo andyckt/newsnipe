@@ -12,6 +12,11 @@ interface Video {
   duration?: string;
 }
 
+interface PersonalDetail {
+  question: string;
+  answer: string;
+}
+
 interface SnipeVideo {
   id: number;
   title: string;
@@ -21,6 +26,7 @@ interface SnipeVideo {
   aspectRatio: string;
   status: string;
   date: string;
+  personalDetails?: PersonalDetail[];
 }
 
 const snipeVideos: SnipeVideo[] = [
@@ -37,6 +43,12 @@ const snipeVideos: SnipeVideo[] = [
     aspectRatio: "9/16",
     status: "completed",
     date: "2024-01-15",
+    personalDetails: [
+      { question: "What is your name?", answer: "Sarah Chen" },
+      { question: "What is your age?", answer: "21 years old" },
+      { question: "Where are you from?", answer: "Shanghai, China" },
+      { question: "Why do you want to join this exchange program?", answer: "I want to experience different education systems and cultures to broaden my perspective." }
+    ],
   },
   {
     id: 2,
@@ -65,6 +77,13 @@ const snipeVideos: SnipeVideo[] = [
     aspectRatio: "9/16",
     status: "completed",
     date: "2024-01-13",
+    personalDetails: [
+      { question: "Current degree program", answer: "MSc in Computer Science" },
+      { question: "University", answer: "University of Cambridge" },
+      { question: "Research interests", answer: "Machine Learning, Natural Language Processing" },
+      { question: "Publications", answer: "2 papers in ACL conference" },
+      { question: "GPA", answer: "3.92/4.0" }
+    ],
   },
   {
     id: 4,
@@ -104,6 +123,13 @@ const snipeVideos: SnipeVideo[] = [
     aspectRatio: "9/16",
     status: "completed",
     date: "2024-01-10",
+    personalDetails: [
+      { question: "Current position", answer: "Postdoctoral Researcher" },
+      { question: "Field of expertise", answer: "Molecular Biology" },
+      { question: "Years of experience", answer: "5 years" },
+      { question: "Lab techniques", answer: "PCR, Western Blot, CRISPR, Cell Culture" },
+      { question: "Publication count", answer: "7 journal articles, 3 conference papers" }
+    ],
   },
   {
     id: 7,
@@ -164,6 +190,7 @@ export function SubmissionsTab() {
             title={selectedVideo.title}
             candidate={selectedVideo.candidate}
             date={selectedVideo.date}
+            personalDetails={selectedVideo.personalDetails}
           />
         )}
       </div>
