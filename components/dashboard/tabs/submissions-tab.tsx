@@ -1,8 +1,10 @@
 "use client"
 
+import { useState } from "react"
 import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Play } from "lucide-react"
+import { VideoPlayerDialog } from "@/components/video-player-dialog"
 
 interface SnipeVideo {
   id: number;
@@ -108,8 +110,35 @@ const snipeVideos: SnipeVideo[] = [
 ]
 
 export function SubmissionsTab() {
+  const [selectedVideo, setSelectedVideo] = useState<SnipeVideo | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+  const handleOpenVideo = (video: SnipeVideo) => {
+    setSelectedVideo(video)
+    setIsDialogOpen(true)
+  }
+
+  const handleCloseVideo = () => {
+    setIsDialogOpen(false)
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 pt-0">
+      {/* Video Player Dialog - Rendered outside the flow */}
+      <div className="fixed-layer">
+        {selectedVideo && (
+          <VideoPlayerDialog
+            isOpen={isDialogOpen}
+            onClose={handleCloseVideo}
+            videoUrl={selectedVideo.videoUrl}
+            title={selectedVideo.title}
+            candidate={selectedVideo.candidate}
+            duration={selectedVideo.duration}
+            date={selectedVideo.date}
+          />
+        )}
+      </div>
+
       {/* Masonry Grid */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -127,7 +156,7 @@ export function SubmissionsTab() {
           >
             <Card 
               className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 rounded-3xl border-0 bg-white group"
-              onClick={() => {}}
+              onClick={() => handleOpenVideo(video)}
               onMouseDown={(e) => {
                 e.currentTarget.style.transform = 'scale(0.98)';
                 e.currentTarget.style.transition = 'transform 0.2s';
