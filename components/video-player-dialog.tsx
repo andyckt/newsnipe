@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, ChevronLeft, ChevronRight } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface Video {
   url: string;
@@ -195,46 +194,42 @@ export function VideoPlayerDialog({
                 </div>
               </div>
               
-              {/* Tabs for content */}
-              <div className="mt-4">
-                <Tabs defaultValue="details" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="details">Details</TabsTrigger>
-                    <TabsTrigger value="info">Info</TabsTrigger>
-                  </TabsList>
-                  
-                  {/* Personal Details Tab */}
-                  <TabsContent value="details" className="mt-4">
-                    {personalDetails && personalDetails.length > 0 ? (
-                      <div className="space-y-4">
-                        {personalDetails.map((detail, index) => (
-                          <div key={index}>
-                            <h5 className="text-xs font-medium text-gray-500">{detail.question}</h5>
-                            <p className="text-sm text-gray-900">{detail.answer}</p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-gray-500">No personal details available.</p>
-                    )}
-                  </TabsContent>
-                  
-                  {/* Video Info Tab */}
-                  <TabsContent value="info" className="mt-4 space-y-4">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500">Recorded on</h4>
-                      <p className="text-gray-900">{date || "N/A"}</p>
+              {/* Content section - all displayed directly */}
+              <div className="mt-4 space-y-6">
+                {/* Personal Details Section */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-semibold text-gray-700">Personal Details</h4>
+                  {personalDetails && personalDetails.length > 0 ? (
+                    <div className="max-h-[180px] overflow-y-auto pr-2 space-y-4">
+                      {personalDetails.map((detail, index) => (
+                        <div key={index} className="pb-2">
+                          <h5 className="text-xs font-medium text-gray-500">{detail.question}</h5>
+                          <p className="text-sm text-gray-900">{detail.answer}</p>
+                        </div>
+                      ))}
                     </div>
-                    
+                  ) : (
+                    <p className="text-sm text-gray-500">No personal details available.</p>
+                  )}
+                </div>
+                
+                {/* Video Info Section */}
+                <div className="space-y-4 pt-2">
+                  <div>
+                    <h5 className="text-xs font-medium text-gray-500">Recorded on</h5>
+                    <p className="text-gray-900">{date || "N/A"}</p>
+                  </div>
+                  
+                    {/* Description section - not needed for now
                     <div>
-                      <h4 className="text-sm font-medium text-gray-500 mb-2">Description</h4>
+                      <h5 className="text-xs font-medium text-gray-500 mb-1">Description</h5>
                       <p className="text-gray-700 text-sm">
                         This interview covers the candidate's background, experience, and suitability for the position.
                         The candidate demonstrates strong communication skills and relevant expertise in the field.
                       </p>
                     </div>
-                  </TabsContent>
-                </Tabs>
+                    */}
+                </div>
               </div>
             </div>
           </motion.div>
