@@ -10,7 +10,7 @@ export const sidebarItems = [
     id: "submissions",
     title: "Submissions",
     icon: <Play />,
-    badge: "8",
+    // badge: "8",
   },
   // {  // Commented out groups menu item
   //   id: "groups",
@@ -23,12 +23,10 @@ export const sidebarItems = [
     id: "my-snipe",
     title: "My Snipe",
     icon: <Target />,
-    badge: "5",
   },
   {
     id: "dashboard",
     title: "Dashboard",
     icon: <LayoutDashboard />,
-    badge: "3",
   },
 ]
