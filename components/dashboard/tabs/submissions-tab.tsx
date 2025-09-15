@@ -6,12 +6,18 @@ import { Card } from "@/components/ui/card"
 import { Play } from "lucide-react"
 import { VideoPlayerDialog } from "@/components/video-player-dialog"
 
+interface Video {
+  url: string;
+  title?: string;
+  duration?: string;
+}
+
 interface SnipeVideo {
   id: number;
   title: string;
   candidate: string;
   thumbnail: string;
-  videoUrl: string;
+  videos: Video[];
   aspectRatio: string;
   duration: string;
   status: string;
@@ -24,7 +30,11 @@ const snipeVideos: SnipeVideo[] = [
     title: "Exchange Program Interview - Sarah Chen",
     candidate: "Sarah Chen",
     thumbnail: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&h=1376&q=80",
-    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    videos: [
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", title: "Interview Part 1", duration: "4:45" },
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", title: "Interview Part 2", duration: "3:21" },
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", title: "Interview Part 3", duration: "4:28" }
+    ],
     aspectRatio: "9/16",
     duration: "12:34",
     status: "completed",
@@ -35,7 +45,9 @@ const snipeVideos: SnipeVideo[] = [
     title: "Teaching Position Assessment - Michael Rodriguez",
     candidate: "Michael Rodriguez",
     thumbnail: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&h=1376&q=80",
-    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    videos: [
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", title: "Demo Video", duration: "3:45" }
+    ],
     aspectRatio: "9/16",
     duration: "8:45",
     status: "completed",
@@ -46,7 +58,13 @@ const snipeVideos: SnipeVideo[] = [
     title: "Graduate Admission Interview - Emma Thompson",
     candidate: "Emma Thompson",
     thumbnail: "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&h=1376&q=80",
-    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    videos: [
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4", title: "Admission Interview", duration: "7:12" },
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4", title: "Portfolio Review", duration: "4:10" },
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4", title: "Academic Discussion", duration: "4:00" },
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", title: "Research Presentation", duration: "3:10" },
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", title: "Final Questions", duration: "2:50" }
+    ],
     aspectRatio: "9/16",
     duration: "15:22",
     status: "completed",
@@ -57,7 +75,9 @@ const snipeVideos: SnipeVideo[] = [
     title: "Physics Assessment - David Kim",
     candidate: "David Kim",
     thumbnail: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&h=1376&q=80",
-    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    videos: [
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", title: "Physics Assessment", duration: "10:18" }
+    ],
     aspectRatio: "9/16",
     duration: "10:18",
     status: "completed",
@@ -68,7 +88,11 @@ const snipeVideos: SnipeVideo[] = [
     title: "Leadership Program - Lisa Wang",
     candidate: "Lisa Wang",
     thumbnail: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&h=1376&q=80",
-    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    videos: [
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", title: "Leadership Assessment", duration: "5:30" },
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", title: "Team Building Exercise", duration: "4:12" },
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4", title: "Problem Solving Challenge", duration: "4:25" }
+    ],
     aspectRatio: "9/16",
     duration: "14:07",
     status: "completed",
@@ -79,7 +103,10 @@ const snipeVideos: SnipeVideo[] = [
     title: "Research Position - James Miller",
     candidate: "James Miller",
     thumbnail: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&h=1376&q=80",
-    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+    videos: [
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", title: "Research Presentation", duration: "6:15" },
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", title: "Q&A Session", duration: "5:18" }
+    ],
     aspectRatio: "9/16",
     duration: "11:33",
     status: "completed",
@@ -90,7 +117,11 @@ const snipeVideos: SnipeVideo[] = [
     title: "Study Abroad Program - Maria Garcia",
     candidate: "Maria Garcia",
     thumbnail: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&h=1376&q=80",
-    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+    videos: [
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4", title: "Program Introduction", duration: "3:10" },
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", title: "Language Assessment", duration: "4:15" },
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4", title: "Cultural Knowledge Quiz", duration: "2:03" }
+    ],
     aspectRatio: "9/16",
     duration: "9:28",
     status: "completed",
@@ -101,7 +132,10 @@ const snipeVideos: SnipeVideo[] = [
     title: "Internship Assessment - Alex Johnson",
     candidate: "Alex Johnson",
     thumbnail: "https://images.unsplash.com/photo-1504203772830-87fba72385ee?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&h=1376&q=80",
-    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+    videos: [
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4", title: "Technical Interview", duration: "5:22" },
+      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", title: "Coding Challenge", duration: "7:53" }
+    ],
     aspectRatio: "9/16",
     duration: "13:15",
     status: "completed",
@@ -113,8 +147,11 @@ export function SubmissionsTab() {
   const [selectedVideo, setSelectedVideo] = useState<SnipeVideo | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
+  const [selectedVideoIndex, setSelectedVideoIndex] = useState(0)
+  
   const handleOpenVideo = (video: SnipeVideo) => {
     setSelectedVideo(video)
+    setSelectedVideoIndex(0) // Start with the first video
     setIsDialogOpen(true)
   }
 
@@ -130,10 +167,11 @@ export function SubmissionsTab() {
           <VideoPlayerDialog
             isOpen={isDialogOpen}
             onClose={handleCloseVideo}
-            videoUrl={selectedVideo.videoUrl}
+            videos={selectedVideo.videos}
+            selectedVideoIndex={selectedVideoIndex}
+            onVideoChange={setSelectedVideoIndex}
             title={selectedVideo.title}
             candidate={selectedVideo.candidate}
-            duration={selectedVideo.duration}
             date={selectedVideo.date}
           />
         )}

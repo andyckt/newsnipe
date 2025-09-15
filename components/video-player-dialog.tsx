@@ -2,29 +2,52 @@
 
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X } from "lucide-react"
+import { X, ChevronLeft, ChevronRight } from "lucide-react"
+
+interface Video {
+  url: string;
+  title?: string;
+  duration?: string;
+}
 
 interface VideoPlayerDialogProps {
   isOpen: boolean
   onClose: () => void
-  videoUrl: string
+  videos: Video[]
+  selectedVideoIndex: number
+  onVideoChange: (index: number) => void
   title: string
   candidate: string
-  duration?: string
   date?: string
 }
 
 export function VideoPlayerDialog({
   isOpen,
   onClose,
-  videoUrl,
+  videos,
+  selectedVideoIndex,
+  onVideoChange,
   title,
   candidate,
-  duration,
   date
 }: VideoPlayerDialogProps) {
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isHovering, setIsHovering] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
+  
+  const currentVideo = videos[selectedVideoIndex]
+  
+  const handlePrevVideo = () => {
+    if (selectedVideoIndex > 0) {
+      onVideoChange(selectedVideoIndex - 1)
+    }
+  }
+  
+  const handleNextVideo = () => {
+    if (selectedVideoIndex < videos.length - 1) {
+      onVideoChange(selectedVideoIndex + 1)
+    }
+  }
   
   // Handle escape key to close dialog
   useEffect(() => {
@@ -36,7 +59,7 @@ export function VideoPlayerDialog({
     return () => window.removeEventListener("keydown", handleEscape)
   }, [onClose])
   
-  // Play/pause video when dialog opens/closes
+  // Play/pause video when dialog opens/closes or video changes
   useEffect(() => {
     if (isOpen && videoRef.current) {
       videoRef.current.play().then(() => setIsPlaying(true)).catch(e => console.error("Video play failed:", e))
@@ -44,7 +67,7 @@ export function VideoPlayerDialog({
       videoRef.current.pause()
       setIsPlaying(false)
     }
-  }, [isOpen])
+  }, [isOpen, selectedVideoIndex])
 
   return (
     <AnimatePresence>
@@ -76,16 +99,64 @@ export function VideoPlayerDialog({
             </button>
             
             {/* Video Player - Left Side */}
-            <div className="md:w-1/2 bg-black relative">
-              <div className="aspect-[9/16] md:h-full">
+            <div 
+              className="md:w-1/2 bg-black relative"
+              onMouseEnter={() => setIsHovering(true)}
+              onMouseLeave={() => setIsHovering(false)}
+            >
+              <div className="aspect-[9/16] md:h-full relative">
                 <video
                   ref={videoRef}
-                  src={videoUrl}
+                  src={currentVideo.url}
                   className="w-full h-full object-contain"
                   controls
                   playsInline
                   controlsList="nodownload"
                 />
+                
+                {/* Navigation Controls - Only visible on hover */}
+                <AnimatePresence>
+                  {isHovering && (
+                    <>
+                      {/* Previous Video Button */}
+                      {selectedVideoIndex > 0 && (
+                        <motion.button
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -10 }}
+                          transition={{ duration: 0.2 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePrevVideo();
+                          }}
+                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 p-3 rounded-full text-white transition-colors"
+                          aria-label="Previous video"
+                        >
+                          <ChevronLeft size={24} />
+                        </motion.button>
+                      )}
+                      
+                      {/* Next Video Button */}
+                      {selectedVideoIndex < videos.length - 1 && (
+                        <motion.button
+                          initial={{ opacity: 0, x: 10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 10 }}
+                          transition={{ duration: 0.2 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleNextVideo();
+                          }}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 p-3 rounded-full text-white transition-colors"
+                          aria-label="Next video"
+                        >
+                          <ChevronRight size={24} />
+                        </motion.button>
+                      )}
+                      
+                    </>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
             
@@ -96,9 +167,33 @@ export function VideoPlayerDialog({
               
               {/* Additional video information can go here */}
               <div className="mt-3 space-y-3">
+                {/* Video selection tabs */}
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">Video Segments</h4>
+                  <div className="flex flex-col gap-2 max-h-[180px] overflow-y-auto pr-2">
+                    {videos.map((video, index) => (
+                      <button
+                        key={index}
+                        onClick={() => onVideoChange(index)}
+                        className={`text-left p-2 rounded-lg transition-colors ${
+                          selectedVideoIndex === index
+                            ? "bg-gray-100 border-l-4 border-blue-500"
+                            : "hover:bg-gray-50"
+                        }`}
+                      >
+                        <p className="font-medium text-sm">{video.title || `Video ${index + 1}`}</p>
+                        {video.duration && (
+                          <p className="text-xs text-gray-500 mt-0.5">{video.duration}</p>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Current video info */}
                 <div>
                   <h4 className="text-sm font-medium text-gray-500">Duration</h4>
-                  <p className="text-gray-900">{duration || "N/A"}</p>
+                  <p className="text-gray-900">{currentVideo.duration || "N/A"}</p>
                 </div>
                 
                 <div>
