@@ -169,8 +169,13 @@ export function VideoPlayerDialog({
             
             {/* Video Info - Right Side */}
             <div className="p-5 md:w-3/5 md:overflow-y-auto flex flex-col">
+              {/* Title and candidate info - commented out as requested
               <h3 className="text-lg font-semibold text-gray-900 mb-1">{title}</h3>
               <p className="text-gray-600 mb-3">{candidate}</p>
+              */}
+              
+              {/* Snipe Title */}
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Snipe Title</h3>
               
               {/* Video selection tabs */}
               <div className="mb-4">
