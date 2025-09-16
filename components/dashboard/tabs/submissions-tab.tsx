@@ -3,8 +3,12 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
-import { Play, Loader2 } from "lucide-react"
+import { Play, Loader2, Filter, X } from "lucide-react"
 import { VideoPlayerDialog } from "@/components/video-player-dialog"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Badge } from "@/components/ui/badge"
 
 interface Video {
   videoKey: string;
@@ -31,6 +35,13 @@ interface SnipeVideo {
   snipeId?: string;
 }
 
+interface SnipeFilter {
+  id: string;
+  title: string;
+  createdAt: string;
+  selected: boolean;
+}
+
 // We'll fetch real data from the API instead of using mock data
 
 export function SubmissionsTab() {
@@ -43,17 +54,68 @@ export function SubmissionsTab() {
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   
-  // Fetch submissions when component mounts
+  // Filter states
+  const [snipeFilters, setSnipeFilters] = useState<SnipeFilter[]>([])
+  const [isLoadingFilters, setIsLoadingFilters] = useState(false)
+  const [filterOpen, setFilterOpen] = useState(false)
+  
+  // Fetch snipe filters when component mounts
   useEffect(() => {
-    fetchSubmissions(1);
+    fetchSnipeFilters();
   }, []);
+  
+  // Fetch submissions when filters change
+  useEffect(() => {
+    if (snipeFilters.length > 0) {
+      fetchSubmissions(1);
+    }
+  }, [snipeFilters]);
+  
+  // Function to fetch available snipes for filtering
+  const fetchSnipeFilters = async () => {
+    try {
+      setIsLoadingFilters(true);
+      const response = await fetch('/api/snipes/list');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch snipes list');
+      }
+      
+      const data = await response.json();
+      
+      // Initialize all filters as unselected
+      const filters = data.snipes.map((snipe: any) => ({
+        ...snipe,
+        selected: false
+      }));
+      
+      setSnipeFilters(filters);
+    } catch (err) {
+      console.error('Error fetching snipes list:', err);
+    } finally {
+      setIsLoadingFilters(false);
+      // After filters are loaded, fetch submissions
+      fetchSubmissions(1);
+    }
+  };
 
   // Function to fetch submissions from the API
   const fetchSubmissions = async (pageNum: number) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/submissions?page=${pageNum}&limit=20`);
-    
+      
+      // Get selected filter IDs
+      const selectedFilters = snipeFilters
+        .filter(filter => filter.selected)
+        .map(filter => filter.id);
+      
+      // Build the URL with filters if any are selected
+      let url = `/api/submissions?page=${pageNum}&limit=20`;
+      if (selectedFilters.length > 0) {
+        url += `&snipeIds=${selectedFilters.join(',')}`;
+      }
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error('Failed to fetch submissions');
@@ -62,7 +124,6 @@ export function SubmissionsTab() {
       const data = await response.json();
       
       if (pageNum === 1) {
-        
         setSubmissions(data.submissions);
       } else {
         setSubmissions(prev => [...prev, ...data.submissions]);
@@ -95,9 +156,120 @@ export function SubmissionsTab() {
   const handleCloseVideo = () => {
     setIsDialogOpen(false)
   }
+  
+  // Toggle a single filter
+  const toggleFilter = (id: string) => {
+    setSnipeFilters(filters => filters.map(filter => 
+      filter.id === id ? { ...filter, selected: !filter.selected } : filter
+    ));
+  }
+  
+  // Clear all filters
+  const clearFilters = () => {
+    setSnipeFilters(filters => filters.map(filter => ({ ...filter, selected: false })));
+  }
+  
+  // Select all filters
+  const selectAllFilters = () => {
+    setSnipeFilters(filters => filters.map(filter => ({ ...filter, selected: true })));
+  }
+  
+  // Get count of active filters
+  const activeFilterCount = snipeFilters.filter(filter => filter.selected).length;
 
   return (
     <div className="space-y-3 pt-0">
+      {/* Filter Controls */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold">Submissions</h2>
+        
+        <div className="flex items-center gap-2">
+          {/* Filter Badges */}
+          <div className="flex flex-wrap gap-2 mr-2">
+            {activeFilterCount > 0 && (
+              <Badge variant="outline" className="flex items-center gap-1 px-2 py-1">
+                {activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''} active
+                <button 
+                  onClick={clearFilters}
+                  className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+                  aria-label="Clear filters"
+                >
+                  <X size={14} />
+                </button>
+              </Badge>
+            )}
+          </div>
+          
+          {/* Filter Popover */}
+          <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className={`flex items-center gap-1 ${activeFilterCount > 0 ? 'border-blue-500 text-blue-500' : ''}`}
+              >
+                <Filter size={16} />
+                Filter
+                {activeFilterCount > 0 && (
+                  <span className="ml-1 bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80" align="end">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">Filter by Snipe</h4>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" onClick={clearFilters} disabled={activeFilterCount === 0}>
+                      Clear
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={selectAllFilters}
+                      disabled={activeFilterCount === snipeFilters.length}
+                    >
+                      Select All
+                    </Button>
+                  </div>
+                </div>
+                
+                {isLoadingFilters ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+                  </div>
+                ) : snipeFilters.length === 0 ? (
+                  <div className="text-center py-4 text-gray-500">
+                    No snipes found
+                  </div>
+                ) : (
+                  <div className="max-h-[300px] overflow-y-auto space-y-2">
+                    {snipeFilters.map((filter) => (
+                      <div key={filter.id} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`filter-${filter.id}`} 
+                          checked={filter.selected}
+                          onCheckedChange={() => toggleFilter(filter.id)}
+                        />
+                        <label 
+                          htmlFor={`filter-${filter.id}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1 truncate"
+                          title={filter.title}
+                        >
+                          {filter.title}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+      
       {/* Video Player Dialog - Rendered outside the flow */}
       <div className="fixed-layer">
         {selectedVideo && (

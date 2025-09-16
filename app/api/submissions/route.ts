@@ -32,6 +32,10 @@ export async function GET(request: Request) {
     const page = parseInt(url.searchParams.get('page') || '1');
     const skip = (page - 1) * limit;
     
+    // Get filter parameters
+    const filterSnipeIds = url.searchParams.get('snipeIds');
+    const snipeIdsArray = filterSnipeIds ? filterSnipeIds.split(',') : [];
+    
     // Connect to the database
     await connectToDatabase();
     
@@ -41,9 +45,14 @@ export async function GET(request: Request) {
     const snipeShortIds = userSnipes.map(snipe => snipe.shortId);
  
     
-    // Find all completed responses for the user's snipes
+    // Apply filters if provided, otherwise use all user's snipes
+    const filteredSnipeIds = snipeIdsArray.length > 0 
+      ? snipeShortIds.filter(id => snipeIdsArray.includes(id))
+      : snipeShortIds;
+    
+    // Find all completed responses for the filtered snipes
     const responses = await Response.find({
-      snipeShortId: { $in: snipeShortIds },
+      snipeShortId: { $in: filteredSnipeIds },
       status: 'completed'
     }).sort({ completedAt: -1 }).skip(skip).limit(limit).lean();
     
@@ -107,9 +116,9 @@ export async function GET(request: Request) {
       };
     });
     
-    // Get total count for pagination
+    // Get total count for pagination (using the same filters)
     const totalCount = await Response.countDocuments({
-      snipeShortId: { $in: snipeShortIds },
+      snipeShortId: { $in: filteredSnipeIds },
       status: 'completed'
     });
     
