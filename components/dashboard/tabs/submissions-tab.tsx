@@ -197,17 +197,24 @@ export function SubmissionsTab() {
                 Filter
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80" align="end">
+            <PopoverContent className="w-80 rounded-xl border-none shadow-lg" align="end">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium">Filter by Snipe</h4>
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" onClick={clearFilters} disabled={activeFilterCount === 0}>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="rounded-full" 
+                      onClick={clearFilters} 
+                      disabled={activeFilterCount === 0}
+                    >
                       Clear
                     </Button>
                     <Button 
                       variant="ghost" 
                       size="sm" 
+                      className="rounded-full"
                       onClick={selectAllFilters}
                       disabled={activeFilterCount === snipeFilters.length}
                     >
