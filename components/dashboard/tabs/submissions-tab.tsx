@@ -1,15 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
-import { Play } from "lucide-react"
+import { Play, Loader2 } from "lucide-react"
 import { VideoPlayerDialog } from "@/components/video-player-dialog"
 
 interface Video {
-  url: string;
+  videoKey: string;
   title?: string;
   duration?: string;
+  thumbnailUrl?: string | null;
 }
 
 interface PersonalDetail {
@@ -18,153 +19,77 @@ interface PersonalDetail {
 }
 
 interface SnipeVideo {
-  id: number;
+  id: string;
   title?: string;
   candidate?: string;
   thumbnail: string;
   videos: Video[];
-  aspectRatio: string;
+  aspectRatio?: string;
   status: string;
   date: string;
   personalDetails?: PersonalDetail[];
+  snipeId?: string;
 }
 
-const snipeVideos: SnipeVideo[] = [
-  {
-    id: 1,
-    title: "Exchange Program Interview - Sarah Chen",
-    candidate: "Sarah Chen",
-    thumbnail: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&h=1376&q=80",
-    videos: [
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", title: "Interview Part 1" },
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", title: "Interview Part 2", duration: "3:21" },
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", title: "Interview Part 3" }
-    ],
-    aspectRatio: "9/16",
-    status: "completed",
-    date: "2024-01-15",
-    personalDetails: [
-      { question: "What is your name?", answer: "Sarah Chen" },
-      { question: "What is your age?", answer: "21 years old" },
-      { question: "Where are you from?", answer: "Shanghai, China" },
-      { question: "Why do you want to join this exchange program?", answer: "I want to experience different education systems and cultures to broaden my perspective." }
-    ],
-  },
-  {
-    id: 2,
-    title: "Teaching Position Assessment - Michael Rodriguez",
-    candidate: "Michael Rodriguez",
-    thumbnail: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&h=1376&q=80",
-    videos: [
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", title: "Demo Video", duration: "3:45" }
-    ],
-    aspectRatio: "9/16",
-    status: "completed",
-    date: "2024-01-14",
-  },
-  {
-    id: 3,
-    title: "Graduate Admission Interview - Emma Thompson",
-    candidate: "Emma Thompson",
-    thumbnail: "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&h=1376&q=80",
-    videos: [
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4", title: "Admission Interview" },
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4", title: "Portfolio Review", duration: "4:10" },
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4", title: "Academic Discussion" },
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", title: "Research Presentation", duration: "3:10" },
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", title: "Final Questions", duration: "2:50" }
-    ],
-    aspectRatio: "9/16",
-    status: "completed",
-    date: "2024-01-13",
-    personalDetails: [
-      { question: "Current degree program", answer: "MSc in Computer Science" },
-      { question: "University", answer: "University of Cambridge" },
-      { question: "Research interests", answer: "Machine Learning, Natural Language Processing" },
-      { question: "Publications", answer: "2 papers in ACL conference" },
-      { question: "GPA", answer: "3.92/4.0" }
-    ],
-  },
-  {
-    id: 4,
-    title: "Physics Assessment - David Kim",
-    candidate: "David Kim",
-    thumbnail: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&h=1376&q=80",
-    videos: [
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", title: "Physics Assessment", duration: "10:18" }
-    ],
-    aspectRatio: "9/16",
-    status: "completed",
-    date: "2024-01-12",
-  },
-  {
-    id: 5,
-    title: "Leadership Program - Lisa Wang",
-    candidate: "Lisa Wang",
-    thumbnail: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&h=1376&q=80",
-    videos: [
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", title: "Leadership Assessment" },
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", title: "Team Building Exercise", duration: "4:12" },
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4", title: "Problem Solving Challenge", duration: "4:25" }
-    ],
-    aspectRatio: "9/16",
-    status: "completed",
-    date: "2024-01-11",
-  },
-  {
-    id: 6,
-    title: "Research Position - James Miller",
-    candidate: "James Miller",
-    thumbnail: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&h=1376&q=80",
-    videos: [
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", title: "Research Presentation" },
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", title: "Q&A Session", duration: "5:18" }
-    ],
-    aspectRatio: "9/16",
-    status: "completed",
-    date: "2024-01-10",
-    personalDetails: [
-      { question: "Current position", answer: "Postdoctoral Researcher" },
-      { question: "Field of expertise", answer: "Molecular Biology" },
-      { question: "Years of experience", answer: "5 years" },
-      { question: "Lab techniques", answer: "PCR, Western Blot, CRISPR, Cell Culture" },
-      { question: "Publication count", answer: "7 journal articles, 3 conference papers" }
-    ],
-  },
-  {
-    id: 7,
-    title: "Study Abroad Program - Maria Garcia",
-    candidate: "Maria Garcia",
-    thumbnail: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&h=1376&q=80",
-    videos: [
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4", title: "Program Introduction", duration: "3:10" },
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", title: "Language Assessment" },
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4", title: "Cultural Knowledge Quiz", duration: "2:03" }
-    ],
-    aspectRatio: "9/16",
-    status: "completed",
-    date: "2024-01-09",
-  },
-  {
-    id: 8,
-    title: "Internship Assessment - Alex Johnson",
-    candidate: "Alex Johnson",
-    thumbnail: "https://images.unsplash.com/photo-1504203772830-87fba72385ee?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&h=1376&q=80",
-    videos: [
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4", title: "Technical Interview" },
-      { url: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", title: "Coding Challenge", duration: "7:53" }
-    ],
-    aspectRatio: "9/16",
-    status: "completed",
-    date: "2024-01-08",
-  },
-]
+// We'll fetch real data from the API instead of using mock data
 
 export function SubmissionsTab() {
+  const [submissions, setSubmissions] = useState<SnipeVideo[]>([])
   const [selectedVideo, setSelectedVideo] = useState<SnipeVideo | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  
+  // Fetch submissions when component mounts
+  useEffect(() => {
+    fetchSubmissions(1);
+  }, []);
+
+  // Function to fetch submissions from the API
+  const fetchSubmissions = async (pageNum: number) => {
+    try {
+      setIsLoading(true);
+      console.log(`Fetching submissions page ${pageNum}...`);
+      const response = await fetch(`/api/submissions?page=${pageNum}&limit=20`);
+      
+      console.log(`API response status: ${response.status}`);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`API error response: ${errorText}`);
+        throw new Error(`Failed to fetch submissions: ${response.status} ${errorText}`);
+      }
+      
+      const data = await response.json();
+      console.log(`API returned ${data.submissions?.length || 0} submissions`);
+      console.log('First submission:', data.submissions?.[0]);
+      
+      if (pageNum === 1) {
+        setSubmissions(data.submissions || []);
+      } else {
+        setSubmissions(prev => [...prev, ...(data.submissions || [])]);
+      }
+      
+      setHasMore(pageNum < (data.pagination?.pages || 1));
+      setPage(pageNum);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching submissions:', err);
+      setError(`Failed to load submissions: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load more submissions when user scrolls to bottom
+  const loadMore = () => {
+    if (!isLoading && hasMore) {
+      fetchSubmissions(page + 1);
+    }
+  };
   
   const handleOpenVideo = (video: SnipeVideo) => {
     setSelectedVideo(video)
@@ -195,6 +120,35 @@ export function SubmissionsTab() {
         )}
       </div>
 
+      {/* Error state */}
+      {error && (
+        <div className="p-8 text-center">
+          <p className="text-red-500">{error}</p>
+          <button 
+            onClick={() => fetchSubmissions(1)} 
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          >
+            Try Again
+          </button>
+        </div>
+      )}
+
+      {/* Loading state */}
+      {isLoading && submissions.length === 0 && (
+        <div className="p-8 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          <span className="ml-2">Loading submissions...</span>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && submissions.length === 0 && !error && (
+        <div className="p-8 text-center">
+          <p className="text-gray-500">No submissions found.</p>
+          <p className="text-gray-500 mt-2">Create a Snipe and share it to get responses.</p>
+        </div>
+      )}
+
       {/* Masonry Grid */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -202,7 +156,7 @@ export function SubmissionsTab() {
         transition={{ delay: 0.2 }}
         className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6"
       >
-        {snipeVideos.map((video: SnipeVideo, index: number) => (
+        {submissions.map((video: SnipeVideo, index: number) => (
           <motion.div
             key={video.id}
             initial={{ opacity: 0, y: 20 }}
@@ -229,13 +183,17 @@ export function SubmissionsTab() {
               {/* Thumbnail Container */}
               <div
                 className="relative bg-gray-100 overflow-hidden"
-                style={{ aspectRatio: video.aspectRatio }}
+                style={{ aspectRatio: video.aspectRatio || "9/16" }}
               >
                 <img
-                  src={video.thumbnail || "/placeholder.svg"}
+                  src={video.thumbnail || "/placeholder-user.jpg"}
                   alt={video.title}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   loading="lazy"
+                  onError={(e) => {
+                    // If thumbnail fails to load, use placeholder
+                    (e.target as HTMLImageElement).src = "/placeholder-user.jpg";
+                  }}
                 />
 
                 {/* Play Button Overlay */}
@@ -257,6 +215,26 @@ export function SubmissionsTab() {
           </motion.div>
         ))}
       </motion.div>
+
+      {/* Load more button */}
+      {submissions.length > 0 && hasMore && (
+        <div className="flex justify-center mt-8 mb-4">
+          <button
+            onClick={loadMore}
+            disabled={isLoading}
+            className="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:opacity-50 flex items-center"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Loading...
+              </>
+            ) : (
+              'Load More'
+            )}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

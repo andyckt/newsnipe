@@ -2,12 +2,13 @@
 
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, ChevronLeft, ChevronRight } from "lucide-react"
+import { X, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 
 interface Video {
-  url: string;
+  videoKey: string;
   title?: string;
   duration?: string;
+  thumbnailUrl?: string | null;
 }
 
 interface PersonalDetail {
@@ -40,6 +41,8 @@ export function VideoPlayerDialog({
 }: VideoPlayerDialogProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
+  const [isLoadingVideo, setIsLoadingVideo] = useState(false)
+  const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   
   const currentVideo = videos[selectedVideoIndex]
@@ -66,15 +69,49 @@ export function VideoPlayerDialog({
     return () => window.removeEventListener("keydown", handleEscape)
   }, [onClose])
   
-  // Play/pause video when dialog opens/closes or video changes
+  // Fetch presigned URL when video changes
   useEffect(() => {
-    if (isOpen && videoRef.current) {
+    const fetchVideoUrl = async () => {
+      if (!isOpen || !currentVideo?.videoKey) return;
+      
+      try {
+        setIsLoadingVideo(true);
+        const response = await fetch(`/api/submissions/presigned-video-url?key=${encodeURIComponent(currentVideo.videoKey)}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to get video URL');
+        }
+        
+        const data = await response.json();
+        setVideoUrl(data.url);
+      } catch (error) {
+        console.error('Error getting video URL:', error);
+        // Use a fallback or show error
+        setVideoUrl(null);
+      } finally {
+        setIsLoadingVideo(false);
+      }
+    };
+    
+    fetchVideoUrl();
+  }, [isOpen, currentVideo, selectedVideoIndex]);
+  
+  // Play/pause video when URL is available
+  useEffect(() => {
+    if (videoUrl && videoRef.current) {
       videoRef.current.play().then(() => setIsPlaying(true)).catch(e => console.error("Video play failed:", e))
     } else if (videoRef.current) {
       videoRef.current.pause()
       setIsPlaying(false)
     }
-  }, [isOpen, selectedVideoIndex])
+  }, [videoUrl])
+  
+  // Reset video URL when dialog closes
+  useEffect(() => {
+    if (!isOpen) {
+      setVideoUrl(null);
+    }
+  }, [isOpen])
 
   return (
     <AnimatePresence>
@@ -112,14 +149,46 @@ export function VideoPlayerDialog({
               onMouseLeave={() => setIsHovering(false)}
             >
               <div className="aspect-[9/16] md:h-full relative">
-                <video
-                  ref={videoRef}
-                  src={currentVideo.url}
-                  className="w-full h-full object-contain"
-                  controls
-                  playsInline
-                  controlsList="nodownload"
-                />
+                {isLoadingVideo ? (
+                  <div className="w-full h-full flex items-center justify-center bg-black">
+                    <Loader2 className="h-10 w-10 animate-spin text-white" />
+                    <span className="ml-2 text-white">Loading video...</span>
+                  </div>
+                ) : videoUrl ? (
+                  <video
+                    ref={videoRef}
+                    src={videoUrl}
+                    className="w-full h-full object-contain"
+                    controls
+                    playsInline
+                    controlsList="nodownload"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-black flex-col">
+                    <div className="text-white mb-2">Unable to load video</div>
+                    <button 
+                      onClick={() => {
+                        // Retry loading the video
+                        if (currentVideo?.videoKey) {
+                          setIsLoadingVideo(true);
+                          fetch(`/api/submissions/presigned-video-url?key=${encodeURIComponent(currentVideo.videoKey)}`).
+                            then(res => res.json()).
+                            then(data => {
+                              setVideoUrl(data.url);
+                              setIsLoadingVideo(false);
+                            }).
+                            catch(err => {
+                              console.error(err);
+                              setIsLoadingVideo(false);
+                            });
+                        }
+                      }}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                )}
                 
                 {/* Navigation Controls - Only visible on hover */}
                 <AnimatePresence>
