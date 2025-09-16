@@ -1,0 +1,437 @@
+commit a2b5e1c27afe0b784e860e99fbd88f450e9e199e
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Tue Sep 16 11:18:27 2025 +0800
+
+    try again
+
+commit ad2a575f750ef840c1006e0f80f90f7929830e45
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Tue Sep 16 10:57:38 2025 +0800
+
+    try matching recordingID with snipe collection
+
+commit e8aa559aa0261258a3954e35b5c0894f8536b38c
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Tue Sep 16 10:50:37 2025 +0800
+
+    continue working
+
+commit a62944a70917a680170799829d812838a3edd68c
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Tue Sep 16 10:25:49 2025 +0800
+
+    remove Your Snipe with 1 questions has been created heading
+
+commit 542f74e462cd1d45af14a2597c2c941afb2aae0d
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Tue Sep 16 10:17:08 2025 +0800
+
+    fixed Your Snipe with 3 questions has been created.
+
+commit 63174f23640689eef1c1acd545a2682002614ad2
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Tue Sep 16 00:11:27 2025 +0800
+
+    make title and candidate name optional field
+
+commit 6a09785215541e1bcd5e05d43142fdb6956ffdb9
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Tue Sep 16 00:08:55 2025 +0800
+
+    added Snipe title in the dialog
+
+commit 3ad706287ccbac7c5af50b099af649d2bc49a420
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Tue Sep 16 00:04:24 2025 +0800
+
+    comment out the text section at the bottom of each card
+
+commit 847a316c998d827aab2d6b53b64160e70124cf58
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 23:59:54 2025 +0800
+
+    disable tab feature
+
+commit 01b823be27abceec9f24d11d0f032c9628be8f6b
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 22:38:45 2025 +0800
+
+    enhance the dialog
+
+commit 495dc13f63ab55acbf2df3f72b86e1165a333582
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 21:46:24 2025 +0800
+
+    further enhance
+
+commit 2c1ff4b6e6e7accdf44150143ce9891cbc2dab01
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 21:33:35 2025 +0800
+
+    added more urls
+
+commit 3d3715c7f2ed99dc3e6550f3f9e9532a65997426
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 20:31:33 2025 +0800
+
+    changed all image to 9:16
+
+commit 6dcc78c4d93a3243fb3cee2a5a5aa96a0f47316b
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 20:24:55 2025 +0800
+
+    enhance the dialog pop up
+
+commit c403b4c95dfdc66dcdc74495a76cc7606143852a
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 20:19:26 2025 +0800
+
+    add some random video url to each card
+
+commit eb739e87a4df0f1d8eec6d350a718b0f220560ac
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 17:28:32 2025 +0800
+
+    enhance submission tab
+
+commit 9d3e3c92b7ecc85de25ca0b84e656ca09af4f9fc
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 16:40:48 2025 +0800
+
+    removed number badge at the sidebar
+
+commit ea473e2db2556c8659ad99f543cc380157131b41
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 16:06:15 2025 +0800
+
+    added some personal details example
+
+commit da70ad2256d7d5d04fc782df20597f603b2d7149
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 16:03:51 2025 +0800
+
+    enhance the continue to question button
+
+commit ad0be240fa8cb7e5abeea510f61123fc717fcfee
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 16:00:11 2025 +0800
+
+    continue to questions works
+
+commit 6c21228d6dcd535d233799bfb594a9d1277efa64
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 15:53:06 2025 +0800
+
+    improved create snipe tab UI
+
+commit 07fbc8f64ed650529cbed001a885cee51a2743f2
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 15:18:27 2025 +0800
+
+    comment out checkbox option in personal details
+
+commit 03cb4cbdde74ed959a94eba35158c9d469410a54
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 14:12:07 2025 +0800
+
+    remove skip button
+
+commit c2ae8b69fb9240eb634b7c1fad16153de697a719
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 13:47:22 2025 +0800
+
+    added cloudianry package
+
+commit 0700100eec40688b5b3e70daa157f822774d5b33
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 15 13:44:53 2025 +0800
+
+    try switching to server side cloudnary
+
+commit 486da0bde2230a1341e4f49da93c29774e11c780
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Sep 14 21:58:28 2025 +0800
+
+    fix deduplication
+
+commit b65713bb442521a0a0d766d7abfd34d706199b6e
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Sep 14 21:36:06 2025 +0800
+
+    try fixing duplicates
+
+commit 47b3ee2fdb1a99a3ceed9af5c6498d2ea83a5765
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Sep 14 15:52:51 2025 +0800
+
+    try fixing
+
+commit a2fbc44690fcb723139f7fb95c0c5df62a454839
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Sep 11 10:42:55 2025 +0800
+
+    further enhance UI of create snipe
+
+commit 6fa4a638569cff7b98e779beb8007ddc80b3ef95
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Sep 11 10:39:08 2025 +0800
+
+    removed grey background on create snipe
+
+commit cad1f625cf6bcde53c3d603ff02f54b0d676e15c
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Sep 11 01:15:13 2025 +0800
+
+    impvoed more
+
+commit d1cf5dcc49ff79ecaaf03737802ef78ad6050e89
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Sep 11 01:10:10 2025 +0800
+
+    improved sidebar UI
+
+commit c4dee5e759e9f8163155b040b15651183a624dba
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 10 16:30:36 2025 +0800
+
+    remove profile pic section in setting tab
+
+commit 9d1207d66e69b50c4959d172e98c595ddd68c151
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Sep 4 12:07:57 2025 +0800
+
+    sucess for aws video recordings
+
+commit 3906d86ac3f5799439072d1c4f0c8c23064d518e
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Sep 4 10:37:57 2025 +0800
+
+    try AWS storing
+
+commit c5352e514fb7b2d28d53ca7b009cb71fb7214a2a
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Sep 4 10:17:51 2025 +0800
+
+    Storing the personal details answers to MongoDB Atlas
+
+commit 0bf57c30b78984803b2f49875142e2cdd8e71ebf
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 23:48:48 2025 +0800
+
+    start now in the next commit
+
+commit 2fc5428927d844c1d05cc8f598995f0b5aa29468
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 23:14:20 2025 +0800
+
+    start working on submission from now on
+
+commit 3abd14ae48bd81bae10145942800063a88c05617
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 02:07:56 2025 +0800
+
+    fixed more bugs
+
+commit 88de599e3d02930913981d25f86b0083425e2247
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 01:44:36 2025 +0800
+
+    change some metadata
+
+commit 61ec1dc33efb187a8423cb65acc674abb47f1779
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 01:20:16 2025 +0800
+
+    added delete snipe feature
+
+commit eb06c12aedfbdeaf4bdfb5c22681dd2e4063d120
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 01:06:35 2025 +0800
+
+    added my snipe tab backend funcionality
+
+commit e9de2a0bc43b7132ca96d3472ce889319dd5b236
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 00:54:40 2025 +0800
+
+    added submission field
+
+commit 4f8e7ea4fd2a014f2ac28a9d4601f6f04f7b551c
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 00:49:10 2025 +0800
+
+    added title field
+
+commit 58084a32274317ef3c8a13143b9ce51d9e3c52db
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 00:34:32 2025 +0800
+
+    fixed some bugs
+
+commit 7b6e44837efc20a9cc331d9e4ba2474615489a7f
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 00:26:20 2025 +0800
+
+    finish working on storing json config in database
+
+commit 9d24b79c4ef066ce2f79de1b7ac76682f1de009e
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Wed Sep 3 00:25:02 2025 +0800
+
+    ignore
+
+commit db7d2ac7366a42f6c60bf1dbb466dac1b99c586f
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Tue Sep 2 23:59:56 2025 +0800
+
+    first attempt
+
+commit d5d68003b98fcda79032de2e428cf20f35005d23
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Tue Sep 2 12:24:27 2025 +0800
+
+    moved all the files for new feature
+
+commit 898840b41caef888c511ea6bb5bc56f0d320c26f
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Tue Sep 2 12:08:03 2025 +0800
+
+    try importing new feature
+
+commit 12e1e618a9195687963793fa09080c7a13c7f8f5
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Tue Sep 2 11:28:36 2025 +0800
+
+    added empty create snipe tab
+
+commit f14a23cd97072a33523608e5cbb02a8c653fc37a
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Sep 1 10:24:59 2025 +0800
+
+    8.0 louder
+
+commit fe67b74145acbcde71a298313b75b7ca3975143f
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 23:35:19 2025 +0800
+
+    finsih working on user auth
+
+commit 66c70300d4280fa06b0b2e3fa9c8e2692e1b63a7
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 23:28:05 2025 +0800
+
+    implement remember me, if checked, stay for 30 days, if not, stay logged in for 3 days
+
+commit 522dd1bf9c3f7d9b53cbe998f032882d254f3225
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 23:16:01 2025 +0800
+
+    bring them to /auth page when signout
+
+commit 151ff721e8656948bef2f8d896e0062b410c8974
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 23:11:48 2025 +0800
+
+    works first test
+
+commit 1632602a03a51a61c6f5f577f73c1d432f75964f
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 22:55:48 2025 +0800
+
+    delete auth form and password strenght file
+
+commit 7788825e7f74c1396e4d0cbccdb708e6f9751853
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 22:42:50 2025 +0800
+
+    comment out social login UI
+
+commit 024362c3e117d4b4d9d0bc1b6712d23f5952e456
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 22:31:06 2025 +0800
+
+    added auth fils
+
+commit a787e910b28360de8179b26c9149a1c346563120
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 22:23:28 2025 +0800
+
+    added auth page.tsx
+
+commit ddff6ceb1a66fe00a97d89506568034a50e46916
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 22:12:12 2025 +0800
+
+    continue
+
+commit 3bd7880d72a03175e505859800f06984225812c5
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 18:27:48 2025 +0800
+
+    remove create snipe tab, and move Launch Recorder to it
+
+commit 7219de8204f3a78f435d3e9f0c9f86e55cb47c0a
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 16:36:33 2025 +0800
+
+    added logo to public
+
+commit 3d9f81fe898e43981c199337fa91214105afe095
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Sun Aug 31 16:34:23 2025 +0800
+
+    removed checkbox
+
+commit 085d667b2596b61c83644983442af982dacf2b35
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Aug 28 23:41:06 2025 +0800
+
+    removed skip button
+
+commit 071e11ec4d3274d638fa5717a2c572f45ea7f295
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Aug 28 23:30:53 2025 +0800
+
+    Placed Launch recorder button at the top right
+
+commit 30d8cf14425c8a8a8a27c3beabda4a752b1f862d
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Thu Aug 28 16:32:40 2025 +0800
+
+    improved launch recorder tab interface
+
+commit c3d9564b41074250e9cf49818dfaaab31e19a158
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 23:57:22 2025 +0800
+
+    correct order in launch recorder
+
+commit fff8d6c8012aaeb64006787a61afd753d1bcc342
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 23:00:59 2025 +0800
+
+    pnpm install more packages
+
+commit 9a849275f0e0dfe5f2e00e386a37939c093c0be8
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 22:51:23 2025 +0800
+
+    added launch recorder tab, working
+
+commit bca5a2e0a646ba45af8a61176eb505e71fd9120c
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 20:27:22 2025 +0800
+
+    added launch recorder tab
+
+commit a7d039c6529d610bbe9fe8fd47167830be7c5d66
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 19:58:52 2025 +0800
+
+    add launch recorder button
+
+commit eaf463e111802fc16b2344473409702f7e4438de
+Author: Andy <kamtocheung1104@gmail.com>
+Date:   Mon Aug 25 19:02:25 2025 +0800
+
+    first commit with sound icon
