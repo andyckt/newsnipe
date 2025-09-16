@@ -69,23 +69,42 @@ export function VideoPlayerDialog({
     return () => window.removeEventListener("keydown", handleEscape)
   }, [onClose])
   
-  // Fetch presigned URL when video changes
+  // Process video key when video changes
   useEffect(() => {
-    const fetchVideoUrl = async () => {
+    const processVideoKey = async () => {
       if (!isOpen || !currentVideo?.videoKey) return;
       
       try {
         setIsLoadingVideo(true);
-        const response = await fetch(`/api/submissions/presigned-video-url?key=${encodeURIComponent(currentVideo.videoKey)}`);
         
-        if (!response.ok) {
-          throw new Error('Failed to get video URL');
+        // Check if the video key is a Cloudinary key
+        if (currentVideo.videoKey.startsWith('cloudinary:')) {
+          // Extract the public ID from the key
+          const publicId = currentVideo.videoKey.replace('cloudinary:', '');
+          
+          // Import the Cloudinary service
+          const { generateVideoUrl } = await import('@/lib/cloudinary-service');
+          
+          // Generate a direct Cloudinary URL
+          const cloudinaryUrl = generateVideoUrl(publicId, {
+            quality: 'auto',
+            streaming_profile: 'hd'
+          });
+          
+          setVideoUrl(cloudinaryUrl);
+        } else {
+          // Fall back to S3 presigned URL for backward compatibility
+          const response = await fetch(`/api/submissions/presigned-video-url?key=${encodeURIComponent(currentVideo.videoKey)}`);
+          
+          if (!response.ok) {
+            throw new Error('Failed to get video URL');
+          }
+          
+          const data = await response.json();
+          setVideoUrl(data.url);
         }
-        
-        const data = await response.json();
-        setVideoUrl(data.url);
       } catch (error) {
-        console.error('Error getting video URL:', error);
+        console.error('Error processing video key:', error);
         // Use a fallback or show error
         setVideoUrl(null);
       } finally {
@@ -93,7 +112,7 @@ export function VideoPlayerDialog({
       }
     };
     
-    fetchVideoUrl();
+    processVideoKey();
   }, [isOpen, currentVideo, selectedVideoIndex]);
   
   // Play/pause video when URL is available
@@ -171,16 +190,39 @@ export function VideoPlayerDialog({
                         // Retry loading the video
                         if (currentVideo?.videoKey) {
                           setIsLoadingVideo(true);
-                          fetch(`/api/submissions/presigned-video-url?key=${encodeURIComponent(currentVideo.videoKey)}`).
-                            then(res => res.json()).
-                            then(data => {
-                              setVideoUrl(data.url);
+                          
+                          // Check if the video key is a Cloudinary key
+                          if (currentVideo.videoKey.startsWith('cloudinary:')) {
+                            // Extract the public ID from the key
+                            const publicId = currentVideo.videoKey.replace('cloudinary:', '');
+                            
+                            // Import the Cloudinary service
+                            import('@/lib/cloudinary-service').then(({ generateVideoUrl }) => {
+                              // Generate a direct Cloudinary URL
+                              const cloudinaryUrl = generateVideoUrl(publicId, {
+                                quality: 'auto',
+                                streaming_profile: 'hd'
+                              });
+                              
+                              setVideoUrl(cloudinaryUrl);
                               setIsLoadingVideo(false);
-                            }).
-                            catch(err => {
+                            }).catch(err => {
                               console.error(err);
                               setIsLoadingVideo(false);
                             });
+                          } else {
+                            // Fall back to S3 presigned URL for backward compatibility
+                            fetch(`/api/submissions/presigned-video-url?key=${encodeURIComponent(currentVideo.videoKey)}`)
+                              .then(res => res.json())
+                              .then(data => {
+                                setVideoUrl(data.url);
+                                setIsLoadingVideo(false);
+                              })
+                              .catch(err => {
+                                console.error(err);
+                                setIsLoadingVideo(false);
+                              });
+                          }
                         }
                       }}
                       className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"

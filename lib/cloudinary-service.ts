@@ -84,6 +84,35 @@ export function generateThumbnailUrl(
 }
 
 /**
+ * Generates a video URL from a Cloudinary video
+ * @param publicId - The public ID of the video in Cloudinary
+ * @param options - Options for the video
+ * @returns The URL of the video
+ */
+export function generateVideoUrl(
+  publicId: string,
+  options: {
+    quality?: string;
+    format?: string;
+    streaming_profile?: string;
+  } = {}
+): string {
+  const {
+    quality = 'auto',
+    format = 'mp4',
+    streaming_profile = 'hd'
+  } = options;
+  
+  // Construct the transformation string
+  const transformation = `q_${quality},sp_${streaming_profile}`;
+  
+  // Generate the URL
+  const url = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/video/upload/${transformation}/${publicId}.${format}`;
+  
+  return url;
+}
+
+/**
  * Gets a signed upload signature for Cloudinary
  * This should be used with a server-side API route
  */

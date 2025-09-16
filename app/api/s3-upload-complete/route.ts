@@ -40,30 +40,49 @@ export async function POST(request: Request) {
       );
     }
     
-    // Generate presigned URLs for accessing the files
-    const getVideoCommand = new GetObjectCommand({
-      Bucket: BUCKET_NAME,
-      Key: videoKey
-    });
-    
-    let videoUrl = await getSignedUrl(s3Client, getVideoCommand, { expiresIn: 3600 * 24 }); // 24 hours
+    // Initialize URLs
+    let videoUrl = null;
     let thumbnailUrl = null;
     
-    // If thumbnail was also uploaded, generate a presigned URL for it
-    if (thumbnailKey) {
-      if (thumbnailKey.startsWith('cloudinary:')) {
-        // For Cloudinary thumbnails, extract the public ID and generate a URL
-        const publicId = thumbnailKey.replace('cloudinary:', '');
-        const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'your-cloud-name';
-        thumbnailUrl = `https://res.cloudinary.com/${cloudName}/video/upload/v1/${publicId}.jpg`;
-        console.log(`Using Cloudinary thumbnail URL: ${thumbnailUrl}`);
-      } else {
-        // For S3 thumbnails, generate a presigned URL
-        const getThumbnailCommand = new GetObjectCommand({
-          Bucket: BUCKET_NAME,
-          Key: thumbnailKey
-        });
-        thumbnailUrl = await getSignedUrl(s3Client, getThumbnailCommand, { expiresIn: 3600 * 24 }); // 24 hours
+    // Check if video key is a Cloudinary key
+    if (videoKey.startsWith('cloudinary:')) {
+      // For Cloudinary videos, extract the public ID and generate a URL
+      const publicId = videoKey.replace('cloudinary:', '');
+      const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'your-cloud-name';
+      
+      // Generate a streaming-optimized URL for video playback
+      videoUrl = `https://res.cloudinary.com/${cloudName}/video/upload/q_auto,sp_hd/${publicId}.mp4`;
+      console.log(`Using Cloudinary video URL: ${videoUrl}`);
+      
+      // If this is a Cloudinary video, we can also generate a thumbnail URL
+      thumbnailUrl = `https://res.cloudinary.com/${cloudName}/video/upload/w_320,h_240,q_80,so_1,c_thumb/${publicId}.jpg`;
+      console.log(`Using Cloudinary thumbnail URL: ${thumbnailUrl}`);
+    } else {
+      // For backward compatibility with S3 videos
+      // Generate presigned URLs for accessing the files
+      const getVideoCommand = new GetObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: videoKey
+      });
+      
+      videoUrl = await getSignedUrl(s3Client, getVideoCommand, { expiresIn: 3600 * 24 }); // 24 hours
+      
+      // If thumbnail was also uploaded, generate a presigned URL for it
+      if (thumbnailKey) {
+        if (thumbnailKey.startsWith('cloudinary:')) {
+          // For Cloudinary thumbnails, extract the public ID and generate a URL
+          const publicId = thumbnailKey.replace('cloudinary:', '');
+          const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'your-cloud-name';
+          thumbnailUrl = `https://res.cloudinary.com/${cloudName}/video/upload/w_320,h_240,q_80,so_1,c_thumb/${publicId}.jpg`;
+          console.log(`Using Cloudinary thumbnail URL: ${thumbnailUrl}`);
+        } else {
+          // For S3 thumbnails, generate a presigned URL
+          const getThumbnailCommand = new GetObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: thumbnailKey
+          });
+          thumbnailUrl = await getSignedUrl(s3Client, getThumbnailCommand, { expiresIn: 3600 * 24 }); // 24 hours
+        }
       }
     }
     

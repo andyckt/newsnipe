@@ -241,7 +241,7 @@ export async function notifyUploadComplete(
 }
 
 /**
- * Uploads a video recording to S3 and uses Cloudinary for thumbnail generation
+ * Uploads a video recording to Cloudinary for both video playback and thumbnail generation
  * @param videoBlob - The video blob to upload
  * @param responseId - The response ID to associate with the video
  * @param questionId - The question ID associated with the recording
@@ -263,28 +263,21 @@ export async function uploadVideoRecording(
   try {
     console.log(`Starting upload process for video of size ${videoBlob.size} bytes`);
     
-    // Get presigned URL for video upload to S3
-    const videoUploadData = await getPresignedUploadUrl(
-      responseId,
-      'video',
-      videoBlob.type,
-      questionId,
-      recordingIndex
-    );
-    
-    // Upload video directly to S3
-    console.log('Uploading video directly to S3...');
-    await uploadToS3WithPresignedUrl(videoUploadData.presignedUrl, videoBlob);
-    
-    // Upload to Cloudinary for thumbnail generation
-    console.log('Uploading to Cloudinary for thumbnail generation...');
-    const { uploadVideoToCloudinary, generateThumbnailUrl } = await import('@/lib/cloudinary-service');
+    // Upload to Cloudinary for both video playback and thumbnail generation
+    console.log('Uploading to Cloudinary...');
+    const { uploadVideoToCloudinary, generateThumbnailUrl, generateVideoUrl } = await import('@/lib/cloudinary-service');
     
     // Upload to Cloudinary with folder structure based on responseId
     const cloudinaryResult = await uploadVideoToCloudinary(
       videoBlob,
       `video-recordings/${responseId}`
     );
+    
+    // Generate video URL for playback using Cloudinary's API
+    const videoUrl = generateVideoUrl(cloudinaryResult.publicId, {
+      quality: 'auto',
+      streaming_profile: 'hd' // Use HD streaming profile for better quality
+    });
     
     // Generate thumbnail URL using Cloudinary's API
     const thumbnailUrl = generateThumbnailUrl(cloudinaryResult.publicId, {
@@ -294,14 +287,15 @@ export async function uploadVideoRecording(
       timestamp: 1 // Get thumbnail from 1 second into the video
     });
     
-    // Store Cloudinary reference as the thumbnail key
+    // Store Cloudinary reference as both video and thumbnail keys
+    const videoKey = `cloudinary:${cloudinaryResult.publicId}`;
     const thumbnailKey = `cloudinary:${cloudinaryResult.publicId}`;
     
     // Notify server that uploads are complete
     console.log('Notifying server of completed uploads...');
     await notifyUploadComplete(
       responseId,
-      videoUploadData.key,
+      videoKey, // Use Cloudinary key instead of S3 key
       thumbnailKey,
       questionId,
       recordingIndex,
@@ -309,8 +303,8 @@ export async function uploadVideoRecording(
     );
     
     return {
-      videoKey: videoUploadData.key,
-      videoUrl: videoUploadData.presignedUrl, // This will be a temporary URL
+      videoKey: videoKey, // Use Cloudinary key instead of S3 key
+      videoUrl: videoUrl, // Use Cloudinary URL instead of S3 URL
       thumbnailKey: thumbnailKey,
       thumbnailUrl: thumbnailUrl
     };
