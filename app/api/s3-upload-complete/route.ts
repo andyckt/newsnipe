@@ -28,6 +28,7 @@ export async function POST(request: Request) {
       videoKey, 
       thumbnailKey,
       questionId,
+      recordingId, // Add recordingId field
       recordingIndex
     } = body;
     
@@ -82,6 +83,7 @@ export async function POST(request: Request) {
     // Create the recording object to add to the response
     const recordingData: any = {
       questionId,
+      recordingId, // Add recordingId field if available
       recordingIndex: parseInt(recordingIndex.toString(), 10),
       videoKey,
       videoUrl

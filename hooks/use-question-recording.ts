@@ -143,7 +143,8 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
             blob,
             effectiveResponseId!,
             questionId,
-            currentRecordingIndex
+            currentRecordingIndex,
+            recordingId // Pass the recordingId
           )
           
           console.log(`Recording ${currentRecordingIndex + 1} uploaded to S3:`, { videoKey, thumbnailKey })

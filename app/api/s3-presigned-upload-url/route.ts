@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     
     // Parse the request body
     const body = await request.json();
-    const { responseId, fileType, contentType, questionId, recordingIndex } = body;
+    const { responseId, fileType, contentType, questionId, recordingIndex, recordingId } = body;
     
     // Validate required fields
     if (!responseId || !fileType || !contentType) {
@@ -80,7 +80,8 @@ export async function POST(request: Request) {
       key,
       fileId,
       questionId,
-      recordingIndex
+      recordingIndex,
+      recordingId
     });
     
   } catch (error: any) {

@@ -117,7 +117,8 @@ export async function getPresignedUploadUrl(
   fileType: 'video' | 'thumbnail',
   contentType: string,
   questionId: string,
-  recordingIndex: number
+  recordingIndex: number,
+  recordingId?: string // Add optional recordingId parameter
 ): Promise<{
   presignedUrl: string;
   key: string;
@@ -136,7 +137,8 @@ export async function getPresignedUploadUrl(
         fileType,
         contentType,
         questionId,
-        recordingIndex
+        recordingIndex,
+        recordingId // Include recordingId if available
       }),
     });
 
@@ -198,7 +200,8 @@ export async function notifyUploadComplete(
   videoKey: string,
   thumbnailKey: string | null,
   questionId: string,
-  recordingIndex: number
+  recordingIndex: number,
+  recordingId?: string // Add optional recordingId parameter
 ): Promise<{
   videoUrl: string;
   thumbnailUrl: string | null;
@@ -216,7 +219,8 @@ export async function notifyUploadComplete(
         videoKey,
         thumbnailKey,
         questionId,
-        recordingIndex
+        recordingIndex,
+        recordingId
       }),
     });
 
@@ -248,7 +252,8 @@ export async function uploadVideoRecording(
   videoBlob: Blob,
   responseId: string,
   questionId: string,
-  recordingIndex: number
+  recordingIndex: number,
+  recordingId?: string // Add optional recordingId parameter
 ): Promise<{
   videoKey: string;
   videoUrl: string;
@@ -299,7 +304,8 @@ export async function uploadVideoRecording(
       videoUploadData.key,
       thumbnailKey,
       questionId,
-      recordingIndex
+      recordingIndex,
+      recordingId
     );
     
     return {
