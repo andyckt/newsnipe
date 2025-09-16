@@ -288,7 +288,7 @@ export function VideoPlayerDialog({
               */}
               
               {/* Snipe Title */}
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Snipe Title</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">{title || "Untitled Snipe"}</h3>
               
               {/* Video selection tabs */}
               <div className="mb-4">
