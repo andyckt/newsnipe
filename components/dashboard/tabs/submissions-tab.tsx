@@ -184,21 +184,6 @@ export function SubmissionsTab() {
         <h2 className="text-xl font-semibold">Submissions</h2>
         
         <div className="flex items-center gap-2">
-          {/* Filter Badges */}
-          <div className="flex flex-wrap gap-2 mr-2">
-            {activeFilterCount > 0 && (
-              <Badge variant="outline" className="flex items-center gap-1 px-2 py-1">
-                {activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''} active
-                <button 
-                  onClick={clearFilters}
-                  className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
-                  aria-label="Clear filters"
-                >
-                  <X size={14} />
-                </button>
-              </Badge>
-            )}
-          </div>
           
           {/* Filter Popover */}
           <Popover open={filterOpen} onOpenChange={setFilterOpen}>
@@ -206,15 +191,10 @@ export function SubmissionsTab() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className={`flex items-center gap-1 ${activeFilterCount > 0 ? 'border-blue-500 text-blue-500' : ''}`}
+                className={`flex items-center gap-1 rounded-full px-4 ${activeFilterCount > 0 ? 'border-blue-500 text-blue-500' : ''}`}
               >
                 <Filter size={16} />
                 Filter
-                {activeFilterCount > 0 && (
-                  <span className="ml-1 bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                    {activeFilterCount}
-                  </span>
-                )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80" align="end">
