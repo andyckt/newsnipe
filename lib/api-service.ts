@@ -274,10 +274,7 @@ export async function uploadVideoRecording(
     );
     
     // Generate video URL for playback using Cloudinary's API
-    const videoUrl = generateVideoUrl(cloudinaryResult.publicId, {
-      quality: 'auto',
-      streaming_profile: 'hd' // Use HD streaming profile for better quality
-    });
+    const videoUrl = generateVideoUrl(cloudinaryResult.publicId, cloudinaryResult.version);
     
     // Generate thumbnail URL using Cloudinary's API
     const thumbnailUrl = generateThumbnailUrl(cloudinaryResult.publicId, {

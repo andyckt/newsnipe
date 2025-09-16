@@ -11,15 +11,15 @@ const CLOUDINARY_API_SECRET = process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET || '
 const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ml_default';
 
 /**
- * Uploads a video to Cloudinary and returns the public ID and URL
+ * Uploads a video to Cloudinary and returns the public ID, URL, and version
  * @param videoBlob - The video blob to upload
  * @param folder - The folder to upload to in Cloudinary
- * @returns Promise with the public ID and URL of the uploaded video
+ * @returns Promise with the public ID, URL, and version of the uploaded video
  */
 export async function uploadVideoToCloudinary(
   videoBlob: Blob,
   folder: string = 'video-recordings'
-): Promise<{ publicId: string; url: string; }> {
+): Promise<{ publicId: string; url: string; version: number; }> {
   try {
     // Create a FormData object for the upload
     const formData = new FormData();
@@ -42,7 +42,8 @@ export async function uploadVideoToCloudinary(
     
     return {
       publicId: data.public_id,
-      url: data.secure_url
+      url: data.secure_url,
+      version: data.version
     };
   } catch (error) {
     console.error('Error uploading video to Cloudinary:', error);
@@ -86,11 +87,13 @@ export function generateThumbnailUrl(
 /**
  * Generates a video URL from a Cloudinary video
  * @param publicId - The public ID of the video in Cloudinary
+ * @param version - The version number of the video in Cloudinary
  * @param options - Options for the video
  * @returns The URL of the video
  */
 export function generateVideoUrl(
   publicId: string,
+  version: number,
   options: {
     quality?: string;
     format?: string;
@@ -103,11 +106,8 @@ export function generateVideoUrl(
     streaming_profile = 'hd'
   } = options;
   
-  // Construct the transformation string
-  const transformation = `q_${quality},sp_${streaming_profile}`;
-  
-  // Generate the URL
-  const url = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/video/upload/${transformation}/${publicId}.${format}`;
+  // Generate the URL with version number
+  const url = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/video/upload/v${version}/${publicId}.${format}`;
   
   return url;
 }

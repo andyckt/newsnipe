@@ -6,6 +6,7 @@ import { X, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 
 interface Video {
   videoKey: string;
+  videoUrl?: string;
   title?: string;
   duration?: string;
   thumbnailUrl?: string | null;
@@ -79,19 +80,21 @@ export function VideoPlayerDialog({
         
         // Check if the video key is a Cloudinary key
         if (currentVideo.videoKey.startsWith('cloudinary:')) {
-          // Extract the public ID from the key
-          const publicId = currentVideo.videoKey.replace('cloudinary:', '');
-          
-          // Import the Cloudinary service
-          const { generateVideoUrl } = await import('@/lib/cloudinary-service');
-          
-          // Generate a direct Cloudinary URL
-          const cloudinaryUrl = generateVideoUrl(publicId, {
-            quality: 'auto',
-            streaming_profile: 'hd'
-          });
-          
-          setVideoUrl(cloudinaryUrl);
+          // For Cloudinary videos, we should already have a direct URL stored
+          // in the database, so we can use that directly
+          if (currentVideo.videoUrl) {
+            setVideoUrl(currentVideo.videoUrl);
+          } else {
+            // If for some reason we don't have the URL, try to construct it
+            const publicId = currentVideo.videoKey.replace('cloudinary:', '');
+            const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dzdjiudg1';
+            
+            // Use a direct URL with current timestamp as version
+            const version = Date.now();
+            const cloudinaryUrl = `https://res.cloudinary.com/${cloudName}/video/upload/v${version}/${publicId}.mp4`;
+            
+            setVideoUrl(cloudinaryUrl);
+          }
         } else {
           // Fall back to S3 presigned URL for backward compatibility
           const response = await fetch(`/api/submissions/presigned-video-url?key=${encodeURIComponent(currentVideo.videoKey)}`);
@@ -193,23 +196,22 @@ export function VideoPlayerDialog({
                           
                           // Check if the video key is a Cloudinary key
                           if (currentVideo.videoKey.startsWith('cloudinary:')) {
-                            // Extract the public ID from the key
-                            const publicId = currentVideo.videoKey.replace('cloudinary:', '');
-                            
-                            // Import the Cloudinary service
-                            import('@/lib/cloudinary-service').then(({ generateVideoUrl }) => {
-                              // Generate a direct Cloudinary URL
-                              const cloudinaryUrl = generateVideoUrl(publicId, {
-                                quality: 'auto',
-                                streaming_profile: 'hd'
-                              });
+                            // For Cloudinary videos, we should already have a direct URL stored
+                            if (currentVideo.videoUrl) {
+                              setVideoUrl(currentVideo.videoUrl);
+                              setIsLoadingVideo(false);
+                            } else {
+                              // If for some reason we don't have the URL, try to construct it
+                              const publicId = currentVideo.videoKey.replace('cloudinary:', '');
+                              const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dzdjiudg1';
+                              
+                              // Use a direct URL with current timestamp as version
+                              const version = Date.now();
+                              const cloudinaryUrl = `https://res.cloudinary.com/${cloudName}/video/upload/v${version}/${publicId}.mp4`;
                               
                               setVideoUrl(cloudinaryUrl);
                               setIsLoadingVideo(false);
-                            }).catch(err => {
-                              console.error(err);
-                              setIsLoadingVideo(false);
-                            });
+                            }
                           } else {
                             // Fall back to S3 presigned URL for backward compatibility
                             fetch(`/api/submissions/presigned-video-url?key=${encodeURIComponent(currentVideo.videoKey)}`)

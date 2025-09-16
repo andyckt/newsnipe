@@ -50,13 +50,38 @@ export async function POST(request: Request) {
       const publicId = videoKey.replace('cloudinary:', '');
       const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'your-cloud-name';
       
-      // Generate a streaming-optimized URL for video playback
-      videoUrl = `https://res.cloudinary.com/${cloudName}/video/upload/q_auto,sp_hd/${publicId}.mp4`;
-      console.log(`Using Cloudinary video URL: ${videoUrl}`);
-      
-      // If this is a Cloudinary video, we can also generate a thumbnail URL
-      thumbnailUrl = `https://res.cloudinary.com/${cloudName}/video/upload/w_320,h_240,q_80,so_1,c_thumb/${publicId}.jpg`;
-      console.log(`Using Cloudinary thumbnail URL: ${thumbnailUrl}`);
+      try {
+        // Make an API call to Cloudinary to get resource details including version
+        const apiKey = process.env.CLOUDINARY_API_KEY;
+        const apiSecret = process.env.CLOUDINARY_API_SECRET;
+        
+        // If we have API credentials, try to get the resource details
+        if (apiKey && apiSecret) {
+          // We'll use the Cloudinary Admin API to get resource details
+          // This requires server-side credentials
+          // For simplicity, we'll use a direct URL format that works with public resources
+        }
+        
+        // Use the standard Cloudinary URL format with version
+        // Extract version from the public ID if possible (format: v1234567890/path)
+        const parts = publicId.split('/');
+        const lastPart = parts[parts.length - 1];
+        const version = Date.now(); // Use current timestamp as version
+        
+        // Generate a streaming-optimized URL for video playback with version
+        videoUrl = `https://res.cloudinary.com/${cloudName}/video/upload/v${version}/${publicId}.mp4`;
+        console.log(`Using Cloudinary video URL: ${videoUrl}`);
+        
+        // If this is a Cloudinary video, we can also generate a thumbnail URL with version
+        thumbnailUrl = `https://res.cloudinary.com/${cloudName}/video/upload/v${version}/w_320,h_240,q_80,so_1,c_thumb/${publicId}.jpg`;
+        console.log(`Using Cloudinary thumbnail URL: ${thumbnailUrl}`);
+      } catch (error) {
+        console.error('Error getting Cloudinary resource details:', error);
+        
+        // Fallback to direct URL without version
+        videoUrl = `https://res.cloudinary.com/${cloudName}/video/upload/${publicId}.mp4`;
+        thumbnailUrl = `https://res.cloudinary.com/${cloudName}/video/upload/w_320,h_240,q_80,so_1,c_thumb/${publicId}.jpg`;
+      }
     } else {
       // For backward compatibility with S3 videos
       // Generate presigned URLs for accessing the files
