@@ -277,12 +277,7 @@ export async function uploadVideoRecording(
     const videoUrl = generateVideoUrl(cloudinaryResult.publicId, cloudinaryResult.version);
     
     // Generate thumbnail URL using Cloudinary's API
-    const thumbnailUrl = generateThumbnailUrl(cloudinaryResult.publicId, {
-      width: 320,
-      height: 240,
-      quality: 80,
-      timestamp: 1 // Get thumbnail from 1 second into the video
-    });
+    const thumbnailUrl = generateThumbnailUrl(cloudinaryResult.publicId);
     
     // Store Cloudinary reference as both video and thumbnail keys
     const videoKey = `cloudinary:${cloudinaryResult.publicId}`;

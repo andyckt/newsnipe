@@ -60,26 +60,15 @@ export async function uploadVideoToCloudinary(
 export function generateThumbnailUrl(
   publicId: string,
   options: {
-    width?: number;
-    height?: number;
-    quality?: number;
     format?: string;
-    timestamp?: number | string;
   } = {}
 ): string {
   const {
-    width = 320,
-    height = 240,
-    quality = 80,
-    format = 'jpg',
-    timestamp = 1
+    format = 'jpg'
   } = options;
   
-  // Construct the transformation string
-  const transformation = `w_${width},h_${height},q_${quality},so_${timestamp},c_thumb`;
-  
-  // Generate the URL with the exact format needed
-  const url = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/video/upload/${transformation}/${publicId}.${format}`;
+  // Generate the direct URL without transformations
+  const url = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/video/upload/${publicId}.${format}`;
   
   return url;
 }

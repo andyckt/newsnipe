@@ -73,7 +73,7 @@ export async function POST(request: Request) {
         console.log(`Using Cloudinary video URL: ${videoUrl}`);
         
         // If this is a Cloudinary video, we can also generate a thumbnail URL
-        thumbnailUrl = `https://res.cloudinary.com/${cloudName}/video/upload/w_320,h_240,q_80,so_1,c_thumb/${publicId}.jpg`;
+        thumbnailUrl = `https://res.cloudinary.com/${cloudName}/video/upload/${publicId}.jpg`;
         console.log(`Using Cloudinary thumbnail URL: ${thumbnailUrl}`);
       } catch (error) {
         console.error('Error getting Cloudinary resource details:', error);
