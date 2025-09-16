@@ -12,6 +12,7 @@ export interface IResponse {
   };
   recordings: Array<{
     questionId: string;
+    recordingId?: string; // Original question ID without suffix for one-to-one mapping
     recordingIndex: number;
     videoKey?: string;
     videoUrl?: string;
@@ -58,6 +59,7 @@ const responseSchema = new mongoose.Schema<IResponse>(
     },
     recordings: [{
       questionId: String,
+      recordingId: String, // Original question ID without suffix for one-to-one mapping
       recordingIndex: Number,
       videoKey: String,
       videoUrl: String,

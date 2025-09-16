@@ -70,6 +70,9 @@ export function useConversationRecording(streamRef: React.RefObject<MediaStream 
     // Get a unique recording index for this recording
     const uniqueIndex = nextUniqueIndexRef.current++;
     
+    // Generate a base recording ID for conversation mode
+    const recordingId = `conversation`
+    
     // Generate a question ID for conversation mode - ensure it's unique with uniqueIndex
     const questionId = `conversation-${uniqueIndex}`
       
@@ -94,6 +97,7 @@ export function useConversationRecording(streamRef: React.RefObject<MediaStream 
           // Store the recording metadata
           recordingsRef.current.push({
             questionId,
+            recordingId, // Original recording ID for one-to-one mapping
             recordingIndex: uniqueIndex, // Use uniqueIndex instead of currentRecordingIndex
             videoKey,
             videoUrl,
@@ -144,6 +148,7 @@ export function useConversationRecording(streamRef: React.RefObject<MediaStream 
     // Store minimal recording metadata
     recordingsRef.current.push({
       questionId,
+      recordingId, // Original recording ID for one-to-one mapping
       recordingIndex: uniqueIndex // Use uniqueIndex instead of currentRecordingIndex
     })
   }

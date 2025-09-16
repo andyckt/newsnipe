@@ -101,6 +101,11 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
     // Get a unique recording index for this recording
     const uniqueIndex = nextUniqueIndexRef.current++;
     
+    // Get the original question ID for one-to-one mapping
+    let recordingId = textInputsRef.current.length > currentRecordingIndex 
+      ? textInputsRef.current[currentRecordingIndex].id 
+      : `question-${currentRecordingIndex + 1}`
+      
     // Get the current question ID - ensure it's unique by appending uniqueIndex
     let questionId = textInputsRef.current.length > currentRecordingIndex 
       ? textInputsRef.current[currentRecordingIndex].id 
@@ -146,6 +151,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
           // Store the recording metadata
           recordingsRef.current.push({
             questionId,
+            recordingId, // Original question ID for one-to-one mapping
             recordingIndex: uniqueIndex, // Use uniqueIndex instead of currentRecordingIndex
             videoKey,
             videoUrl,
@@ -203,6 +209,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
     // Store minimal recording metadata
     recordingsRef.current.push({
       questionId,
+      recordingId, // Original question ID for one-to-one mapping
       recordingIndex: uniqueIndex // Use uniqueIndex instead of currentRecordingIndex
     })
   }
