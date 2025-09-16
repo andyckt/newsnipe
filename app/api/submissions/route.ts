@@ -71,15 +71,15 @@ export async function GET(request: Request) {
       }
       
       // Format videos
-      const videos = response.recordings.map((recording: any) => {
-        // Find the matching text input for this recording
-        const textInput = snipe?.textInputs?.find((input: any) => 
-          input.id === recording.recordingId
-        );
+      const videos = response.recordings.map((recording: any, index: number) => {
+        // Get title from the corresponding index in the snipe's textInputs array
+        // This ensures we follow the sequential order of the original questions
+        const textInput = snipe?.textInputs?.[Math.min(index, (snipe?.textInputs?.length || 1) - 1)];
         
         return {
           videoKey: recording.videoKey,
-          title: textInput?.value || `Question ${recording.recordingIndex + 1}`,
+          videoUrl: recording.videoUrl || null,
+          title: textInput?.value || `Question ${index + 1}`,
           thumbnailUrl: recording.thumbnailUrl || null
         };
       });
