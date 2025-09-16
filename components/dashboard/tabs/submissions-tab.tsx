@@ -52,33 +52,28 @@ export function SubmissionsTab() {
   const fetchSubmissions = async (pageNum: number) => {
     try {
       setIsLoading(true);
-      console.log(`Fetching submissions page ${pageNum}...`);
       const response = await fetch(`/api/submissions?page=${pageNum}&limit=20`);
-      
-      console.log(`API response status: ${response.status}`);
+    
       
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`API error response: ${errorText}`);
-        throw new Error(`Failed to fetch submissions: ${response.status} ${errorText}`);
+        throw new Error('Failed to fetch submissions');
       }
       
       const data = await response.json();
-      console.log(`API returned ${data.submissions?.length || 0} submissions`);
-      console.log('First submission:', data.submissions?.[0]);
       
       if (pageNum === 1) {
-        setSubmissions(data.submissions || []);
+        
+        setSubmissions(data.submissions);
       } else {
-        setSubmissions(prev => [...prev, ...(data.submissions || [])]);
+        setSubmissions(prev => [...prev, ...data.submissions]);
       }
       
-      setHasMore(pageNum < (data.pagination?.pages || 1));
+      setHasMore(pageNum < data.pagination?.pages);
       setPage(pageNum);
       setError(null);
     } catch (err) {
       console.error('Error fetching submissions:', err);
-      setError(`Failed to load submissions: ${err.message}`);
+      setError(`Failed to load submissions: Please try again.`);
     } finally {
       setIsLoading(false);
     }
