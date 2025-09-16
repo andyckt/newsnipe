@@ -177,6 +177,7 @@ function SortableTextInput({
 }
 
 export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTabProps) {
+  const [isCreating, setIsCreating] = useState<boolean>(false)
   const [textInputs, setTextInputs] = useState<TextInput[]>([
     { 
       id: crypto.randomUUID(), 
@@ -427,13 +428,25 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
       
       <div className="flex justify-end">
         <Button 
-          onClick={() => {
-            unlockAudio(); // Unlock audio on user interaction
-            initAudioContext(); // Initialize Web Audio API context
-            onLaunch(textInputs.length, language, textInputs, "question", "no_limit");
+          onClick={async () => {
+            try {
+              setIsCreating(true);
+              unlockAudio(); // Unlock audio on user interaction
+              initAudioContext(); // Initialize Web Audio API context
+              await onLaunch(textInputs.length, language, textInputs, "question", "no_limit");
+            } catch (error) {
+              console.error("Error creating snipe:", error);
+              alert("Failed to create snipe. Please try again.");
+            } finally {
+              setIsCreating(false);
+            }
           }}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-4 text-xl rounded-full"
+          disabled={isCreating}
+          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-4 text-xl rounded-full flex items-center gap-2"
         >
+          {isCreating && (
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+          )}
           Create Now
         </Button>
       </div>
