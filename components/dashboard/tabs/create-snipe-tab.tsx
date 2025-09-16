@@ -210,6 +210,9 @@ export default function CameraRecorder() {
       // Store the shortId in state
       setCreatedShortId(shortId);
       
+      // Update numRecordings to match the actual number of questions created
+      setNumRecordings(selectedTextInputs.length);
+      
       // Transition to completed state
       setAppState("completed");
     } catch (error) {
