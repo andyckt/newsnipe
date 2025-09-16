@@ -78,7 +78,7 @@ export function generateThumbnailUrl(
   // Construct the transformation string
   const transformation = `w_${width},h_${height},q_${quality},so_${timestamp},c_thumb`;
   
-  // Generate the URL
+  // Generate the URL with the exact format needed
   const url = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/video/upload/${transformation}/${publicId}.${format}`;
   
   return url;

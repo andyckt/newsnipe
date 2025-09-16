@@ -68,12 +68,12 @@ export async function POST(request: Request) {
         const lastPart = parts[parts.length - 1];
         const version = Date.now(); // Use current timestamp as version
         
-        // Generate a streaming-optimized URL for video playback with version
-        videoUrl = `https://res.cloudinary.com/${cloudName}/video/upload/v${version}/${publicId}.mp4`;
+        // Generate a streaming-optimized URL for video playback
+        videoUrl = `https://res.cloudinary.com/${cloudName}/video/upload/${publicId}.mp4`;
         console.log(`Using Cloudinary video URL: ${videoUrl}`);
         
-        // If this is a Cloudinary video, we can also generate a thumbnail URL with version
-        thumbnailUrl = `https://res.cloudinary.com/${cloudName}/video/upload/v${version}/w_320,h_240,q_80,so_1,c_thumb/${publicId}.jpg`;
+        // If this is a Cloudinary video, we can also generate a thumbnail URL
+        thumbnailUrl = `https://res.cloudinary.com/${cloudName}/video/upload/w_320,h_240,q_80,so_1,c_thumb/${publicId}.jpg`;
         console.log(`Using Cloudinary thumbnail URL: ${thumbnailUrl}`);
       } catch (error) {
         console.error('Error getting Cloudinary resource details:', error);
