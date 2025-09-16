@@ -302,10 +302,7 @@ export default function CameraRecorder() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold mb-4">Snipe Created Successfully!</h1>
-          <p className="text-lg mb-6">
-            Your Snipe with {numRecordings} questions has been created.
-          </p>
+          <h1 className="text-3xl font-bold mb-6">Snipe Created Successfully!</h1>
           <div className="bg-gray-50 p-4 rounded-lg w-full max-w-lg mb-6">
             <p className="text-sm text-gray-500 mb-2">Share this link with participants:</p>
             <div className="flex">
