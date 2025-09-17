@@ -315,7 +315,7 @@ export default function CameraRecorder() {
               />
               <button 
                 className={`text-white px-4 py-2 rounded-r-md relative transition-colors duration-300 ${
-                  isCopied ? "bg-green-500" : "bg-blue-500 hover:bg-blue-600"
+                  isCopied ? "bg-blue-600" : "bg-blue-500 hover:bg-blue-600"
                 }`}
                 onClick={() => {
                   navigator.clipboard.writeText(`${typeof window !== 'undefined' ? window.location.origin : ''}/snipe/${createdShortId}`);
