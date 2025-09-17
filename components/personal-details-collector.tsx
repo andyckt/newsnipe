@@ -223,9 +223,9 @@ export default function PersonalDetailsCollector({ config, onComplete, shortId }
       </div>
       
       {/* Branding */}
-      <div className="absolute bottom-4 right-4 text-gray-400 text-xs">
+      <div className="absolute bottom-4 right-4 text-gray-400 text-sm">
         <span style={{ fontFamily: "'Century Gothic', 'CenturyGothic', 'AppleGothic', sans-serif" }}>
-          Powered by Snipe
+          Powered by <span style={{ color: "#1649ff" }}>Snipe</span>
         </span>
       </div>
 
