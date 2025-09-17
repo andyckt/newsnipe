@@ -298,10 +298,12 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="rounded-2xl">
+                        {/* Edit option temporarily disabled
                         <DropdownMenuItem className="rounded-xl">
                           <Edit className="h-4 w-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
+                        */}
                         <DropdownMenuItem
                           className="rounded-xl"
                           onClick={() => copyToClipboard(snipe.url, snipe.title)}
