@@ -132,9 +132,14 @@ export function SubmissionsTab() {
     };
   }, []);
   
+  // Track if we're applying a filter programmatically
+  const isApplyingFilterRef = useRef(false);
+  
   // Fetch submissions when filters change
   useEffect(() => {
     if (snipeFilters.length > 0) {
+      // Only fetch if we're not in the middle of applying a filter programmatically
+      // or if we're done applying the filter
       fetchSubmissions(1);
     }
   }, [snipeFilters]);
@@ -200,6 +205,8 @@ export function SubmissionsTab() {
         .filter(filter => filter.selected)
         .map(filter => filter.id);
       
+      console.log(`Fetching submissions with filters: ${selectedFilters.length > 0 ? selectedFilters.join(', ') : 'none'}`);
+      
       // Build the URL with filters if any are selected
       let url = `/api/submissions?page=${pageNum}&limit=20`;
       if (selectedFilters.length > 0) {
@@ -214,14 +221,30 @@ export function SubmissionsTab() {
       
       const data = await response.json();
       
-      if (pageNum === 1) {
-        setSubmissions(data.submissions);
+      // Only update submissions if we're still in the same filter state
+      // This prevents race conditions where a newer request completes after an older one
+      const currentSelectedFilters = snipeFilters
+        .filter(filter => filter.selected)
+        .map(filter => filter.id);
+      
+      const filtersMatch = 
+        selectedFilters.length === currentSelectedFilters.length && 
+        selectedFilters.every(id => currentSelectedFilters.includes(id));
+      
+      if (filtersMatch) {
+        if (pageNum === 1) {
+          console.log(`Setting ${data.submissions.length} submissions with filters: ${selectedFilters.join(', ')}`);
+          setSubmissions(data.submissions);
+        } else {
+          setSubmissions(prev => [...prev, ...data.submissions]);
+        }
+        
+        setHasMore(pageNum < data.pagination?.pages);
+        setPage(pageNum);
       } else {
-        setSubmissions(prev => [...prev, ...data.submissions]);
+        console.log('Filter state changed during fetch, ignoring results');
       }
       
-      setHasMore(pageNum < data.pagination?.pages);
-      setPage(pageNum);
       setError(null);
     } catch (err) {
       console.error('Error fetching submissions:', err);
@@ -267,11 +290,22 @@ export function SubmissionsTab() {
   
   // Apply a specific snipe filter by ID
   const applySelectedSnipeFilter = (snipeId: string) => {
-    setSnipeFilters(filters => filters.map(filter => ({
-      ...filter,
-      // Only select the matching filter, deselect all others
-      selected: filter.id === snipeId
-    })));
+    // Set flag to indicate we're applying a filter programmatically
+    isApplyingFilterRef.current = true;
+    
+    console.log(`Applying filter for snipeId: ${snipeId}`);
+    
+    // Update filters to select only the matching one
+    setSnipeFilters(filters => {
+      const updatedFilters = filters.map(filter => ({
+        ...filter,
+        // Only select the matching filter, deselect all others
+        selected: filter.id === snipeId
+      }));
+      
+      console.log('Filter applied:', updatedFilters.filter(f => f.selected).map(f => f.id));
+      return updatedFilters;
+    });
     
     // Open the filter popover to show the selected filter
     setFilterOpen(true);
@@ -280,6 +314,11 @@ export function SubmissionsTab() {
     setTimeout(() => {
       setFilterOpen(false);
     }, 1500);
+    
+    // Reset the flag after a short delay to allow state updates to complete
+    setTimeout(() => {
+      isApplyingFilterRef.current = false;
+    }, 100);
   }
   
   // Get count of active filters
