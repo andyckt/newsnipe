@@ -439,7 +439,15 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
                       <Button
                         size="sm"
                         className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                        onClick={() => window.open(`/snipe/${snipe.url}`, '_blank')}
+                        onClick={() => {
+                          // Navigate to submissions tab with this snipe pre-filtered
+                          // Store the selected snipe ID in localStorage for the submissions tab to use
+                          localStorage.setItem('selectedSnipeFilter', snipe.id);
+                          // Trigger navigation to the submissions tab
+                          window.dispatchEvent(new CustomEvent('navigateToTab', { 
+                            detail: { tab: 'submissions', snipeId: snipe.id } 
+                          }));
+                        }}
                       >
                         <Play className="h-4 w-4 mr-1" />
                         View

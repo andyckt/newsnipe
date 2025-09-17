@@ -62,6 +62,39 @@ export function SubmissionsTab() {
   // Fetch snipe filters when component mounts
   useEffect(() => {
     fetchSnipeFilters();
+    
+    // Check if there's a selected snipe filter from localStorage (set by the View button in My Snipe tab)
+    const selectedSnipeFilter = typeof window !== 'undefined' ? localStorage.getItem('selectedSnipeFilter') : null;
+    
+    // Listen for navigation events from other tabs
+    const handleNavigateToTab = (event: CustomEvent) => {
+      if (event.detail?.snipeId) {
+        // Apply the filter when we receive the navigation event
+        applySelectedSnipeFilter(event.detail.snipeId);
+      }
+    };
+    
+    // Add event listener
+    window.addEventListener('navigateToTab', handleNavigateToTab as EventListener);
+    
+    // If we have a selected filter in localStorage, apply it after filters are loaded
+    if (selectedSnipeFilter) {
+      // We'll apply the filter after the filters are loaded
+      const applyFilterTimer = setTimeout(() => {
+        applySelectedSnipeFilter(selectedSnipeFilter);
+        // Clear the localStorage item to prevent it from being applied again on future visits
+        localStorage.removeItem('selectedSnipeFilter');
+      }, 500); // Small delay to ensure filters are loaded
+      
+      return () => {
+        clearTimeout(applyFilterTimer);
+        window.removeEventListener('navigateToTab', handleNavigateToTab as EventListener);
+      };
+    }
+    
+    return () => {
+      window.removeEventListener('navigateToTab', handleNavigateToTab as EventListener);
+    };
   }, []);
   
   // Fetch submissions when filters change
@@ -172,6 +205,23 @@ export function SubmissionsTab() {
   // Select all filters
   const selectAllFilters = () => {
     setSnipeFilters(filters => filters.map(filter => ({ ...filter, selected: true })));
+  }
+  
+  // Apply a specific snipe filter by ID
+  const applySelectedSnipeFilter = (snipeId: string) => {
+    setSnipeFilters(filters => filters.map(filter => ({
+      ...filter,
+      // Only select the matching filter, deselect all others
+      selected: filter.id === snipeId
+    })));
+    
+    // Open the filter popover to show the selected filter
+    setFilterOpen(true);
+    
+    // Close the filter popover after a short delay
+    setTimeout(() => {
+      setFilterOpen(false);
+    }, 1500);
   }
   
   // Get count of active filters

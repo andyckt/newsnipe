@@ -52,16 +52,26 @@ export function DesignaliCreative() {
     return () => clearTimeout(timer)
   }, [])
   
-  // Listen for custom setActiveMenu event from UserProfile component
+  // Listen for custom events to navigate between tabs
   useEffect(() => {
+    // Handle setActiveMenu event from UserProfile component
     const handleSetActiveMenu = (event: CustomEvent) => {
       setActiveMenu(event.detail);
     };
     
+    // Handle navigateToTab event from other components
+    const handleNavigateToTab = (event: CustomEvent) => {
+      if (event.detail?.tab) {
+        setActiveMenu(event.detail.tab);
+      }
+    };
+    
     window.addEventListener('setActiveMenu', handleSetActiveMenu as EventListener);
+    window.addEventListener('navigateToTab', handleNavigateToTab as EventListener);
     
     return () => {
       window.removeEventListener('setActiveMenu', handleSetActiveMenu as EventListener);
+      window.removeEventListener('navigateToTab', handleNavigateToTab as EventListener);
     };
   }, [])
 
