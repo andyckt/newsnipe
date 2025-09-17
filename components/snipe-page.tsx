@@ -328,20 +328,25 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
   // Completed state
   if (appState === "completed") {
     return (
-      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center relative">
-        <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen p-8 items-center justify-center text-center">
-          <div className="text-6xl mb-4">✅</div>
+      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
+        <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen p-8 items-center justify-center text-center relative">
+          <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
           <h1 className="text-3xl font-bold mb-4">Thank You!</h1>
           <p className="text-lg mb-6">
             All {numRecordings} recordings have been completed successfully.
           </p>
-        </div>
-        
-        {/* Branding */}
-        <div className="absolute bottom-4 right-4 text-gray-400 text-base">
-          <span style={{ fontFamily: "'Century Gothic', 'CenturyGothic', 'AppleGothic', sans-serif" }}>
-            Powered by <span style={{ color: "#1649ff" }}>Snipe</span>
-          </span>
+          
+          {/* Branding */}
+          <div className="absolute bottom-4 right-4 text-gray-400 text-base">
+            <span style={{ fontFamily: "'Century Gothic', 'CenturyGothic', 'AppleGothic', sans-serif" }}>
+              Powered by <span style={{ color: "#1649ff" }}>Snipe</span>
+            </span>
+          </div>
         </div>
       </div>
     )
