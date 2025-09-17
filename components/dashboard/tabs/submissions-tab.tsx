@@ -156,42 +156,52 @@ export function SubmissionsTab() {
       
       const data = await response.json();
       
-      // Initialize all filters as unselected
+      // Get the pending filter ID before we update anything
+      const pendingId = pendingFilterIdRef.current;
+      
+      // Initialize filters - if we have a pending filter, pre-select it
       const filters = data.snipes.map((snipe: any) => ({
         ...snipe,
-        selected: false
+        selected: pendingId ? snipe.id === pendingId : false
       }));
       
-      setSnipeFilters(filters);
+      console.log(`Loaded ${filters.length} filters, pendingId: ${pendingId || 'none'}`);
       
       // Mark filters as loaded
       filtersLoadedRef.current = true;
       
-      // Check if we have a pending filter to apply
-      if (pendingFilterIdRef.current) {
-        const pendingId = pendingFilterIdRef.current;
-        console.log(`Applying pending filter: ${pendingId}`);
+      // Set the filters with any pre-selected filter
+      setSnipeFilters(filters);
+      
+      // Clear the pending filter reference
+      pendingFilterIdRef.current = null;
+      
+      // If we had a pending filter, log it and open the filter popover briefly
+      if (pendingId) {
+        console.log(`Applied filter ${pendingId} during filter loading`);
         
-        // Check if the filter exists in our loaded filters
-        const filterExists = filters.some((filter: SnipeFilter) => filter.id === pendingId);
+        // Show the filter popover briefly
+        setFilterOpen(true);
+        setTimeout(() => {
+          setFilterOpen(false);
+        }, 1500);
         
-        if (filterExists) {
-          // Apply the filter
-          setTimeout(() => {
-            applySelectedSnipeFilter(pendingId);
-            pendingFilterIdRef.current = null;
-          }, 100);
-        } else {
-          console.warn(`Pending filter ID ${pendingId} not found in loaded filters`);
-          pendingFilterIdRef.current = null;
-        }
+        // Don't fetch submissions here - the useEffect for snipeFilters will handle that
+        // with the correct filter already applied
+      } else {
+        // If no pending filter, fetch all submissions
+        setTimeout(() => {
+          fetchSubmissions(1);
+        }, 100);
       }
     } catch (err) {
       console.error('Error fetching snipes list:', err);
+      // If error, still fetch submissions with no filter
+      setTimeout(() => {
+        fetchSubmissions(1);
+      }, 100);
     } finally {
       setIsLoadingFilters(false);
-      // After filters are loaded, fetch submissions
-      fetchSubmissions(1);
     }
   };
 
@@ -211,9 +221,25 @@ export function SubmissionsTab() {
       let url = `/api/submissions?page=${pageNum}&limit=20`;
       if (selectedFilters.length > 0) {
         url += `&snipeIds=${selectedFilters.join(',')}`;
+        console.log(`Adding filter to URL: ${url}`);
+      } else {
+        console.log(`No filters applied, URL: ${url}`);
       }
       
-      const response = await fetch(url);
+      // Log the actual request being made
+      console.log(`Making API request to: ${url}`);
+      
+      // Add a timestamp parameter to prevent caching
+      url += `&_t=${new Date().getTime()}`;
+      
+      const response = await fetch(url, {
+        // Add cache control headers to prevent caching
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
       
       if (!response.ok) {
         throw new Error('Failed to fetch submissions');
