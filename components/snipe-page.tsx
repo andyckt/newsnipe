@@ -328,13 +328,20 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
   // Completed state
   if (appState === "completed") {
     return (
-      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
+      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center relative">
         <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen p-8 items-center justify-center text-center">
           <div className="text-6xl mb-4">✅</div>
           <h1 className="text-3xl font-bold mb-4">Thank You!</h1>
           <p className="text-lg mb-6">
             All {numRecordings} recordings have been completed successfully.
           </p>
+        </div>
+        
+        {/* Branding */}
+        <div className="absolute bottom-4 right-4 text-gray-400 text-base">
+          <span style={{ fontFamily: "'Century Gothic', 'CenturyGothic', 'AppleGothic', sans-serif" }}>
+            Powered by <span style={{ color: "#1649ff" }}>Snipe</span>
+          </span>
         </div>
       </div>
     )
