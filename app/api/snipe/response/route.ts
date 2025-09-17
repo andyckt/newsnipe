@@ -165,6 +165,14 @@ export async function PUT(request: Request) {
       updateData.status = status;
       if (status === 'completed') {
         updateData.completedAt = new Date();
+        
+        // Increment the submissions count in the Snipe document
+        await Snipe.findByIdAndUpdate(
+          response.snipeId,
+          { $inc: { submissions: 1 } }
+        );
+        
+        console.log(`Incremented submission count for Snipe ${response.snipeShortId}`);
       }
     }
     
