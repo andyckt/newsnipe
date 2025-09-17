@@ -468,7 +468,10 @@ export default function CameraRecorder() {
             </Button>
             */}
             
-            <Button
+            <button 
+              className={`text-white px-6 py-2 rounded-full relative transition-colors duration-300 ${
+                isCopied ? "bg-blue-500" : "bg-blue-500 hover:bg-blue-600"
+              }`}
               onClick={() => {
                 navigator.clipboard.writeText(`${typeof window !== 'undefined' ? window.location.origin : ''}/snipe/${createdShortId}`);
                 setIsCopied(true);
@@ -476,27 +479,22 @@ export default function CameraRecorder() {
                   setIsCopied(false);
                 }, 2000);
               }}
-              className={`relative px-6 py-2 rounded-full ${
-                isCopied ? "bg-blue-600 text-white" : "bg-blue-500 hover:bg-blue-600 text-white"
-              }`}
             >
-              {!isCopied ? (
-                <>Copy URL</>
-              ) : (
-                <>
-                  <span className="opacity-0">Copy URL</span>
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className="h-5 w-5 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-                    fill="none" 
-                    viewBox="0 0 24 24" 
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </>
-              )}
-            </Button>
+              <span className={`transition-all duration-300 ${isCopied ? "opacity-0" : "opacity-100"}`}>
+                Copy URL
+              </span>
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className={`h-5 w-5 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
+                  isCopied ? "opacity-100 scale-100" : "opacity-0 scale-75"
+                }`}
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </button>
             
             <Button
               onClick={() => setAppState("settings")}
