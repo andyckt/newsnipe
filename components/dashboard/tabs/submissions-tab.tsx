@@ -476,12 +476,12 @@ export function SubmissionsTab() {
         </div>
       )}
 
-      {/* Masonry Grid */}
+      {/* Regular Grid - 4 items per row */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
       >
         {submissions.map((video: SnipeVideo, index: number) => (
           <motion.div
@@ -489,7 +489,7 @@ export function SubmissionsTab() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="mb-6 break-inside-avoid"
+            className="w-full"
           >
             <Card 
               className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 rounded-3xl border-0 bg-white group"
@@ -507,10 +507,13 @@ export function SubmissionsTab() {
                 e.currentTarget.style.transition = 'transform 0.2s';
               }}
             >
-              {/* Thumbnail Container */}
+              {/* Thumbnail Container - 9:16 aspect ratio as requested */}
               <div
-                className="relative bg-gray-100 overflow-hidden"
-                style={{ aspectRatio: video.aspectRatio || "9/16" }}
+                className="relative bg-gray-100 overflow-hidden w-full"
+                style={{ 
+                  aspectRatio: "9/16",  // Restore original 9:16 aspect ratio
+                  objectFit: "cover"
+                }}
               >
                 <img
                   src={video.thumbnail || "/placeholder-user.jpg"}
