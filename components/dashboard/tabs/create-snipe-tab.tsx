@@ -175,8 +175,9 @@ export default function CameraRecorder() {
     completeSession
   } = mode === "question" ? questionRecording : conversationRecording
 
-  // State to store the created shortId
+  // State to store the created shortId and UI states
   const [createdShortId, setCreatedShortId] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
 
   // Handle launching the recorder with selected settings
   const handleLaunch = async (selectedNumRecordings: number, selectedLanguage: AudioLanguage, selectedTextInputs: TextInput[], selectedMode: "question" | "conversation", selectedTimeLimit: TimeLimit) => {
@@ -313,13 +314,31 @@ export default function CameraRecorder() {
                 className="flex-1 p-2 border border-gray-300 rounded-l-md bg-white"
               />
               <button 
-                className="bg-blue-500 text-white px-4 py-2 rounded-r-md"
+                className={`text-white px-4 py-2 rounded-r-md relative transition-colors duration-300 ${
+                  isCopied ? "bg-green-500" : "bg-blue-500 hover:bg-blue-600"
+                }`}
                 onClick={() => {
                   navigator.clipboard.writeText(`${typeof window !== 'undefined' ? window.location.origin : ''}/snipe/${createdShortId}`);
-                  alert('Link copied to clipboard!');
+                  setIsCopied(true);
+                  setTimeout(() => {
+                    setIsCopied(false);
+                  }, 2000);
                 }}
               >
-                Copy
+                <span className={`transition-all duration-300 ${isCopied ? "opacity-0" : "opacity-100"}`}>
+                  Copy
+                </span>
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  className={`h-5 w-5 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
+                    isCopied ? "opacity-100 scale-100" : "opacity-0 scale-75"
+                  }`}
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
               </button>
             </div>
           </div>
