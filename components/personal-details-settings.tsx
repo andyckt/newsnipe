@@ -356,9 +356,9 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
 
   return (
     <div className="w-full space-y-6">
+      {/* Personal Details section header commented out
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Personal Details Collection</h2>
-        {/* Toggle section commented out as requested - personal details always enabled
         <div className="flex items-center space-x-2">
           <Switch 
             id="include-personal-details"
@@ -369,8 +369,8 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
             {includePersonalDetails ? "Enabled" : "Disabled"}
           </Label>
         </div>
-        */}
       </div>
+      */}
 
       {includePersonalDetails && (
         <div className="space-y-4 animate-in fade-in duration-300">
