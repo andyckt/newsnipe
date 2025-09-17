@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Play, Loader2, Filter, X } from "lucide-react"
@@ -59,6 +59,47 @@ export function SubmissionsTab() {
   const [isLoadingFilters, setIsLoadingFilters] = useState(false)
   const [filterOpen, setFilterOpen] = useState(false)
   
+  // Reference to track if filters are loaded
+  const filtersLoadedRef = useRef(false);
+  
+  // Reference to store pending filter ID to apply
+  const pendingFilterIdRef = useRef<string | null>(null);
+  
+  // Function to apply filter with retry mechanism
+  const applyFilterWithRetry = useRef((filterId: string, maxRetries = 10, delay = 300) => {
+    let retryCount = 0;
+    
+    const attemptApply = () => {
+      // Check if filters are loaded and the filter ID exists in our filters
+      const filterExists = snipeFilters.some(filter => filter.id === filterId);
+      
+      if (filtersLoadedRef.current && filterExists) {
+        // Filters are loaded and the ID exists, apply the filter
+        console.log(`Applying filter ${filterId} (attempt ${retryCount + 1})`);
+        applySelectedSnipeFilter(filterId);
+        pendingFilterIdRef.current = null;
+        return true;
+      } else if (retryCount < maxRetries) {
+        // Retry after delay
+        retryCount++;
+        console.log(`Filter application attempt ${retryCount} failed, retrying in ${delay}ms...`);
+        setTimeout(attemptApply, delay);
+        return false;
+      } else {
+        // Max retries reached
+        console.error(`Failed to apply filter ${filterId} after ${maxRetries} attempts`);
+        pendingFilterIdRef.current = null;
+        return false;
+      }
+    };
+    
+    // Store the pending filter ID
+    pendingFilterIdRef.current = filterId;
+    
+    // Start the retry process
+    return attemptApply();
+  }).current;
+  
   // Fetch snipe filters when component mounts
   useEffect(() => {
     fetchSnipeFilters();
@@ -70,26 +111,20 @@ export function SubmissionsTab() {
     const handleNavigateToTab = (event: CustomEvent) => {
       if (event.detail?.snipeId) {
         // Apply the filter when we receive the navigation event
-        applySelectedSnipeFilter(event.detail.snipeId);
+        applyFilterWithRetry(event.detail.snipeId);
       }
     };
     
     // Add event listener
     window.addEventListener('navigateToTab', handleNavigateToTab as EventListener);
     
-    // If we have a selected filter in localStorage, apply it after filters are loaded
+    // If we have a selected filter in localStorage, prepare to apply it
     if (selectedSnipeFilter) {
-      // We'll apply the filter after the filters are loaded
-      const applyFilterTimer = setTimeout(() => {
-        applySelectedSnipeFilter(selectedSnipeFilter);
-        // Clear the localStorage item to prevent it from being applied again on future visits
-        localStorage.removeItem('selectedSnipeFilter');
-      }, 500); // Small delay to ensure filters are loaded
+      // Store it for application after filters are loaded
+      pendingFilterIdRef.current = selectedSnipeFilter;
       
-      return () => {
-        clearTimeout(applyFilterTimer);
-        window.removeEventListener('navigateToTab', handleNavigateToTab as EventListener);
-      };
+      // Clear the localStorage item to prevent it from being applied again on future visits
+      localStorage.removeItem('selectedSnipeFilter');
     }
     
     return () => {
@@ -123,6 +158,29 @@ export function SubmissionsTab() {
       }));
       
       setSnipeFilters(filters);
+      
+      // Mark filters as loaded
+      filtersLoadedRef.current = true;
+      
+      // Check if we have a pending filter to apply
+      if (pendingFilterIdRef.current) {
+        const pendingId = pendingFilterIdRef.current;
+        console.log(`Applying pending filter: ${pendingId}`);
+        
+        // Check if the filter exists in our loaded filters
+        const filterExists = filters.some((filter: SnipeFilter) => filter.id === pendingId);
+        
+        if (filterExists) {
+          // Apply the filter
+          setTimeout(() => {
+            applySelectedSnipeFilter(pendingId);
+            pendingFilterIdRef.current = null;
+          }, 100);
+        } else {
+          console.warn(`Pending filter ID ${pendingId} not found in loaded filters`);
+          pendingFilterIdRef.current = null;
+        }
+      }
     } catch (err) {
       console.error('Error fetching snipes list:', err);
     } finally {
