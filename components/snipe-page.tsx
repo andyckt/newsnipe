@@ -314,12 +314,19 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
   if (appState === "processing") {
     return (
       <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
-        <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen p-8 items-center justify-center text-center">
+        <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen p-8 items-center justify-center text-center relative">
           <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mb-6"></div>
           <h1 className="text-3xl font-bold mb-4">Processing...</h1>
           <p className="text-lg">
             Your recordings are being processed. This will only take a moment.
           </p>
+          
+          {/* Branding */}
+          <div className="absolute bottom-4 right-4 text-gray-400 text-base">
+            <span style={{ fontFamily: "'Century Gothic', 'CenturyGothic', 'AppleGothic', sans-serif" }}>
+              Powered by <span style={{ color: "#1649ff" }}>Snipe</span>
+            </span>
+          </div>
         </div>
       </div>
     )
