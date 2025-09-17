@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button"
 import { unlockAudio } from "@/lib/audio"
 import { initAudioContext } from "@/lib/mobile-audio"
 import PersonalDetailsCollector, { PersonalDetailField, PersonalDetailsConfig, PersonalDetailsResponse } from "@/components/personal-details-collector"
+import { Download } from "lucide-react"
+import QRCode from "qrcode"
 
 // App states
 type AppState = "settings" | "personal_details" | "recording" | "completed"
@@ -178,6 +180,95 @@ export default function CameraRecorder() {
   // State to store the created shortId and UI states
   const [createdShortId, setCreatedShortId] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [isGeneratingQR, setIsGeneratingQR] = useState(false);
+  
+  // Function to generate QR code with logo and rounded corners
+  const generateQRCode = async (url: string): Promise<string> => {
+    // Create a canvas element
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return "";
+    
+    // Set canvas size (larger for better quality)
+    const size = 400;
+    canvas.width = size;
+    canvas.height = size;
+    
+    // Generate the QR code on the canvas
+    const fullUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/snipe/${url}`;
+    await QRCode.toCanvas(canvas, fullUrl, {
+      errorCorrectionLevel: 'H', // High - allows for 30% of the QR code to be damaged
+      margin: 1,
+      width: size,
+      color: {
+        dark: '#000000',
+        light: '#ffffff'
+      }
+    });
+    
+    // Create a new canvas for our final QR code with rounded corners and logo
+    const finalCanvas = document.createElement("canvas");
+    const finalCtx = finalCanvas.getContext("2d");
+    if (!finalCtx) return "";
+    
+    finalCanvas.width = size;
+    finalCanvas.height = size;
+    
+    // Draw rounded rectangle background
+    finalCtx.fillStyle = "#ffffff";
+    roundRect(finalCtx, 0, 0, size, size, 20); // 20px border radius
+    finalCtx.fill();
+    
+    // Draw the QR code onto the final canvas (with slight margin for rounded corners)
+    const margin = 10;
+    finalCtx.drawImage(canvas, margin, margin, size - margin * 2, size - margin * 2);
+    
+    // Load and draw the logo in the center
+    const logoImg = new Image();
+    
+    // Return a promise that resolves when the logo is loaded and drawn
+    return new Promise((resolve, reject) => {
+      logoImg.onload = () => {
+        // Calculate logo size (about 20% of QR code)
+        const logoSize = size * 0.2;
+        const logoX = (size - logoSize) / 2;
+        const logoY = (size - logoSize) / 2;
+        
+        // Draw white background for logo
+        finalCtx.fillStyle = "#ffffff";
+        finalCtx.fillRect(logoX - 5, logoY - 5, logoSize + 10, logoSize + 10);
+        
+        // Draw the logo
+        finalCtx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+        
+        // Return the data URL of the final canvas
+        resolve(finalCanvas.toDataURL("image/png"));
+      };
+      
+      logoImg.onerror = () => {
+        // If logo fails to load, just return the QR code without logo
+        resolve(finalCanvas.toDataURL("image/png"));
+      };
+      
+      // Set the source of the logo
+      logoImg.src = "/forQRCode.png";
+    });
+  };
+  
+  // Helper function to draw rounded rectangles
+  const roundRect = (ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) => {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  };
 
   // Handle launching the recorder with selected settings
   const handleLaunch = async (selectedNumRecordings: number, selectedLanguage: AudioLanguage, selectedTextInputs: TextInput[], selectedMode: "question" | "conversation", selectedTimeLimit: TimeLimit) => {
@@ -343,12 +434,43 @@ export default function CameraRecorder() {
             </div>
           </div>
           
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4 justify-center">
             <Button
               onClick={() => window.open(`${typeof window !== 'undefined' ? window.location.origin : ''}/snipe/${createdShortId}`, '_blank')}
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full"
             >
               Open in New Tab
+            </Button>
+            
+            <Button
+              onClick={async () => {
+                try {
+                  setIsGeneratingQR(true);
+                  // Generate the QR code
+                  const dataUrl = await generateQRCode(createdShortId || "");
+                  
+                  // Create a download link
+                  const link = document.createElement("a");
+                  link.href = dataUrl;
+                  link.download = `snipe_qr_code.png`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                } catch (error) {
+                  console.error("Error generating QR code:", error);
+                } finally {
+                  setIsGeneratingQR(false);
+                }
+              }}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full flex items-center gap-2"
+              disabled={isGeneratingQR}
+            >
+              {isGeneratingQR ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              {isGeneratingQR ? "Generating..." : "Download QR Code"}
             </Button>
             
             <Button
