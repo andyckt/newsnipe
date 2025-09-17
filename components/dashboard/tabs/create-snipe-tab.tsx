@@ -181,6 +181,7 @@ export default function CameraRecorder() {
   const [createdShortId, setCreatedShortId] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
   const [isGeneratingQR, setIsGeneratingQR] = useState(false);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   
   // Function to generate QR code with logo and rounded corners
   const generateQRCode = async (url: string): Promise<string> => {
@@ -269,6 +270,25 @@ export default function CameraRecorder() {
     ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
   };
+
+  // Generate QR code when shortId is available
+  useEffect(() => {
+    const generateQRCodeForShortId = async () => {
+      if (createdShortId && appState === "completed") {
+        setIsGeneratingQR(true);
+        try {
+          const dataUrl = await generateQRCode(createdShortId);
+          setQrCodeDataUrl(dataUrl);
+        } catch (error) {
+          console.error("Error generating QR code:", error);
+        } finally {
+          setIsGeneratingQR(false);
+        }
+      }
+    };
+    
+    generateQRCodeForShortId();
+  }, [createdShortId, appState]);
 
   // Handle launching the recorder with selected settings
   const handleLaunch = async (selectedNumRecordings: number, selectedLanguage: AudioLanguage, selectedTextInputs: TextInput[], selectedMode: "question" | "conversation", selectedTimeLimit: TimeLimit) => {
@@ -384,9 +404,6 @@ export default function CameraRecorder() {
   if (appState === "completed") {
     return (
       <div className="flex flex-col h-full w-full space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold">Snipe Created</h2>
-        </div>
         
         <div className="rounded-3xl border bg-white p-8 flex flex-col items-center justify-center text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
@@ -395,82 +412,90 @@ export default function CameraRecorder() {
             </svg>
           </div>
           <h1 className="text-3xl font-bold mb-6">Snipe Created Successfully!</h1>
-          <div className="bg-gray-50 p-4 rounded-lg w-full max-w-lg mb-6">
-            <p className="text-sm text-gray-500 mb-2">Share this link with participants:</p>
-            <div className="flex">
-              <input 
-                type="text" 
-                readOnly 
-                value={`${typeof window !== 'undefined' ? window.location.origin : ''}/snipe/${createdShortId}`}
-                className="flex-1 p-2 border border-gray-300 rounded-l-md bg-white"
-              />
-              <button 
-                className={`text-white px-4 py-2 rounded-r-md relative transition-colors duration-300 ${
-                  isCopied ? "bg-blue-600" : "bg-blue-500 hover:bg-blue-600"
-                }`}
+          <div className="bg-gray-50 p-6 rounded-lg w-full max-w-lg mb-6">
+            <p className="text-sm text-gray-500 mb-4">Share this QR code with participants:</p>
+            
+            <div className="flex flex-col items-center space-y-4">
+              {/* QR Code Display */}
+              <div className="relative w-48 h-48 mb-2">
+                {isGeneratingQR ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+                  </div>
+                ) : qrCodeDataUrl ? (
+                  <img 
+                    src={qrCodeDataUrl} 
+                    alt="QR Code for Snipe" 
+                    className="w-full h-full object-contain rounded-lg shadow-sm" 
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+                    <p className="text-sm text-gray-500">QR Code unavailable</p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Download QR Code Button (moved up) */}
+              <Button
                 onClick={() => {
-                  navigator.clipboard.writeText(`${typeof window !== 'undefined' ? window.location.origin : ''}/snipe/${createdShortId}`);
-                  setIsCopied(true);
-                  setTimeout(() => {
-                    setIsCopied(false);
-                  }, 2000);
+                  if (qrCodeDataUrl) {
+                    // Create a download link
+                    const link = document.createElement("a");
+                    link.href = qrCodeDataUrl;
+                    link.download = `snipe_qr_code.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }
                 }}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full flex items-center gap-2"
+                disabled={isGeneratingQR || !qrCodeDataUrl}
               >
-                <span className={`transition-all duration-300 ${isCopied ? "opacity-0" : "opacity-100"}`}>
-                  Copy
-                </span>
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className={`h-5 w-5 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
-                    isCopied ? "opacity-100 scale-100" : "opacity-0 scale-75"
-                  }`}
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </button>
+                <Download className="h-4 w-4" />
+                Download QR Code
+              </Button>
+              
             </div>
           </div>
           
           <div className="flex flex-wrap gap-4 justify-center">
+            {/* "Open in New Tab" button commented out as requested
             <Button
               onClick={() => window.open(`${typeof window !== 'undefined' ? window.location.origin : ''}/snipe/${createdShortId}`, '_blank')}
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full"
             >
               Open in New Tab
             </Button>
+            */}
             
             <Button
-              onClick={async () => {
-                try {
-                  setIsGeneratingQR(true);
-                  // Generate the QR code
-                  const dataUrl = await generateQRCode(createdShortId || "");
-                  
-                  // Create a download link
-                  const link = document.createElement("a");
-                  link.href = dataUrl;
-                  link.download = `snipe_qr_code.png`;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                } catch (error) {
-                  console.error("Error generating QR code:", error);
-                } finally {
-                  setIsGeneratingQR(false);
-                }
+              onClick={() => {
+                navigator.clipboard.writeText(`${typeof window !== 'undefined' ? window.location.origin : ''}/snipe/${createdShortId}`);
+                setIsCopied(true);
+                setTimeout(() => {
+                  setIsCopied(false);
+                }, 2000);
               }}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full flex items-center gap-2"
-              disabled={isGeneratingQR}
+              className={`relative px-6 py-2 rounded-full ${
+                isCopied ? "bg-blue-600 text-white" : "bg-blue-500 hover:bg-blue-600 text-white"
+              }`}
             >
-              {isGeneratingQR ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+              {!isCopied ? (
+                <>Copy URL</>
               ) : (
-                <Download className="h-4 w-4" />
+                <>
+                  <span className="opacity-0">Copy URL</span>
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className="h-5 w-5 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </>
               )}
-              {isGeneratingQR ? "Generating..." : "Download QR Code"}
             </Button>
             
             <Button
