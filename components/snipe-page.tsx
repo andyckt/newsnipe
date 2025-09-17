@@ -263,9 +263,9 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
     return (
       <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
         <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen p-8 items-center justify-center text-center">
-          <h1 className="text-3xl font-bold mb-4">Loading...</h1>
+          <h1 className="text-3xl font-bold mb-4">Loading Snipe...</h1>
           <p className="text-lg">
-            Please wait while we prepare your recording session.
+            Please wait while we prepare your snipe.
           </p>
         </div>
       </div>
