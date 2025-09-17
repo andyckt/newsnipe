@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { toast } from "@/components/ui/use-toast"
+import { SnipeQuestionsDialog } from "@/components/snipe-questions-dialog"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +30,21 @@ interface CreatedSnipe {
   status: "active" | "draft" | "completed"
   submissions: number
   url: string
+  textInputs?: Array<{
+    id: string
+    value: string
+    timeLimit?: string
+  }>
+  personalDetailsConfig?: {
+    includePersonalDetails: boolean
+    personalFields: Array<{
+      id: string
+      label: string
+      type: string
+      required: boolean
+      dropdownOptions?: string[]
+    }>
+  }
 }
 
 interface MySnipeTabProps {
@@ -42,6 +58,8 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false)
   const [snipeToDelete, setSnipeToDelete] = useState<CreatedSnipe | null>(null)
   const [isDeleting, setIsDeleting] = useState<boolean>(false)
+  const [questionsDialogOpen, setQuestionsDialogOpen] = useState<boolean>(false)
+  const [selectedSnipe, setSelectedSnipe] = useState<CreatedSnipe | null>(null)
   
   useEffect(() => {
     async function fetchUserSnipes() {
@@ -318,10 +336,18 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
                       {snipe.language === "english" ? "English" : "Mandarin"}
                     </div>
 
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <FileText className="h-4 w-4 mr-2" />
-                      {snipe.questionsCount} questions
-                      {snipe.personalDetailsEnabled && " + Personal details"}
+                    <div 
+                      className="flex items-center text-sm text-muted-foreground hover:text-blue-600 transition-colors cursor-pointer group"
+                      onClick={() => {
+                        setSelectedSnipe(snipe);
+                        setQuestionsDialogOpen(true);
+                      }}
+                    >
+                      <FileText className="h-4 w-4 mr-2 group-hover:text-blue-600 transition-colors" />
+                      <span>
+                        {snipe.questionsCount} questions
+                        {snipe.personalDetailsEnabled && " + Personal details"}
+                      </span>
                     </div>
 
                     <div className="flex items-center text-sm text-muted-foreground">
@@ -390,6 +416,17 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      {/* Questions and Personal Details Dialog */}
+      {selectedSnipe && (
+        <SnipeQuestionsDialog
+          open={questionsDialogOpen}
+          onOpenChange={setQuestionsDialogOpen}
+          title={selectedSnipe.title}
+          questions={selectedSnipe.textInputs || []}
+          personalFields={selectedSnipe.personalDetailsConfig?.personalFields || []}
+        />
+      )}
     </div>
   )
 }

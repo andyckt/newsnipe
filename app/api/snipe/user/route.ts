@@ -45,7 +45,13 @@ export async function GET(request: Request) {
         createdAt: snipeData.createdAt,
         status: 'active', // Default status
         submissions: snipeData.submissions || 0,
-        url: snipeData.shortId
+        url: snipeData.shortId,
+        // Include the detailed data needed for the dialog
+        textInputs: snipeData.textInputs || [],
+        personalDetailsConfig: snipeData.personalDetailsConfig || {
+          includePersonalDetails: false,
+          personalFields: []
+        }
       };
     });
     
