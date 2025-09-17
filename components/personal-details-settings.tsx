@@ -212,7 +212,8 @@ function SortableField({
 }
 
 export default function PersonalDetailsSettings({ config, onConfigChange }: PersonalDetailsSettingsProps) {
-  const [includePersonalDetails, setIncludePersonalDetails] = useState(config.includePersonalDetails)
+  // Always keep personal details enabled by default
+  const [includePersonalDetails, setIncludePersonalDetails] = useState(true)
   const [personalFields, setPersonalFields] = useState<PersonalDetailField[]>(config.personalFields)
   
   // Set up sensors for drag and drop
@@ -229,6 +230,8 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
     })
   )
 
+  // Function commented out as toggle is now disabled
+  /*
   const handleToggleIncludePersonalDetails = () => {
     const newValue = !includePersonalDetails
     setIncludePersonalDetails(newValue)
@@ -237,6 +240,7 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
       personalFields
     })
   }
+  */
 
   const handleAddField = () => {
     const newField: PersonalDetailField = {
@@ -248,7 +252,7 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
     const newFields = [...personalFields, newField]
     setPersonalFields(newFields)
     onConfigChange({
-      includePersonalDetails,
+      includePersonalDetails: true, // Always keep it enabled
       personalFields: newFields
     })
   }
@@ -257,7 +261,7 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
     const newFields = personalFields.filter(field => field.id !== id)
     setPersonalFields(newFields)
     onConfigChange({
-      includePersonalDetails,
+      includePersonalDetails: true, // Always keep it enabled
       personalFields: newFields
     })
   }
@@ -268,7 +272,7 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
     )
     setPersonalFields(newFields)
     onConfigChange({
-      includePersonalDetails,
+      includePersonalDetails: true, // Always keep it enabled
       personalFields: newFields
     })
   }
@@ -290,7 +294,7 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
     const newFields = arrayMove(personalFields, oldIndex, newIndex)
     setPersonalFields(newFields)
     onConfigChange({
-      includePersonalDetails,
+      includePersonalDetails: true, // Always keep it enabled
       personalFields: newFields
     })
   }
@@ -308,7 +312,7 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
     })
     setPersonalFields(newFields)
     onConfigChange({
-      includePersonalDetails,
+      includePersonalDetails: true, // Always keep it enabled
       personalFields: newFields
     })
   }
@@ -327,7 +331,7 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
     })
     setPersonalFields(newFields)
     onConfigChange({
-      includePersonalDetails,
+      includePersonalDetails: true, // Always keep it enabled
       personalFields: newFields
     })
   }
@@ -345,7 +349,7 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
     })
     setPersonalFields(newFields)
     onConfigChange({
-      includePersonalDetails,
+      includePersonalDetails: true, // Always keep it enabled
       personalFields: newFields
     })
   }
@@ -354,6 +358,7 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
     <div className="w-full space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Personal Details Collection</h2>
+        {/* Toggle section commented out as requested - personal details always enabled
         <div className="flex items-center space-x-2">
           <Switch 
             id="include-personal-details"
@@ -364,6 +369,7 @@ export default function PersonalDetailsSettings({ config, onConfigChange }: Pers
             {includePersonalDetails ? "Enabled" : "Disabled"}
           </Label>
         </div>
+        */}
       </div>
 
       {includePersonalDetails && (
