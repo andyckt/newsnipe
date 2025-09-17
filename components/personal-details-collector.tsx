@@ -150,7 +150,7 @@ export default function PersonalDetailsCollector({ config, onComplete, shortId }
           <Input
             value={currentResponse as string}
             onChange={(e) => setCurrentResponse(e.target.value)}
-            placeholder={`Enter ${currentField.label.toLowerCase()}`}
+            placeholder="Enter here"
             className="w-full text-lg p-4 h-14"
             autoFocus
           />
@@ -184,7 +184,7 @@ export default function PersonalDetailsCollector({ config, onComplete, shortId }
               onValueChange={setCurrentResponse as (value: string) => void}
             >
               <SelectTrigger className="w-full text-lg p-4 h-14">
-                <SelectValue placeholder={`Select ${currentField.label.toLowerCase()}`} />
+                <SelectValue placeholder="Select here" />
               </SelectTrigger>
               <SelectContent>
                 {currentField.dropdownOptions?.map((option, index) => (
