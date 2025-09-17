@@ -213,13 +213,20 @@ export default function PersonalDetailsCollector({ config, onComplete, shortId }
   }
 
   return (
-    <div className="flex flex-col h-full w-full bg-white">
+    <div className="flex flex-col h-full w-full bg-white relative">
       {/* Progress bar */}
       <div className="w-full h-1 bg-gray-100">
         <div 
           className="h-full bg-blue-500 transition-all duration-500 ease-in-out" 
           style={{ width: `${progress}%` }} 
         />
+      </div>
+      
+      {/* Branding */}
+      <div className="absolute bottom-4 right-4 text-gray-400 text-xs">
+        <span style={{ fontFamily: "'Century Gothic', 'CenturyGothic', 'AppleGothic', sans-serif" }}>
+          Powered by Snipe
+        </span>
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center p-8 max-w-lg mx-auto w-full">
