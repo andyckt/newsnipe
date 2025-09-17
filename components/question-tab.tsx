@@ -124,7 +124,8 @@ function SortableTextInput({
                 {input.timeLimit === "1_minute" && "1m"}
                 {input.timeLimit === "2_minutes" && "2m"}
                 {input.timeLimit === "3_minutes" && "3m"}
-                {input.timeLimit === "5_minutes" && "5m"}
+                {/* Temporarily removed 5 minutes option */}
+                {/* {input.timeLimit === "5_minutes" && "5m"} */}
                 {(!input.timeLimit || input.timeLimit === "no_limit") && "No limit"}
               </SelectValue>
             </SelectTrigger>
@@ -134,7 +135,8 @@ function SortableTextInput({
               <SelectItem value="1_minute">1 minute</SelectItem>
               <SelectItem value="2_minutes">2 minutes</SelectItem>
               <SelectItem value="3_minutes">3 minutes</SelectItem>
-              <SelectItem value="5_minutes">5 minutes</SelectItem>
+              {/* Temporarily removed 5 minutes option */}
+              {/* <SelectItem value="5_minutes">5 minutes</SelectItem> */}
             </SelectContent>
           </Select>
         </div>
