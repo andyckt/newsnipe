@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { toast } from "@/components/ui/use-toast"
 import { SnipeQuestionsDialog } from "@/components/snipe-questions-dialog"
+import QRCode from "qrcode"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -101,34 +102,91 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
     }
   }
 
-  const generateQRCode = (url: string, canvas: HTMLCanvasElement) => {
+  const generateQRCode = async (url: string): Promise<string> => {
+    // Create a canvas element
+    const canvas = document.createElement("canvas")
     const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    canvas.width = 200
-    canvas.height = 200
-
-    ctx.fillStyle = "#000000"
-    ctx.fillRect(0, 0, 200, 200)
-    ctx.fillStyle = "#ffffff"
-
-    for (let i = 0; i < 20; i++) {
-      for (let j = 0; j < 20; j++) {
-        if ((i + j) % 3 === 0) {
-          ctx.fillRect(i * 10, j * 10, 8, 8)
-        }
+    if (!ctx) return ""
+    
+    // Set canvas size (larger for better quality)
+    const size = 400
+    canvas.width = size
+    canvas.height = size
+    
+    // Generate the QR code on the canvas
+    const fullUrl = `${window.location.origin}/snipe/${url}`
+    await QRCode.toCanvas(canvas, fullUrl, {
+      errorCorrectionLevel: 'H', // High - allows for 30% of the QR code to be damaged
+      margin: 1,
+      width: size,
+      color: {
+        dark: '#000000',
+        light: '#ffffff'
       }
-    }
-
-    ctx.fillStyle = "#000000"
-    ctx.fillRect(10, 10, 30, 30)
-    ctx.fillRect(160, 10, 30, 30)
-    ctx.fillRect(10, 160, 30, 30)
-
-    ctx.fillStyle = "#ffffff"
-    ctx.fillRect(15, 15, 20, 20)
-    ctx.fillRect(165, 15, 20, 20)
-    ctx.fillRect(15, 165, 20, 20)
+    })
+    
+    // Create a new canvas for our final QR code with rounded corners and logo
+    const finalCanvas = document.createElement("canvas")
+    const finalCtx = finalCanvas.getContext("2d")
+    if (!finalCtx) return ""
+    
+    finalCanvas.width = size
+    finalCanvas.height = size
+    
+    // Draw rounded rectangle background
+    finalCtx.fillStyle = "#ffffff"
+    roundRect(finalCtx, 0, 0, size, size, 20) // 20px border radius
+    finalCtx.fill()
+    
+    // Draw the QR code onto the final canvas (with slight margin for rounded corners)
+    const margin = 10
+    finalCtx.drawImage(canvas, margin, margin, size - margin * 2, size - margin * 2)
+    
+    // Load and draw the logo in the center
+    const logoImg = new Image()
+    
+    // Return a promise that resolves when the logo is loaded and drawn
+    return new Promise((resolve, reject) => {
+      logoImg.onload = () => {
+        // Calculate logo size (about 20% of QR code)
+        const logoSize = size * 0.2
+        const logoX = (size - logoSize) / 2
+        const logoY = (size - logoSize) / 2
+        
+        // Draw white background for logo
+        finalCtx.fillStyle = "#ffffff"
+        finalCtx.fillRect(logoX - 5, logoY - 5, logoSize + 10, logoSize + 10)
+        
+        // Draw the logo
+        finalCtx.drawImage(logoImg, logoX, logoY, logoSize, logoSize)
+        
+        // Return the data URL of the final canvas
+        resolve(finalCanvas.toDataURL("image/png"))
+      }
+      
+      logoImg.onerror = () => {
+        // If logo fails to load, just return the QR code without logo
+        resolve(finalCanvas.toDataURL("image/png"))
+      }
+      
+      // Set the source of the logo
+      logoImg.src = "/forQRCode.png"
+    })
+  }
+  
+  // Helper function to draw rounded rectangles
+  const roundRect = (ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) => {
+    ctx.beginPath()
+    ctx.moveTo(x + radius, y)
+    ctx.lineTo(x + width - radius, y)
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius)
+    ctx.lineTo(x + width, y + height - radius)
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
+    ctx.lineTo(x + radius, y + height)
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius)
+    ctx.lineTo(x, y + radius)
+    ctx.quadraticCurveTo(x, y, x + radius, y)
+    ctx.closePath()
   }
 
   const copyToClipboard = async (url: string, title: string) => {
@@ -152,27 +210,41 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
     }
   }
 
-  const downloadQRCode = (url: string, title: string) => {
-    const canvas = document.createElement("canvas")
-    generateQRCode(url, canvas)
-
-    canvas.toBlob((blob) => {
-      if (blob) {
-        const downloadUrl = URL.createObjectURL(blob)
-        const link = document.createElement("a")
-        link.href = downloadUrl
-        link.download = `${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_qr_code.png`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        URL.revokeObjectURL(downloadUrl)
-
-        toast({
-          title: "QR Code Downloaded!",
-          description: `QR code for "${title}" saved to your device`,
-        })
-      }
-    })
+  const downloadQRCode = async (url: string, title: string) => {
+    try {
+      // Show loading toast
+      toast({
+        title: "Generating QR Code...",
+        description: "Please wait while we create your branded QR code",
+        duration: 2000,
+      })
+      
+      // Generate the QR code with logo and rounded corners
+      const dataUrl = await generateQRCode(url)
+      
+      // Create a download link
+      const link = document.createElement("a")
+      link.href = dataUrl
+      link.download = `${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_qr_code.png`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Show success toast
+      toast({
+        title: "QR Code Downloaded!",
+        description: `Branded QR code for "${title}" saved to your device`,
+        className: "rounded-3xl",
+      })
+    } catch (error) {
+      console.error("Error generating QR code:", error)
+      toast({
+        title: "QR Code Generation Failed",
+        description: "Unable to generate QR code. Please try again.",
+        variant: "destructive",
+        className: "rounded-3xl",
+      })
+    }
   }
   
   const handleDeleteClick = (snipe: CreatedSnipe) => {
