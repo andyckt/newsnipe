@@ -78,7 +78,22 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
     thumbnailKey?: string;
     thumbnailUrl?: string;
     duration?: number;
+    pending?: boolean; // Track if this recording is pending upload
   }>>([])
+
+  // Initialize the recordings array with placeholders for each recording position
+  useEffect(() => {
+    // Only initialize if the array is empty or if totalRecordings changed
+    if (recordingsRef.current.length !== totalRecordings) {
+      console.log(`[init] Initializing recordings array with ${totalRecordings} placeholders`);
+      // Create an array of the correct size with placeholder entries
+      recordingsRef.current = Array.from({ length: totalRecordings }, (_, index) => ({
+        questionId: '', // Will be filled when recording starts
+        recordingIndex: index,
+        pending: false
+      }));
+    }
+  }, [totalRecordings])
   
   // Track pending uploads
   const pendingUploadsRef = useRef<Promise<any>[]>([])
@@ -102,18 +117,20 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
     // Get a unique recording index for this recording
     const uniqueIndex = nextUniqueIndexRef.current++;
     
-    // Get the original question ID for one-to-one mapping
-    let recordingId = textInputsRef.current.length > currentRecordingIndex 
+    // Get the original question ID from the text inputs
+    const originalQuestionId = textInputsRef.current.length > currentRecordingIndex 
       ? textInputsRef.current[currentRecordingIndex].id 
       : `question-${currentRecordingIndex + 1}`
-      
-    // Get the current question ID - ensure it's unique by appending uniqueIndex
-    let questionId = textInputsRef.current.length > currentRecordingIndex 
-      ? textInputsRef.current[currentRecordingIndex].id 
-      : `question-${currentRecordingIndex + 1}`
-      
-    // Ensure questionId is unique by appending the uniqueIndex
-    questionId = `${questionId}-${uniqueIndex}`
+    
+    // Mark this position in the recordings array as pending upload
+    if (recordingsRef.current[currentRecordingIndex]) {
+      console.log(`[handleRecordingComplete] Marking recording ${currentRecordingIndex + 1} as pending upload with questionId: ${originalQuestionId}`);
+      recordingsRef.current[currentRecordingIndex].questionId = originalQuestionId;
+      recordingsRef.current[currentRecordingIndex].pending = true;
+    }
+    
+    // Create a unique upload ID for tracking if needed
+    const uploadId = `${originalQuestionId}-${uniqueIndex}`
     
     // Try to get responseId from window object if not provided
     let effectiveResponseId = responseId;
@@ -145,30 +162,36 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
           const { videoKey, videoUrl, thumbnailKey, thumbnailUrl } = await uploadVideoRecording(
             blob,
             effectiveResponseId!,
-            questionId,
+            uploadId,
             currentRecordingIndex
           )
           
           console.log(`Recording ${currentRecordingIndex + 1} uploaded to S3:`, { videoKey, thumbnailKey })
           
-          // Store the recording metadata
-          recordingsRef.current.push({
-            questionId,
-            recordingId, // Original question ID for one-to-one mapping
-            recordingIndex: uniqueIndex, // Use uniqueIndex instead of currentRecordingIndex
-            videoKey,
-            videoUrl,
-            thumbnailKey,
-            thumbnailUrl,
-            duration: blob.size > 0 ? 0 : undefined // We don't know the duration yet
-          })
+          // Update the recording metadata at the correct position
+          if (recordingsRef.current[currentRecordingIndex]) {
+            console.log(`[uploadComplete] Updating recording ${currentRecordingIndex + 1} with upload results`);
+            // Update the existing entry with upload results
+            recordingsRef.current[currentRecordingIndex] = {
+              ...recordingsRef.current[currentRecordingIndex],
+              questionId: originalQuestionId, // Use the original question ID
+              videoKey,
+              videoUrl,
+              thumbnailKey,
+              thumbnailUrl,
+              duration: blob.size > 0 ? 0 : undefined, // We don't know the duration yet
+              pending: false // Mark as no longer pending
+            };
+          } else {
+            console.warn(`[uploadComplete] Could not find recording at index ${currentRecordingIndex} in recordings array`);
+          }
           
           return { success: true, recordingIndex: currentRecordingIndex }
         } catch (error) {
           console.error('Error uploading recording to S3:', error)
-          console.warn(`No responseId available, falling back to download`, { questionId });
+          console.warn(`No responseId available, falling back to download`, { originalQuestionId });
           // Fall back to downloading the file
-          downloadRecordingFallback(blob, questionId, uniqueIndex)
+          downloadRecordingFallback(blob, originalQuestionId, currentRecordingIndex)
           return { success: false, recordingIndex: currentRecordingIndex }
         }
       })()
@@ -177,8 +200,8 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
       pendingUploadsRef.current.push(uploadPromise)
     } else {
       // No responseId, so fall back to downloading
-      console.warn(`No responseId available, falling back to download`, { questionId });
-      downloadRecordingFallback(blob, questionId, uniqueIndex)
+      console.warn(`No responseId available, falling back to download`, { originalQuestionId });
+      downloadRecordingFallback(blob, originalQuestionId, currentRecordingIndex)
     }
     
     // Clear chunks for next recording
@@ -186,7 +209,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
   }
   
   // Fallback function to download recording if S3 upload fails
-  const downloadRecordingFallback = (blob: Blob, questionId: string, uniqueIndex: number) => {
+  const downloadRecordingFallback = (blob: Blob, originalQuestionId: string, recordingIdx: number) => {
     // Determine the correct file extension based on MIME type
     let fileExtension = "webm";
     if (blob.type.includes('mp4')) fileExtension = "mp4";
@@ -209,12 +232,18 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
       window.URL.revokeObjectURL(url)
     }, 100)
     
-    // Store minimal recording metadata
-    recordingsRef.current.push({
-      questionId,
-      recordingId, // Original question ID for one-to-one mapping
-      recordingIndex: uniqueIndex // Use uniqueIndex instead of currentRecordingIndex
-    })
+    // Update the recording metadata at the correct position
+    if (recordingsRef.current[recordingIdx]) {
+      console.log(`[downloadFallback] Updating recording ${recordingIdx + 1} with download results`);
+      // Update the existing entry with minimal metadata
+      recordingsRef.current[recordingIdx] = {
+        ...recordingsRef.current[recordingIdx],
+        questionId: originalQuestionId, // Use the original question ID
+        pending: false // Mark as no longer pending
+      };
+    } else {
+      console.warn(`[downloadFallback] Could not find recording at index ${recordingIdx} in recordings array`);
+    }
   }
 
   // Helper function to play the appropriate audio for a specific recording index
@@ -565,9 +594,15 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
         return acc;
       }, []);
       
-      console.log(`Submitting ${uniqueRecordings.length} recordings to the database:`)
+      // Log the original recordings array for debugging
+      console.log(`[submitRecordings] Original recordings array (${recordingsRef.current.length} items):`)
+      recordingsRef.current.forEach((rec, i) => {
+        console.log(`[submitRecordings] Original Recording ${i + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}, pending=${rec.pending}`)
+      })
+      
+      console.log(`[submitRecordings] Submitting ${uniqueRecordings.length} recordings to the database:`)
       uniqueRecordings.forEach((rec, i) => {
-        console.log(`Recording ${i + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}`)
+        console.log(`[submitRecordings] Final Recording ${i + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}`)
       })
       
       // Submit the recordings to the API
