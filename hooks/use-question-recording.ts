@@ -163,8 +163,9 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
           const { videoKey, videoUrl, thumbnailKey, thumbnailUrl } = await uploadVideoRecording(
             blob,
             effectiveResponseId!,
-            uploadId,
-            recordingIdx
+            originalQuestionId, // Use originalQuestionId instead of uploadId
+            recordingIdx,
+            uploadId // Pass uploadId as recordingId for tracking
           )
           
           console.log(`Recording ${recordingIdx + 1} uploaded to S3:`, { videoKey, thumbnailKey })
