@@ -153,7 +153,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
           recordingsRef.current.push({
             questionId,
             recordingId, // Original question ID for one-to-one mapping
-            recordingIndex: uniqueIndex, // Use uniqueIndex instead of currentRecordingIndex
+            recordingIndex: currentRecordingIndex, // Use the actual recording index instead of uniqueIndex
             videoKey,
             videoUrl,
             thumbnailKey,
@@ -211,7 +211,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
     recordingsRef.current.push({
       questionId,
       recordingId, // Original question ID for one-to-one mapping
-      recordingIndex: uniqueIndex // Use uniqueIndex instead of currentRecordingIndex
+      recordingIndex: currentRecordingIndex // Use the actual recording index instead of uniqueIndex
     })
   }
 
