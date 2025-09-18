@@ -56,7 +56,7 @@ export function SettingsScreen({ onLaunch, personalDetailsConfig, onPersonalDeta
       >
         <TabsList className="grid w-full grid-cols-2 mb-8">
           <TabsTrigger value="personal_details">Personal Details</TabsTrigger>
-          <TabsTrigger value="question">By Question</TabsTrigger>
+          <TabsTrigger value="question">Snipe Questions</TabsTrigger>
           {/* Conversation mode temporarily disabled until future implementation */}
           {/* <TabsTrigger value="conversation">By Conversation</TabsTrigger> */}
         </TabsList>
