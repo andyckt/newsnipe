@@ -44,31 +44,53 @@ export function VideoPlayerDialog({
   const [isHovering, setIsHovering] = useState(false)
   const [isLoadingVideo, setIsLoadingVideo] = useState(false)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   
   const currentVideo = videos[selectedVideoIndex]
   
   const handlePrevVideo = () => {
     if (selectedVideoIndex > 0) {
-      onVideoChange(selectedVideoIndex - 1)
+      setIsTransitioning(true)
+      // Short delay to allow animation to complete
+      setTimeout(() => {
+        onVideoChange(selectedVideoIndex - 1)
+        setIsTransitioning(false)
+      }, 300)
     }
   }
   
   const handleNextVideo = () => {
     if (selectedVideoIndex < videos.length - 1) {
-      onVideoChange(selectedVideoIndex + 1)
+      setIsTransitioning(true)
+      // Short delay to allow animation to complete
+      setTimeout(() => {
+        onVideoChange(selectedVideoIndex + 1)
+        setIsTransitioning(false)
+      }, 300)
     }
   }
   
-  // Handle escape key to close dialog
+  // Handle keyboard navigation
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Close dialog on Escape
       if (e.key === "Escape") onClose()
+      
+      // Navigate to previous video on ArrowUp
+      if (e.key === "ArrowUp" && selectedVideoIndex > 0) {
+        handlePrevVideo()
+      }
+      
+      // Navigate to next video on ArrowDown
+      if (e.key === "ArrowDown" && selectedVideoIndex < videos.length - 1) {
+        handleNextVideo()
+      }
     }
     
-    window.addEventListener("keydown", handleEscape)
-    return () => window.removeEventListener("keydown", handleEscape)
-  }, [onClose])
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [onClose, selectedVideoIndex, videos.length])
   
   // Process video key when video changes
   useEffect(() => {
@@ -177,14 +199,21 @@ export function VideoPlayerDialog({
                     <span className="ml-2 text-white">Loading video...</span>
                   </div>
                 ) : videoUrl ? (
-                  <video
-                    ref={videoRef}
-                    src={videoUrl}
-                    className="w-full h-full object-contain"
-                    controls
-                    playsInline
-                    controlsList="nodownload"
-                  />
+                  <motion.div
+                    initial={{ opacity: 1 }}
+                    animate={{ opacity: isTransitioning ? 0 : 1 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="w-full h-full"
+                  >
+                    <video
+                      ref={videoRef}
+                      src={videoUrl}
+                      className="w-full h-full object-contain"
+                      controls
+                      playsInline
+                      controlsList="nodownload"
+                    />
+                  </motion.div>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-black flex-col">
                     <div className="text-white mb-2">Unable to load video</div>
@@ -292,6 +321,15 @@ export function VideoPlayerDialog({
               
               {/* Video selection tabs */}
               <div className="mb-4">
+                {videos.length > 1 && (
+                  <div className="flex items-center justify-center mb-3 text-xs text-gray-500">
+                    <span className="inline-flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md">
+                      <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-gray-600 font-mono">↑</kbd>
+                      <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-gray-600 font-mono">↓</kbd>
+                      <span>Use up/down arrows to navigate</span>
+                    </span>
+                  </div>
+                )}
                 <div className="flex flex-col gap-2 max-h-[180px] overflow-y-auto pr-2">
                   {videos.map((video, index) => (
                     <button
