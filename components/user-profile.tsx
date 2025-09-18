@@ -66,10 +66,11 @@ export default function UserProfile() {
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => router.push('/profile')}>
+          {/* Commented out Profile option */}
+          {/* <DropdownMenuItem onClick={() => router.push('/profile')}>
             <User className="mr-2 h-4 w-4" />
             <span>Profile</span>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
           <DropdownMenuItem onClick={() => {
             // Find the parent component that has setActiveMenu
             // This is a custom event to communicate with the parent DesignaliCreative component
@@ -79,10 +80,11 @@ export default function UserProfile() {
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => window.open('/help', '_blank')}>
+          {/* Commented out Help & Support option */}
+          {/* <DropdownMenuItem onClick={() => window.open('/help', '_blank')}>
             <HelpCircle className="mr-2 h-4 w-4" />
             <span>Help & Support</span>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
           <DropdownMenuSeparator />
           <DropdownMenuItem 
             onClick={handleSignOut}
