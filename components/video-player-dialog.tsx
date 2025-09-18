@@ -324,15 +324,6 @@ export function VideoPlayerDialog({
               
               {/* Video selection tabs */}
               <div className="mb-4">
-                {videos.length > 1 && (
-                  <div className="flex items-center justify-center mb-3 text-xs text-gray-500">
-                    <span className="inline-flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md">
-                      <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-gray-600 font-mono">↑</kbd>
-                      <kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded text-gray-600 font-mono">↓</kbd>
-                      <span>Use up/down arrows to navigate</span>
-                    </span>
-                  </div>
-                )}
                 <div className="flex flex-col gap-2 max-h-[180px] overflow-y-auto pr-2">
                   {videos.map((video, index) => (
                     <button
