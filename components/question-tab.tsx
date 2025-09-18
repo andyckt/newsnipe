@@ -390,8 +390,8 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
 
       
       <div className="flex flex-col mb-12 w-full">
-        <h2 className="text-xl font-semibold mb-2">Custom Text Fields</h2>
-        <p className="text-sm text-gray-500 mb-6">Each text field will correspond to one recording. Drag to reorder.</p>
+        <h2 className="text-xl font-semibold mb-2">Questions</h2>
+        {/* <p className="text-sm text-gray-500 mb-6">Each text field will correspond to one recording. Drag to reorder.</p> */}
         
         <DndContext 
           sensors={sensors}
@@ -422,7 +422,7 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
               variant="outline"
               className="mt-2 flex items-center gap-2 text-blue-500 hover:text-blue-700 border-dashed"
             >
-              <PlusCircle size={18} /> Add Text Field
+              <PlusCircle size={18} /> Add Questions
             </Button>
           </div>
         </DndContext>
