@@ -572,9 +572,9 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
       console.log(`[submitRecordings] Waiting for ${pendingUploadsRef.current.length} pending uploads to complete...`)
       if (pendingUploadsRef.current.length > 0) {
         try {
-          // Add a timeout to avoid waiting forever
+          // Add a timeout to avoid waiting forever - 2 minutes should be enough for large videos
           const timeout = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Upload timeout')), 30000)
+            setTimeout(() => reject(new Error('Upload timeout')), 120000) // 2 minutes
           );
           
           // Race between all uploads completing and timeout
