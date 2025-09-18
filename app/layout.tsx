@@ -8,7 +8,7 @@ import "./globals.css"
 
 export const metadata: Metadata = {
   title: "Snipe",
-  description: "Access Better",
+  description: "See and Hear your candidate",
   generator: "v0.app",
   viewport: "width=device-width, initial-scale=1.0",
 }
