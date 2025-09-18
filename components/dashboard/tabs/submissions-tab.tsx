@@ -287,6 +287,11 @@ export function SubmissionsTab() {
     }
   };
   
+  // Find the index of a video in the submissions array
+  const findVideoIndex = (videoId: string) => {
+    return submissions.findIndex(video => video.id === videoId);
+  }
+  
   const handleOpenVideo = (video: SnipeVideo) => {
     setSelectedVideo(video)
     setSelectedVideoIndex(0) // Start with the first video
@@ -295,6 +300,28 @@ export function SubmissionsTab() {
 
   const handleCloseVideo = () => {
     setIsDialogOpen(false)
+  }
+  
+  // Navigate to the next card
+  const handleNextCard = () => {
+    if (!selectedVideo) return;
+    
+    const currentIndex = findVideoIndex(selectedVideo.id);
+    if (currentIndex < submissions.length - 1) {
+      setSelectedVideo(submissions[currentIndex + 1]);
+      setSelectedVideoIndex(0); // Reset to first video of the next card
+    }
+  }
+  
+  // Navigate to the previous card
+  const handlePrevCard = () => {
+    if (!selectedVideo) return;
+    
+    const currentIndex = findVideoIndex(selectedVideo.id);
+    if (currentIndex > 0) {
+      setSelectedVideo(submissions[currentIndex - 1]);
+      setSelectedVideoIndex(0); // Reset to first video of the previous card
+    }
   }
   
   // Toggle a single filter
@@ -443,6 +470,10 @@ export function SubmissionsTab() {
             candidate={selectedVideo.candidate}
             date={selectedVideo.date}
             personalDetails={selectedVideo.personalDetails}
+            onNextCard={handleNextCard}
+            onPrevCard={handlePrevCard}
+            hasNextCard={findVideoIndex(selectedVideo.id) < submissions.length - 1}
+            hasPrevCard={findVideoIndex(selectedVideo.id) > 0}
           />
         )}
       </div>

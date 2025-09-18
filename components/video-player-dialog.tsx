@@ -27,6 +27,10 @@ interface VideoPlayerDialogProps {
   candidate?: string
   date?: string
   personalDetails?: PersonalDetail[]
+  onNextCard?: () => void
+  onPrevCard?: () => void
+  hasNextCard?: boolean
+  hasPrevCard?: boolean
 }
 
 export function VideoPlayerDialog({
@@ -38,7 +42,11 @@ export function VideoPlayerDialog({
   title,
   candidate,
   date,
-  personalDetails
+  personalDetails,
+  onNextCard,
+  onPrevCard,
+  hasNextCard = false,
+  hasPrevCard = false
 }: VideoPlayerDialogProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
@@ -77,11 +85,23 @@ export function VideoPlayerDialog({
         e.preventDefault() // Prevent default scroll behavior
         handleNextVideo()
       }
+      
+      // Navigate to previous card on ArrowLeft
+      if (e.key === "ArrowLeft" && hasPrevCard && onPrevCard) {
+        e.preventDefault()
+        onPrevCard()
+      }
+      
+      // Navigate to next card on ArrowRight
+      if (e.key === "ArrowRight" && hasNextCard && onNextCard) {
+        e.preventDefault()
+        onNextCard()
+      }
     }
     
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [onClose, selectedVideoIndex, videos.length])
+  }, [onClose, selectedVideoIndex, videos.length, hasPrevCard, hasNextCard, onPrevCard, onNextCard])
   
   // Process video key when video changes
   useEffect(() => {
