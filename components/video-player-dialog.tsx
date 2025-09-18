@@ -44,30 +44,19 @@ export function VideoPlayerDialog({
   const [isHovering, setIsHovering] = useState(false)
   const [isLoadingVideo, setIsLoadingVideo] = useState(false)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
-  const [isTransitioning, setIsTransitioning] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   
   const currentVideo = videos[selectedVideoIndex]
   
   const handlePrevVideo = () => {
     if (selectedVideoIndex > 0) {
-      setIsTransitioning(true)
-      // Short delay to allow animation to complete
-      setTimeout(() => {
-        onVideoChange(selectedVideoIndex - 1)
-        setIsTransitioning(false)
-      }, 300)
+      onVideoChange(selectedVideoIndex - 1)
     }
   }
   
   const handleNextVideo = () => {
     if (selectedVideoIndex < videos.length - 1) {
-      setIsTransitioning(true)
-      // Short delay to allow animation to complete
-      setTimeout(() => {
-        onVideoChange(selectedVideoIndex + 1)
-        setIsTransitioning(false)
-      }, 300)
+      onVideoChange(selectedVideoIndex + 1)
     }
   }
   
@@ -202,12 +191,7 @@ export function VideoPlayerDialog({
                     <span className="ml-2 text-white">Loading video...</span>
                   </div>
                 ) : videoUrl ? (
-                  <motion.div
-                    initial={{ opacity: 1 }}
-                    animate={{ opacity: isTransitioning ? 0 : 1 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="w-full h-full"
-                  >
+                  <div className="w-full h-full">
                     <video
                       ref={videoRef}
                       src={videoUrl}
@@ -216,7 +200,7 @@ export function VideoPlayerDialog({
                       playsInline
                       controlsList="nodownload"
                     />
-                  </motion.div>
+                  </div>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-black flex-col">
                     <div className="text-white mb-2">Unable to load video</div>
