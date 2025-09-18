@@ -24,9 +24,9 @@ export const sidebarItems = [
     title: "My Snipe",
     icon: <Target />,
   },
-  {
-    id: "dashboard",
-    title: "Dashboard",
-    icon: <LayoutDashboard />,
-  },
+  // {
+  //   id: "dashboard",
+  //   title: "Dashboard",
+  //   icon: <LayoutDashboard />,
+  // },
 ]
