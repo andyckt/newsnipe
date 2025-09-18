@@ -628,6 +628,14 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
         return isValid;
       });
       
+      // Sort recordings by recordingIndex to ensure they're in the correct order
+      validRecordings.sort((a, b) => {
+        // Convert to number to ensure proper comparison
+        const indexA = typeof a.recordingIndex === 'number' ? a.recordingIndex : parseInt(a.recordingIndex || '0');
+        const indexB = typeof b.recordingIndex === 'number' ? b.recordingIndex : parseInt(b.recordingIndex || '0');
+        return indexA - indexB;
+      });
+      
       console.log(`[submitRecordings] Submitting ${validRecordings.length} valid recordings to the database:`)
       validRecordings.forEach((rec, i) => {
         console.log(`[submitRecordings] Final Recording ${i + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}`)

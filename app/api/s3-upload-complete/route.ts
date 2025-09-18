@@ -165,6 +165,14 @@ export async function POST(request: Request) {
       existingRecordings.push(recordingData);
     }
     
+    // Sort recordings by recordingIndex before saving
+    existingRecordings.sort((a: any, b: any) => {
+      // Convert to number to ensure proper comparison
+      const indexA = typeof a.recordingIndex === 'number' ? a.recordingIndex : parseInt(a.recordingIndex || '0');
+      const indexB = typeof b.recordingIndex === 'number' ? b.recordingIndex : parseInt(b.recordingIndex || '0');
+      return indexA - indexB;
+    });
+    
     // Save the updated response
     response.recordings = existingRecordings;
     await response.save();

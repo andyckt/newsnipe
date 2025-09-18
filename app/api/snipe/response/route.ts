@@ -152,6 +152,14 @@ export async function PUT(request: Request) {
       // Combine with any recordings without videoKeys
       const finalRecordings = [...uniqueRecordings];
       
+      // Sort recordings by recordingIndex to ensure correct order
+      finalRecordings.sort((a: any, b: any) => {
+        // Convert to number to ensure proper comparison
+        const indexA = typeof a.recordingIndex === 'number' ? a.recordingIndex : parseInt(a.recordingIndex || '0');
+        const indexB = typeof b.recordingIndex === 'number' ? b.recordingIndex : parseInt(b.recordingIndex || '0');
+        return indexA - indexB;
+      });
+      
       // Update the recordings array
       updateData.recordings = finalRecordings;
       
