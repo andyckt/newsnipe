@@ -79,6 +79,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
     thumbnailUrl?: string;
     duration?: number;
     pending?: boolean; // Track if this recording is pending upload
+    uploadFailed?: boolean; // Track if upload failed
   }>>([])
 
   // Initialize the recordings array with placeholders for each recording position
@@ -189,9 +190,18 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
           return { success: true, recordingIndex: currentRecordingIndex }
         } catch (error) {
           console.error('Error uploading recording to S3:', error)
-          console.warn(`No responseId available, falling back to download`, { originalQuestionId });
-          // Fall back to downloading the file
-          downloadRecordingFallback(blob, originalQuestionId, currentRecordingIndex)
+          console.warn(`Upload failed for recording ${currentRecordingIndex + 1}`, { originalQuestionId });
+          
+          // Instead of downloading, just mark this position as failed but keep the questionId
+          if (recordingsRef.current[currentRecordingIndex]) {
+            console.log(`[uploadError] Marking recording ${currentRecordingIndex + 1} as failed but keeping questionId`);
+            recordingsRef.current[currentRecordingIndex] = {
+              ...recordingsRef.current[currentRecordingIndex],
+              questionId: originalQuestionId,
+              uploadFailed: true,
+              pending: false
+            };
+          }
           return { success: false, recordingIndex: currentRecordingIndex }
         }
       })()
@@ -199,50 +209,37 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
       // Add to pending uploads
       pendingUploadsRef.current.push(uploadPromise)
     } else {
-      // No responseId, so fall back to downloading
-      console.warn(`No responseId available, falling back to download`, { originalQuestionId });
-      downloadRecordingFallback(blob, originalQuestionId, currentRecordingIndex)
+      // No responseId, so mark as failed but keep the questionId
+      console.warn(`No responseId available for recording ${currentRecordingIndex + 1}`, { originalQuestionId });
+      
+      // Mark this position as failed but keep the questionId
+      if (recordingsRef.current[currentRecordingIndex]) {
+        console.log(`[noResponseId] Marking recording ${currentRecordingIndex + 1} as failed but keeping questionId`);
+        recordingsRef.current[currentRecordingIndex] = {
+          ...recordingsRef.current[currentRecordingIndex],
+          questionId: originalQuestionId,
+          uploadFailed: true,
+          pending: false
+        };
+      }
     }
     
     // Clear chunks for next recording
     recordedChunksRef.current = []
   }
   
-  // Fallback function to download recording if S3 upload fails
-  const downloadRecordingFallback = (blob: Blob, originalQuestionId: string, recordingIdx: number) => {
-    // Determine the correct file extension based on MIME type
-    let fileExtension = "webm";
-    if (blob.type.includes('mp4')) fileExtension = "mp4";
-    if (blob.type.includes('quicktime')) fileExtension = "mov";
-    
-    console.log(`Download initiated`, { filename: `question-recording-${currentRecordingIndex + 1}.${fileExtension}` });
-    
-    // Create a download link for the recorded video
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.style.display = "none"
-    a.href = url
-    a.download = `question-recording-${currentRecordingIndex + 1}.${fileExtension}`
-    document.body.appendChild(a)
-    a.click()
-
-    // Clean up
-    setTimeout(() => {
-      document.body.removeChild(a)
-      window.URL.revokeObjectURL(url)
-    }, 100)
-    
-    // Update the recording metadata at the correct position
+  // Function to mark a recording as failed
+  const markRecordingAsFailed = (originalQuestionId: string, recordingIdx: number) => {
     if (recordingsRef.current[recordingIdx]) {
-      console.log(`[downloadFallback] Updating recording ${recordingIdx + 1} with download results`);
-      // Update the existing entry with minimal metadata
+      console.log(`[markFailed] Marking recording ${recordingIdx + 1} as failed`);
       recordingsRef.current[recordingIdx] = {
         ...recordingsRef.current[recordingIdx],
         questionId: originalQuestionId, // Use the original question ID
+        uploadFailed: true,
         pending: false // Mark as no longer pending
       };
     } else {
-      console.warn(`[downloadFallback] Could not find recording at index ${recordingIdx} in recordings array`);
+      console.warn(`[markFailed] Could not find recording at index ${recordingIdx} in recordings array`);
     }
   }
 
@@ -565,11 +562,26 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
     }
     
     try {
-      // Wait for all pending uploads to complete
-      console.log(`Waiting for ${pendingUploadsRef.current.length} pending uploads to complete...`)
+      // Wait for all pending uploads to complete with a timeout
+      console.log(`[submitRecordings] Waiting for ${pendingUploadsRef.current.length} pending uploads to complete...`)
       if (pendingUploadsRef.current.length > 0) {
-        await Promise.all(pendingUploadsRef.current)
-        console.log('All uploads completed')
+        try {
+          // Add a timeout to avoid waiting forever
+          const timeout = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Upload timeout')), 30000)
+          );
+          
+          // Race between all uploads completing and timeout
+          await Promise.race([
+            Promise.all(pendingUploadsRef.current),
+            timeout
+          ]);
+          
+          console.log('[submitRecordings] All uploads completed')
+        } catch (error) {
+          console.warn('[submitRecordings] Upload timeout or error occurred:', error);
+          console.log('[submitRecordings] Continuing with available recordings...');
+        }
       }
       
       // Check if we have any recordings to submit
@@ -597,29 +609,69 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
       // Log the original recordings array for debugging
       console.log(`[submitRecordings] Original recordings array (${recordingsRef.current.length} items):`)
       recordingsRef.current.forEach((rec, i) => {
-        console.log(`[submitRecordings] Original Recording ${i + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}, pending=${rec.pending}`)
+        console.log(`[submitRecordings] Original Recording ${i + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}, pending=${rec.pending}, failed=${rec.uploadFailed || false}`)
       })
       
-      console.log(`[submitRecordings] Submitting ${uniqueRecordings.length} recordings to the database:`)
-      uniqueRecordings.forEach((rec, i) => {
+      // Filter out recordings that failed to upload
+      const validRecordings = uniqueRecordings.filter(rec => {
+        // Must have a questionId and not be marked as failed
+        const isValid = rec.questionId && !rec.uploadFailed;
+        if (!isValid) {
+          console.warn(`[submitRecordings] Skipping invalid recording: questionId=${rec.questionId}, failed=${rec.uploadFailed || false}`);
+        }
+        return isValid;
+      });
+      
+      console.log(`[submitRecordings] Submitting ${validRecordings.length} valid recordings to the database:`)
+      validRecordings.forEach((rec, i) => {
         console.log(`[submitRecordings] Final Recording ${i + 1}: questionId=${rec.questionId}, recordingIndex=${rec.recordingIndex}`)
       })
       
-      // Submit the recordings to the API
-      const response = await fetch('/api/snipe/response', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          responseId,
-          recordings: uniqueRecordings,
-          status: 'completed'
-        }),
-      })
+      // Submit only valid recordings to the API with retry mechanism
+      let retries = 3;
+      let success = false;
+      let lastError = null;
       
-      if (!response.ok) {
-        throw new Error('Failed to submit recordings')
+      while (retries > 0 && !success) {
+        try {
+          console.log(`[submitRecordings] Submitting recordings to API (retries left: ${retries})`);
+          
+          const response = await fetch('/api/snipe/response', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              responseId,
+              recordings: validRecordings,
+              status: 'completed'
+            }),
+          });
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API error: ${response.status} ${errorText}`);
+          }
+          
+          success = true;
+          console.log('[submitRecordings] Successfully submitted recordings to API');
+        } catch (error) {
+          lastError = error;
+          console.warn(`[submitRecordings] Error submitting recordings (retries left: ${retries}):`, error);
+          retries--;
+          
+          if (retries > 0) {
+            // Wait before retrying (exponential backoff)
+            const delay = (3 - retries) * 1000;
+            console.log(`[submitRecordings] Retrying in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+        }
+      }
+      
+      if (!success) {
+        console.error('[submitRecordings] Failed to submit recordings after multiple attempts');
+        throw lastError || new Error('Failed to submit recordings');
       }
       
       // Clear pending uploads after successful submission
