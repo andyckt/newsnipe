@@ -79,11 +79,13 @@ export function VideoPlayerDialog({
       
       // Navigate to previous video on ArrowUp
       if (e.key === "ArrowUp" && selectedVideoIndex > 0) {
+        e.preventDefault() // Prevent default scroll behavior
         handlePrevVideo()
       }
       
       // Navigate to next video on ArrowDown
       if (e.key === "ArrowDown" && selectedVideoIndex < videos.length - 1) {
+        e.preventDefault() // Prevent default scroll behavior
         handleNextVideo()
       }
     }
@@ -176,6 +178,7 @@ export function VideoPlayerDialog({
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="relative w-full max-w-4xl bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row"
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
             <button
