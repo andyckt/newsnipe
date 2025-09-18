@@ -29,6 +29,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
   const [isCountingDown, setIsCountingDown] = useState(false)
   const [countdown, setCountdown] = useState<number | null>(null)
   const [currentRecordingIndex, setCurrentRecordingIndex] = useState(0)
+  const currentRecordingIndexRef = useRef(0) // Add a ref to track the current index reliably
   const [isSessionComplete, setIsSessionComplete] = useState(false)
   const [recordingTimeLeft, setRecordingTimeLeft] = useState<number | null>(null)
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -139,12 +140,13 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
           const { uploadVideoRecording } = await import('@/lib/api-service')
           
           // Upload the video and get the URLs and keys
+          // Note: Assuming uploadVideoRecording is defined in api-service
+          // If it's not available, this will need to be updated based on the actual API
           const { videoKey, videoUrl, thumbnailKey, thumbnailUrl } = await uploadVideoRecording(
             blob,
             effectiveResponseId!,
             questionId,
-            currentRecordingIndex,
-            recordingId // Pass the recordingId
+            currentRecordingIndex
           )
           
           console.log(`Recording ${currentRecordingIndex + 1} uploaded to S3:`, { videoKey, thumbnailKey })
@@ -451,16 +453,17 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
     // Reset if starting a new session
     if (isSessionComplete) {
       setCurrentRecordingIndex(0)
+      currentRecordingIndexRef.current = 0 // Also reset the ref
       setIsSessionComplete(false)
       isFirstRecordingRef.current = true // Reset first recording flag
     }
     
-    // Use the current recording index
-    await startRecordingWithIndex(currentRecordingIndex, skipCountdown)
+    // Use the current recording index from ref for reliability
+    await startRecordingWithIndex(currentRecordingIndexRef.current, skipCountdown)
   }
 
   const stopRecording = () => {
-    console.log(`[stopRecording] Stopping recording at index: ${currentRecordingIndex}`);
+    console.log(`[stopRecording] Stopping recording at index: ${currentRecordingIndexRef.current}`);
     
     // Clear the recording timer if it exists
     if (recordingTimerRef.current) {
@@ -479,17 +482,20 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
   }
   
   const nextRecording = async () => {
-    console.log(`[nextRecording] Starting - Current index: ${currentRecordingIndex}, Total recordings: ${totalRecordings}`);
+    // Use the ref value for reliable tracking
+    const currentIndex = currentRecordingIndexRef.current;
+    console.log(`[nextRecording] Starting - Current index (from ref): ${currentIndex}, Total recordings: ${totalRecordings}`);
     
     // Stop the current recording
     stopRecording()
     
     // Move to the next recording index
-    const nextIndex = currentRecordingIndex + 1
+    const nextIndex = currentIndex + 1
     console.log(`[nextRecording] Incremented to index: ${nextIndex}`);
     
-    // Update the current recording index state
+    // Update both the state and ref
     setCurrentRecordingIndex(nextIndex)
+    currentRecordingIndexRef.current = nextIndex;
     
     // Check if we've reached the end of the session
     if (nextIndex >= totalRecordings) {
@@ -513,7 +519,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
   }
   
   const completeSession = () => {
-    console.log(`[completeSession] Called - Current index: ${currentRecordingIndex}, Total recordings: ${totalRecordings}`);
+    console.log(`[completeSession] Called - Current index: ${currentRecordingIndexRef.current}, Total recordings: ${totalRecordings}`);
     stopRecording()
     
     console.log(`[completeSession] Setting isSessionComplete to true`);
@@ -597,7 +603,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
     countdown,
     currentRecordingIndex,
     totalRecordings,
-    isLastRecording: currentRecordingIndex === totalRecordings - 1,
+    isLastRecording: currentRecordingIndexRef.current === totalRecordings - 1,
     isSessionComplete,
     recordingTimeLeft,
     startRecording,
