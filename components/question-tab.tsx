@@ -66,6 +66,7 @@ interface SortableTextInputProps {
   onGenerateSpeech: (id: string, text: string) => void;
   onPlayAudio: (audioUrl?: string, audioKey?: string) => void;
   onRemove: (id: string) => void;
+  onRedoAudio: (id: string, text: string) => void;
   disableRemove: boolean;
 }
 
@@ -76,6 +77,7 @@ function SortableTextInput({
   onGenerateSpeech, 
   onPlayAudio, 
   onRemove,
+  onRedoAudio,
   disableRemove
 }: SortableTextInputProps) {
   const {
@@ -108,12 +110,28 @@ function SortableTextInput({
         <GripVertical size={20} />
       </div>
       
-      <Input
-        value={input.value}
-        onChange={(e) => onTextChange(input.id, e.target.value)}
-        placeholder="Enter text..."
-        className="flex-1"
-      />
+      <div className="flex-1 relative">
+        <Input
+          value={input.value}
+          onChange={(e) => onTextChange(input.id, e.target.value)}
+          placeholder="Enter text..."
+          className="w-full pr-16" /* Add padding to the right to make space for the Redo button */
+        />
+        
+        {/* Redo button - only shown when audio exists, positioned inside the input field */}
+        {input.audioUrl && (
+          <Button
+            onClick={() => onRedoAudio(input.id, input.value)}
+            disabled={!input.value.trim() || input.isGenerating}
+            variant="ghost"
+            size="sm"
+            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 px-2 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md"
+            title="Regenerate audio for this question"
+          >
+            Redo
+          </Button>
+        )}
+      </div>
       
       <div className="flex gap-1 items-center">
         {/* Time limit select */}
@@ -326,6 +344,40 @@ export function QuestionTab({
   }
   
   // Function to generate audio for all questions
+  // Function to handle redoing audio for a specific question
+  const handleRedoAudio = async (id: string, text: string) => {
+    // Audio needs to be checked again after regenerating
+    setAudioChecked(false);
+    
+    if (!text.trim()) return;
+    
+    try {
+      // Update the state to show loading
+      setTextInputs(prev => 
+        prev.map(input => input.id === id ? { ...input, isGenerating: true } : input)
+      );
+      
+      // Unlock audio and initialize audio context
+      unlockAudio();
+      initAudioContext();
+      
+      // Regenerate the audio
+      console.log(`Regenerating audio for question ID: ${id}`);
+      await generateSpeech(id, text);
+      
+    } catch (error) {
+      console.error('Error regenerating speech:', error);
+      
+      // Update the state to show error
+      setTextInputs(prev => 
+        prev.map(input => input.id === id ? { ...input, isGenerating: false } : input)
+      );
+      
+      // Show an alert
+      alert('Failed to regenerate audio. Please try again.');
+    }
+  };
+  
   const handleGenerateAudio = async () => {
     try {
       setIsCheckingAudio(true);
@@ -534,6 +586,7 @@ export function QuestionTab({
                   onGenerateSpeech={generateSpeech}
                   onPlayAudio={handlePlayAudio}
                   onRemove={handleRemoveTextInput}
+                  onRedoAudio={handleRedoAudio}
                   disableRemove={textInputs.length <= 1}
                 />
               ))}
