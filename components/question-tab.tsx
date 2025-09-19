@@ -438,7 +438,11 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
             <Button
               onClick={handleAddTextInput}
               variant="outline"
+              disabled={textInputs.length > 0 && !textInputs[textInputs.length - 1].value.trim()}
               className="mt-2 flex items-center gap-2 text-blue-500 hover:text-blue-700 border-dashed"
+              title={textInputs.length > 0 && !textInputs[textInputs.length - 1].value.trim() ? 
+                "Please fill in the current question before adding a new one" : 
+                "Add a new question"}
             >
               <PlusCircle size={18} /> Add Questions
             </Button>
