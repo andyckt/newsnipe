@@ -10,10 +10,11 @@ import { useConversationRecording } from "@/hooks/use-conversation-recording"
 import { Button } from "@/components/ui/button"
 import { unlockAudio } from "@/lib/audio"
 import { initAudioContext } from "@/lib/mobile-audio"
+import { useMobileDetection } from "@/lib/use-mobile-detection"
 import PersonalDetailsCollector, { PersonalDetailField, PersonalDetailsConfig, PersonalDetailsResponse } from "@/components/personal-details-collector"
 
 // App states
-type AppState = "loading" | "personal_details" | "recording" | "processing" | "completed" | "error"
+type AppState = "loading" | "personal_details" | "recording" | "processing" | "completed" | "error" | "desktop_warning"
 
 interface SnipePageProps {
   shortId?: string // For database mode
@@ -21,6 +22,9 @@ interface SnipePageProps {
 }
 
 export function SnipePage({ shortId, urlData }: SnipePageProps) {
+  // Mobile detection
+  const { isMobile, isLoading: isMobileCheckLoading } = useMobileDetection();
+  
   // State management
   const [appState, setAppState] = useState<AppState>("loading")
   const [numRecordings, setNumRecordings] = useState(3)
@@ -38,8 +42,24 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
   })
   const [personalDetailsResponses, setPersonalDetailsResponses] = useState<PersonalDetailsResponse>({})
   
+  // Check if device is mobile and set app state accordingly
+  useEffect(() => {
+    if (!isMobileCheckLoading) {
+      if (!isMobile) {
+        // If not a mobile phone, show desktop warning
+        setAppState("desktop_warning");
+      } else if (appState === "desktop_warning") {
+        // If we were showing desktop warning but device is now mobile, reset to loading
+        setAppState("loading");
+      }
+    }
+  }, [isMobile, isMobileCheckLoading, appState]);
+
   // Load configuration data on initial load
   useEffect(() => {
+    // Don't load configuration if we're showing desktop warning
+    if (appState === "desktop_warning") return;
+    
     async function loadConfigData() {
       try {
         let configData;
@@ -100,8 +120,11 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
       }
     }
     
-    loadConfigData();
-  }, [shortId, urlData]);
+    // Only load config data if we're in the loading state and not showing desktop warning
+    if (appState === "loading" && !isMobileCheckLoading && isMobile) {
+      loadConfigData();
+    }
+  }, [shortId, urlData, appState, isMobile, isMobileCheckLoading]);
   
   // Try to unlock audio on component mount and on any user interaction
   useEffect(() => {
@@ -267,6 +290,34 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
           <p className="text-lg">
             Please wait while we prepare your snipe.
           </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Desktop warning state
+  if (appState === "desktop_warning") {
+    return (
+      <div className="flex flex-col h-screen w-full overflow-hidden bg-white md:bg-gray-100 md:items-center md:justify-center">
+        <div className="flex flex-col h-full w-full bg-white md:max-w-sm md:h-screen p-8 items-center justify-center text-center">
+          <div className="text-6xl mb-4">📱</div>
+          <h1 className="text-3xl font-bold mb-4">Mobile Access Only</h1>
+          <p className="text-lg mb-8">
+            This Snipe is designed to be accessed from a mobile phone only.
+          </p>
+          
+          {/* QR code for easy mobile access */}
+          <div className="mb-6">
+            <p className="text-sm text-gray-500 mb-2">Please scan this QR code with your phone:</p>
+            <div className="bg-white p-4 inline-block rounded-lg shadow-md">
+              <img 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.href)}`}
+                alt="QR Code to access on mobile"
+                width={150}
+                height={150}
+              />
+            </div>
+          </div>
         </div>
       </div>
     )
