@@ -559,11 +559,15 @@ export function QuestionTab({
           onClick={handleGenerateAudio}
           disabled={isCheckingAudio || textInputs.some(input => input.isGenerating) || 
             (textInputs.length > 0 && !textInputs[textInputs.length - 1].value.trim())}
-          className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium px-6 py-3 rounded-full flex items-center gap-2"
+          className={`px-6 py-3 rounded-full flex items-center gap-2 ${
+            audioChecked 
+              ? "bg-green-50 text-green-600 hover:bg-green-100" 
+              : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+          }`}
         >
           {isCheckingAudio ? (
             <>
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-500 border-t-transparent" />
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent" />
               Generating...
             </>
           ) : audioChecked ? (
@@ -575,7 +579,7 @@ export function QuestionTab({
             </>
           ) : (
             <>
-              <Volume2 className="h-5 w-5" />
+              <Volume2 className="h-5 w-5 text-blue-500" />
               Generate Audio
             </>
           )}
