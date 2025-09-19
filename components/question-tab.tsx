@@ -232,14 +232,32 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
   )
   
   const handleAddTextInput = () => {
+    // Add new text input immediately
+    const newId = crypto.randomUUID();
     setTextInputs(prev => [...prev, { 
-      id: crypto.randomUUID(), 
+      id: newId, 
       value: '',
       audioUrl: undefined,
       audioKey: undefined,
       isGenerating: false,
       timeLimit: "no_limit"
-    }])
+    }]);
+    
+    // Check if the previous text input has audio generated
+    const lastInput = textInputs[textInputs.length - 1];
+    
+    // If the last input has text but no audio, generate audio for it in the background
+    if (lastInput && lastInput.value.trim() && !lastInput.audioUrl && !lastInput.isGenerating) {
+      // Unlock audio and initialize audio context
+      unlockAudio();
+      initAudioContext();
+      
+      // Generate audio for the last input in the background
+      // We don't await this, so the UI isn't blocked
+      generateSpeech(lastInput.id, lastInput.value).catch(error => {
+        console.error("Error generating speech in background:", error);
+      });
+    }
   }
   
   const handleRemoveTextInput = (id: string) => {
