@@ -180,6 +180,8 @@ function SortableTextInput({
 
 export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTabProps) {
   const [isCreating, setIsCreating] = useState<boolean>(false)
+  const [isCheckingAudio, setIsCheckingAudio] = useState<boolean>(false)
+  const [audioChecked, setAudioChecked] = useState<boolean>(false)
   const [textInputs, setTextInputs] = useState<TextInput[]>([
     { 
       id: crypto.randomUUID(), 
@@ -232,6 +234,9 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
   )
   
   const handleAddTextInput = () => {
+    // Adding a new question means audio needs to be checked again
+    setAudioChecked(false);
+    
     // Add new text input immediately
     const newId = crypto.randomUUID();
     setTextInputs(prev => [...prev, { 
@@ -260,6 +265,42 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
     }
   }
   
+  // Function to generate audio for all questions
+  const handleGenerateAudio = async () => {
+    try {
+      setIsCheckingAudio(true);
+      unlockAudio();
+      initAudioContext();
+      
+      // Find all questions that have text but no audio
+      const questionsNeedingAudio = textInputs.filter(
+        input => input.value.trim() && !input.audioUrl && !input.isGenerating
+      );
+      
+      if (questionsNeedingAudio.length === 0) {
+        // All questions already have audio
+        console.log("All questions already have audio generated");
+        setAudioChecked(true);
+        return;
+      }
+      
+      console.log(`Generating audio for ${questionsNeedingAudio.length} questions`);
+      
+      // Generate audio for all questions in parallel
+      await Promise.all(
+        questionsNeedingAudio.map(input => generateSpeech(input.id, input.value))
+      );
+      
+      console.log("Audio generation complete for all questions");
+      setAudioChecked(true);
+    } catch (error) {
+      console.error("Error checking audio:", error);
+      alert("There was an error generating audio for some questions. Please try again.");
+    } finally {
+      setIsCheckingAudio(false);
+    }
+  }
+  
   const handleRemoveTextInput = (id: string) => {
     // Don't remove if it's the last input
     if (textInputs.length <= 1) return
@@ -268,6 +309,9 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
   }
   
   const handleTextInputChange = (id: string, value: string) => {
+    // If text is changed, audio needs to be checked again
+    setAudioChecked(false);
+    
     setTextInputs(prev => 
       prev.map(input => input.id === id ? { ...input, value } : input)
     )
@@ -450,7 +494,33 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
         </DndContext>
       </div>
       
-      <div className="flex justify-end">
+      <div className="flex justify-end items-center gap-4">
+        <Button 
+          onClick={handleGenerateAudio}
+          disabled={isCheckingAudio || textInputs.some(input => input.isGenerating) || 
+            (textInputs.length > 0 && !textInputs[textInputs.length - 1].value.trim())}
+          className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium px-6 py-3 rounded-full flex items-center gap-2"
+        >
+          {isCheckingAudio ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-500 border-t-transparent" />
+              Generating...
+            </>
+          ) : audioChecked ? (
+            <>
+              <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Audio Ready
+            </>
+          ) : (
+            <>
+              <Volume2 className="h-5 w-5" />
+              Generate Audio
+            </>
+          )}
+        </Button>
+        
         <Button 
           onClick={async () => {
             try {
@@ -465,8 +535,10 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
               setIsCreating(false);
             }
           }}
-          disabled={isCreating}
+          disabled={isCreating || !audioChecked || 
+            (textInputs.length > 0 && !textInputs[textInputs.length - 1].value.trim())}
           className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-4 text-xl rounded-full flex items-center gap-2"
+          title={!audioChecked ? "Please check audio before creating" : "Create your snipe"}
         >
           {isCreating && (
             <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
