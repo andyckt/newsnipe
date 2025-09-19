@@ -71,7 +71,8 @@ export default function UserProfile() {
             <User className="mr-2 h-4 w-4" />
             <span>Profile</span>
           </DropdownMenuItem> */}
-          <DropdownMenuItem onClick={() => {
+          {/* Settings option commented out temporarily */}
+          {/* <DropdownMenuItem onClick={() => {
             // Find the parent component that has setActiveMenu
             // This is a custom event to communicate with the parent DesignaliCreative component
             const event = new CustomEvent('setActiveMenu', { detail: 'settings' });
@@ -79,7 +80,7 @@ export default function UserProfile() {
           }}>
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
           {/* Commented out Help & Support option */}
           {/* <DropdownMenuItem onClick={() => window.open('/help', '_blank')}>
             <HelpCircle className="mr-2 h-4 w-4" />
