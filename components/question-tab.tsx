@@ -51,6 +51,11 @@ interface QuestionTabProps {
   onLaunch: (numRecordings: number, language: AudioLanguage, textInputs: TextInput[], mode: "question" | "conversation", timeLimit: TimeLimit) => void;
   language: AudioLanguage;
   onLanguageChange: (newLanguage: AudioLanguage) => void;
+  // Add props for state preservation
+  savedTextInputs?: TextInput[];
+  onTextInputsChange?: (textInputs: TextInput[]) => void;
+  audioCheckedState?: boolean;
+  onAudioCheckedChange?: (checked: boolean) => void;
 }
 
 // SortableTextInput component for drag and drop functionality
@@ -178,20 +183,58 @@ function SortableTextInput({
   );
 }
 
-export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTabProps) {
+export function QuestionTab({ 
+  onLaunch, 
+  language, 
+  onLanguageChange,
+  savedTextInputs,
+  onTextInputsChange,
+  audioCheckedState,
+  onAudioCheckedChange
+}: QuestionTabProps) {
   const [isCreating, setIsCreating] = useState<boolean>(false)
   const [isCheckingAudio, setIsCheckingAudio] = useState<boolean>(false)
-  const [audioChecked, setAudioChecked] = useState<boolean>(false)
-  const [textInputs, setTextInputs] = useState<TextInput[]>([
-    { 
-      id: crypto.randomUUID(), 
-      value: '', 
-      audioUrl: undefined, 
-      audioKey: undefined, 
-      isGenerating: false,
-      timeLimit: "no_limit"
+  
+  // Use saved state if provided, otherwise use default state
+  const [audioChecked, setAudioCheckedInternal] = useState<boolean>(audioCheckedState || false)
+  const [textInputs, setTextInputsInternal] = useState<TextInput[]>(
+    savedTextInputs && savedTextInputs.length > 0 
+      ? savedTextInputs 
+      : [{ 
+          id: crypto.randomUUID(), 
+          value: '', 
+          audioUrl: undefined, 
+          audioKey: undefined, 
+          isGenerating: false,
+          timeLimit: "no_limit"
+        }]
+  )
+  
+  // Create wrapper functions to update both local state and parent state
+  const setAudioChecked = (checked: boolean) => {
+    setAudioCheckedInternal(checked);
+    if (onAudioCheckedChange) {
+      onAudioCheckedChange(checked);
     }
-  ])
+  }
+  
+  const setTextInputs = (updater: TextInput[] | ((prev: TextInput[]) => TextInput[])) => {
+    // Handle both direct value and function updater
+    if (typeof updater === 'function') {
+      setTextInputsInternal(prev => {
+        const newValue = updater(prev);
+        if (onTextInputsChange) {
+          onTextInputsChange(newValue);
+        }
+        return newValue;
+      });
+    } else {
+      setTextInputsInternal(updater);
+      if (onTextInputsChange) {
+        onTextInputsChange(updater);
+      }
+    }
+  }
   
   // Try to unlock audio on component mount and on any user interaction
   useEffect(() => {
@@ -237,6 +280,9 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
     // Adding a new question means audio needs to be checked again
     setAudioChecked(false);
     
+    // Store the current last input before adding a new one
+    const lastInput = textInputs.length > 0 ? textInputs[textInputs.length - 1] : null;
+    
     // Add new text input immediately
     const newId = crypto.randomUUID();
     setTextInputs(prev => [...prev, { 
@@ -248,11 +294,17 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
       timeLimit: "no_limit"
     }]);
     
-    // Check if the previous text input has audio generated
-    const lastInput = textInputs[textInputs.length - 1];
-    
     // If the last input has text but no audio, generate audio for it in the background
     if (lastInput && lastInput.value.trim() && !lastInput.audioUrl && !lastInput.isGenerating) {
+      // Mark the input as generating audio
+      setTextInputs(prev => 
+        prev.map(input => 
+          input.id === lastInput.id 
+            ? { ...input, isGenerating: true } 
+            : input
+        )
+      );
+      
       // Unlock audio and initialize audio context
       unlockAudio();
       initAudioContext();
@@ -261,6 +313,14 @@ export function QuestionTab({ onLaunch, language, onLanguageChange }: QuestionTa
       // We don't await this, so the UI isn't blocked
       generateSpeech(lastInput.id, lastInput.value).catch(error => {
         console.error("Error generating speech in background:", error);
+        // Reset generating state on error
+        setTextInputs(prev => 
+          prev.map(input => 
+            input.id === lastInput.id 
+              ? { ...input, isGenerating: false } 
+              : input
+          )
+        );
       });
     }
   }

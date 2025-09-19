@@ -20,6 +20,10 @@ export function SettingsScreen({ onLaunch, personalDetailsConfig, onPersonalDeta
   const [language, setLanguage] = useState<AudioLanguage>("english")
   const [snipeTitle, setSnipeTitle] = useState<string>(title)
   
+  // Add state for question tab
+  const [questionTextInputs, setQuestionTextInputs] = useState<TextInput[]>([])
+  const [audioChecked, setAudioChecked] = useState<boolean>(false)
+  
   const handleLanguageChange = (newLanguage: AudioLanguage) => {
     setLanguage(newLanguage)
   }
@@ -65,7 +69,11 @@ export function SettingsScreen({ onLaunch, personalDetailsConfig, onPersonalDeta
           <QuestionTab 
             onLaunch={onLaunch} 
             language={language} 
-            onLanguageChange={handleLanguageChange} 
+            onLanguageChange={handleLanguageChange}
+            savedTextInputs={questionTextInputs}
+            onTextInputsChange={setQuestionTextInputs}
+            audioCheckedState={audioChecked}
+            onAudioCheckedChange={setAudioChecked}
           />
         </TabsContent>
         
