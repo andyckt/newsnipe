@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { unlockAudio } from "@/lib/audio"
 import { initAudioContext } from "@/lib/mobile-audio"
 import { useMobileDetection } from "@/lib/use-mobile-detection"
+import { generateStyledQRCode } from "@/lib/qr-code-utils"
 import PersonalDetailsCollector, { PersonalDetailField, PersonalDetailsConfig, PersonalDetailsResponse } from "@/components/personal-details-collector"
 
 // App states
@@ -24,6 +25,10 @@ interface SnipePageProps {
 export function SnipePage({ shortId, urlData }: SnipePageProps) {
   // Mobile detection
   const { isMobile, isLoading: isMobileCheckLoading } = useMobileDetection();
+  
+  // QR code state
+  const [mobileQrCode, setMobileQrCode] = useState<string | null>(null);
+  const [isGeneratingQR, setIsGeneratingQR] = useState<boolean>(false);
   
   // State management
   const [appState, setAppState] = useState<AppState>("loading")
@@ -54,6 +59,26 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
       }
     }
   }, [isMobile, isMobileCheckLoading, appState]);
+  
+  // Generate QR code for desktop warning screen
+  useEffect(() => {
+    const generateQRCode = async () => {
+      if (appState === "desktop_warning" && !mobileQrCode && !isGeneratingQR) {
+        setIsGeneratingQR(true);
+        try {
+          // Generate styled QR code with the current URL
+          const dataUrl = await generateStyledQRCode(window.location.href, 200);
+          setMobileQrCode(dataUrl);
+        } catch (error) {
+          console.error("Error generating QR code:", error);
+        } finally {
+          setIsGeneratingQR(false);
+        }
+      }
+    };
+    
+    generateQRCode();
+  }, [appState, mobileQrCode, isGeneratingQR]);
 
   // Load configuration data on initial load
   useEffect(() => {
@@ -310,12 +335,23 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
           <div className="mb-6">
             <p className="text-sm text-gray-500 mb-2">Please scan this QR code with your phone:</p>
             <div className="bg-white p-4 inline-block rounded-lg shadow-md">
-              <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.href)}`}
-                alt="QR Code to access on mobile"
-                width={150}
-                height={150}
-              />
+              {isGeneratingQR ? (
+                <div className="w-[150px] h-[150px] flex items-center justify-center bg-gray-100 rounded-lg">
+                  <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+                </div>
+              ) : mobileQrCode ? (
+                <img 
+                  src={mobileQrCode} 
+                  alt="QR Code to access on mobile"
+                  width={150}
+                  height={150}
+                  className="rounded-lg"
+                />
+              ) : (
+                <div className="w-[150px] h-[150px] flex items-center justify-center bg-gray-100 rounded-lg">
+                  <p className="text-sm text-gray-500">QR Code unavailable</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
