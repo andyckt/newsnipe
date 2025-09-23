@@ -334,7 +334,7 @@ export function SnipePage({ shortId, urlData }: SnipePageProps) {
           {/* QR code for easy mobile access */}
           <div className="mb-6">
             <p className="text-sm text-gray-500 mb-2">Please scan this QR code with your phone:</p>
-            <div className="bg-white p-4 inline-block rounded-lg shadow-md">
+            <div className="bg-white p-1 inline-block rounded-lg shadow-md">
               {isGeneratingQR ? (
                 <div className="w-[150px] h-[150px] flex items-center justify-center bg-gray-100 rounded-lg">
                   <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
