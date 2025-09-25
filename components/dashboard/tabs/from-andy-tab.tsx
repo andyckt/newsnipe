@@ -135,91 +135,122 @@ export function FromAndyTab() {
 
       {/* Why I Do This Section */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-        <Card className="rounded-3xl border-0 bg-white shadow-xl">
-          <CardContent className="p-12">
-            <div className="max-w-4xl mx-auto">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center">
-                  <Lightbulb className="w-6 h-6 text-blue-600" />
-                </div>
-                <h2 className="text-3xl font-bold text-gray-900">Why I Do This</h2>
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-50 via-white to-blue-50/30 border border-slate-100/50">
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-blue-500/5" />
+          <div className="relative p-16">
+            <div className="max-w-3xl mx-auto text-center space-y-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25">
+                <Lightbulb className="w-8 h-8 text-white" />
               </div>
 
-              <div className="space-y-6 text-gray-700">
-                <p className="text-xl leading-relaxed">
-                  I've witnessed firsthand how traditional application processes have become compromised by AI tools.
-                  Students and job applicants can easily generate perfect responses using ChatGPT, making it impossible
-                  to assess their true capabilities and character.
-                </p>
-                <p className="text-xl leading-relaxed">
-                  This isn't just about preventing cheating—it's about creating authentic connections between
-                  organizations and candidates. Real conversations reveal personality, critical thinking, and genuine
-                  passion that no AI can replicate.
-                </p>
+              <div className="space-y-6">
+                <h2 className="text-4xl font-light text-slate-900 tracking-tight">
+                  Why I Do{" "}
+                  <span className="font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    This
+                  </span>
+                </h2>
 
-                <div className="mt-8 p-6 bg-blue-50 rounded-2xl border-l-4 border-blue-500">
-                  <p className="text-lg font-medium text-blue-900 italic">
-                    "Every authentic conversation is worth a thousand perfect AI-generated responses."
+                <div className="w-16 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent mx-auto" />
+
+                <div className="space-y-8 text-slate-600">
+                  <p className="text-xl leading-relaxed font-light">
+                    I've witnessed firsthand how traditional application processes have become compromised by AI tools.
+                    Students and job applicants can easily generate perfect responses using ChatGPT, making it
+                    impossible to assess their true capabilities and character.
                   </p>
+                  <p className="text-xl leading-relaxed font-light">
+                    This isn't just about preventing cheating—it's about creating authentic connections between
+                    organizations and candidates. Real conversations reveal personality, critical thinking, and genuine
+                    passion that no AI can replicate.
+                  </p>
+                </div>
+
+                <div className="relative mt-12 p-8 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/50 shadow-sm">
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full" />
+                  </div>
+                  <blockquote className="text-lg font-medium text-slate-700 italic">
+                    "Every authentic conversation is worth a thousand perfect AI-generated responses."
+                  </blockquote>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </motion.div>
 
       {/* My Mission Section */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-        <Card className="rounded-3xl border-0 bg-white shadow-xl">
-          <CardContent className="p-12">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/30 border border-emerald-100/50">
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-emerald-500/5" />
+          <div className="relative p-16">
             <div className="max-w-4xl mx-auto">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center">
-                  <Target className="w-6 h-6 text-emerald-600" />
+              <div className="text-center mb-16">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25 mb-8">
+                  <Target className="w-8 h-8 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900">My Mission</h2>
+
+                <h2 className="text-4xl font-light text-slate-900 tracking-tight mb-6">
+                  My{" "}
+                  <span className="font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                    Mission
+                  </span>
+                </h2>
+
+                <div className="w-16 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent mx-auto mb-8" />
+
+                <h3 className="text-2xl font-light text-slate-700 leading-relaxed max-w-2xl mx-auto">
+                  To restore authenticity in human assessment and selection processes.
+                </h3>
               </div>
 
-              <div className="space-y-8">
-                <div className="text-center py-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    To restore authenticity in human assessment and selection processes.
-                  </h3>
-                  <div className="w-24 h-1 bg-emerald-500 mx-auto rounded-full"></div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-semibold text-gray-900">Current Challenge</h4>
-                    <p className="text-gray-700 leading-relaxed">
+              <div className="grid md:grid-cols-2 gap-12 mb-16">
+                <div className="relative">
+                  <div className="absolute -top-2 -left-2 w-12 h-12 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl opacity-60" />
+                  <div className="relative bg-white/60 backdrop-blur-sm rounded-2xl p-8 border border-white/50 shadow-sm">
+                    <h4 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-3">
+                      <div className="w-2 h-2 bg-red-500 rounded-full" />
+                      Current Challenge
+                    </h4>
+                    <p className="text-slate-600 leading-relaxed font-light">
                       Organizations struggle to identify genuine candidates as AI tools make it easy to generate perfect
                       application responses, masking true abilities and character.
                     </p>
                   </div>
+                </div>
 
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-semibold text-gray-900">Our Solution</h4>
-                    <p className="text-gray-700 leading-relaxed">
+                <div className="relative">
+                  <div className="absolute -top-2 -right-2 w-12 h-12 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-2xl opacity-60" />
+                  <div className="relative bg-white/60 backdrop-blur-sm rounded-2xl p-8 border border-white/50 shadow-sm">
+                    <h4 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-3">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full" />
+                      Our Solution
+                    </h4>
+                    <p className="text-slate-600 leading-relaxed font-light">
                       Through Snipe's AI-powered voice interviews, we reveal authentic human qualities that no AI can
                       replicate, ensuring decisions are based on genuine merit.
                     </p>
                   </div>
                 </div>
+              </div>
 
-                <div className="bg-emerald-50 rounded-2xl p-8 text-center">
-                  <div className="flex items-center justify-center gap-3 mb-4">
-                    <Heart className="w-6 h-6 text-emerald-600" />
-                    <span className="text-lg font-semibold text-emerald-900">Vision for the Future</span>
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 rounded-3xl blur-xl" />
+                <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl p-12 border border-white/60 shadow-sm text-center">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 mb-6">
+                    <Heart className="w-6 h-6 text-white" />
                   </div>
-                  <p className="text-lg text-gray-700 leading-relaxed max-w-2xl mx-auto">
+                  <h4 className="text-xl font-semibold text-slate-900 mb-6">Vision for the Future</h4>
+                  <p className="text-lg text-slate-600 leading-relaxed font-light max-w-3xl mx-auto">
                     A world where merit, authenticity, and real human connection drive important life decisions. Every
                     interview should reveal the person behind the application, not the AI behind the screen.
                   </p>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </motion.div>
     </div>
   )
