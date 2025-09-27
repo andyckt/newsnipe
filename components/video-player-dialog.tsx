@@ -113,11 +113,17 @@ export function VideoPlayerDialog({
       // Speed up video on Space key press
       if (e.key === " " || e.code === "Space") {
         e.preventDefault() // Prevent default space behavior (page scroll)
+        e.stopPropagation() // Stop event from reaching video element
         setIsSpacePressed(true)
         
         // Set playback rate to 1.5x
         if (videoRef.current) {
           videoRef.current.playbackRate = 1.5
+        }
+        
+        // Ensure no element gets focused by the spacebar
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur()
         }
       }
     }
@@ -126,6 +132,7 @@ export function VideoPlayerDialog({
       // Reset video speed on Space key release
       if (e.key === " " || e.code === "Space") {
         e.preventDefault()
+        e.stopPropagation()
         setIsSpacePressed(false)
         
         // Reset playback rate to normal
@@ -267,6 +274,20 @@ export function VideoPlayerDialog({
                       controls
                       playsInline
                       controlsList="nodownload"
+                      tabIndex={-1} /* Prevent video from receiving focus via tab */
+                      onClick={(e) => {
+                        // Prevent focus when clicking on the video
+                        if (document.activeElement === e.currentTarget) {
+                          (document.activeElement as HTMLElement).blur();
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        // Prevent the video element from handling spacebar
+                        if (e.key === " " || e.code === "Space") {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }
+                      }}
                     />
                     {/* Speed indicator */}
                     {isSpacePressed && (
