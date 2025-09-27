@@ -260,11 +260,46 @@ export function SubmissionsTab() {
         selectedFilters.every(id => currentSelectedFilters.includes(id));
       
       if (filtersMatch) {
+        let submissionsToSet = data.submissions;
+        
+        // If we have submissions, fetch their decisions
+        if (submissionsToSet.length > 0) {
+          try {
+            // Get all submission IDs
+            const submissionIds = submissionsToSet.map((s: SnipeVideo) => s.id).join(',');
+            
+            // Fetch decisions for these submissions
+            const decisionsResponse = await fetch(`/api/submissions/decisions?responseIds=${submissionIds}`);
+            
+            if (decisionsResponse.ok) {
+              const decisionsData = await decisionsResponse.json();
+              const decisionsMap = decisionsData.decisions || {};
+              
+              console.log('Fetched decisions:', decisionsMap);
+              
+              // Update submissions with decisions
+              submissionsToSet = submissionsToSet.map((submission: SnipeVideo) => ({
+                ...submission,
+                decision: decisionsMap[submission.id] || undefined
+              }));
+              
+              // Update decisions state
+              setSubmissionDecisions(prev => ({
+                ...prev,
+                ...decisionsMap
+              }));
+            }
+          } catch (decisionError) {
+            console.error('Error fetching decisions:', decisionError);
+            // Continue with submissions without decisions
+          }
+        }
+        
         if (pageNum === 1) {
-          console.log(`Setting ${data.submissions.length} submissions with filters: ${selectedFilters.join(', ')}`);
-          setSubmissions(data.submissions);
+          console.log(`Setting ${submissionsToSet.length} submissions with filters: ${selectedFilters.join(', ')}`);
+          setSubmissions(submissionsToSet);
         } else {
-          setSubmissions(prev => [...prev, ...data.submissions]);
+          setSubmissions(prev => [...prev, ...submissionsToSet]);
         }
         
         setHasMore(pageNum < data.pagination?.pages);
@@ -301,58 +336,80 @@ export function SubmissionsTab() {
   }
   
   // Handle submission decisions
-  const handleSubmissionDecision = (submissionId: string, decision: string) => {
-    // Handle empty decision (cancellation)
-    if (decision === '') {
-      // Remove from local state
-      const updatedDecisions = { ...submissionDecisions };
-      delete updatedDecisions[submissionId];
-      setSubmissionDecisions(updatedDecisions);
+  const handleSubmissionDecision = async (submissionId: string, decision: string) => {
+    try {
+      // Optimistically update UI first for better UX
       
-      // Update the submission in the list to remove decision
-      setSubmissions(prev => 
-        prev.map(submission => 
-          submission.id === submissionId 
-            ? { ...submission, decision: undefined } 
-            : submission
-        )
-      );
-      
-      // If the selected video is the one being updated, update it too
-      if (selectedVideo?.id === submissionId) {
-        setSelectedVideo(prev => 
-          prev ? { ...prev, decision: undefined } : null
+      // Handle empty decision (cancellation)
+      if (decision === '') {
+        // Remove from local state
+        const updatedDecisions = { ...submissionDecisions };
+        delete updatedDecisions[submissionId];
+        setSubmissionDecisions(updatedDecisions);
+        
+        // Update the submission in the list to remove decision
+        setSubmissions(prev => 
+          prev.map(submission => 
+            submission.id === submissionId 
+              ? { ...submission, decision: undefined } 
+              : submission
+          )
         );
+        
+        // If the selected video is the one being updated, update it too
+        if (selectedVideo?.id === submissionId) {
+          setSelectedVideo(prev => 
+            prev ? { ...prev, decision: undefined } : null
+          );
+        }
+        
+        console.log(`Decision cancelled for submission ${submissionId}`);
+      } else {
+        // Update local state with new decision
+        setSubmissionDecisions(prev => ({
+          ...prev,
+          [submissionId]: decision
+        }));
+        
+        // Update the submission in the list
+        setSubmissions(prev => 
+          prev.map(submission => 
+            submission.id === submissionId 
+              ? { ...submission, decision } 
+              : submission
+          )
+        );
+        
+        // If the selected video is the one being updated, update it too
+        if (selectedVideo?.id === submissionId) {
+          setSelectedVideo(prev => 
+            prev ? { ...prev, decision } : null
+          );
+        }
+        
+        console.log(`Submission ${submissionId} marked as ${decision}`);
       }
       
-      console.log(`Decision cancelled for submission ${submissionId}`);
-      return;
+      // Send decision to backend
+      const response = await fetch('/api/submissions/decision', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ submissionId, decision }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save decision');
+      }
+      
+      const data = await response.json();
+      console.log('Decision saved to backend:', data);
+      
+    } catch (error) {
+      console.error('Error saving decision:', error);
+      // Show error notification (you could add a toast here)
     }
-    
-    // Update local state with new decision
-    setSubmissionDecisions(prev => ({
-      ...prev,
-      [submissionId]: decision
-    }));
-    
-    // Update the submission in the list
-    setSubmissions(prev => 
-      prev.map(submission => 
-        submission.id === submissionId 
-          ? { ...submission, decision } 
-          : submission
-      )
-    );
-    
-    // If the selected video is the one being updated, update it too
-    if (selectedVideo?.id === submissionId) {
-      setSelectedVideo(prev => 
-        prev ? { ...prev, decision } : null
-      );
-    }
-    
-    // TODO: Send decision to backend when implemented
-    console.log(`Submission ${submissionId} marked as ${decision}`)
   }
 
   const handleCloseVideo = () => {
