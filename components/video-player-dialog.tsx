@@ -61,6 +61,7 @@ export function VideoPlayerDialog({
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [currentDecision, setCurrentDecision] = useState<string | undefined>(decision)
   const [isSpacePressed, setIsSpacePressed] = useState(false)
+  const [spaceKeyTimer, setSpaceKeyTimer] = useState<NodeJS.Timeout | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   
   const currentVideo = videos[selectedVideoIndex]
@@ -74,6 +75,20 @@ export function VideoPlayerDialog({
   const handleNextVideo = () => {
     if (selectedVideoIndex < videos.length - 1) {
       onVideoChange(selectedVideoIndex + 1)
+    }
+  }
+  
+  // Toggle video play/pause
+  const togglePlayPause = () => {
+    if (!videoRef.current) return
+    
+    if (videoRef.current.paused) {
+      videoRef.current.play()
+        .then(() => setIsPlaying(true))
+        .catch(e => console.error("Video play failed:", e))
+    } else {
+      videoRef.current.pause()
+      setIsPlaying(false)
     }
   }
   
@@ -110,34 +125,70 @@ export function VideoPlayerDialog({
         onNextCard()
       }
       
-      // Speed up video on Space key press
+      // Handle Space key press for both toggle play/pause and speed control
       if (e.key === " " || e.code === "Space") {
         e.preventDefault() // Prevent default space behavior (page scroll)
         e.stopPropagation() // Stop event from reaching video element
-        setIsSpacePressed(true)
-        
-        // Set playback rate to 1.5x
-        if (videoRef.current) {
-          videoRef.current.playbackRate = 1.5
-        }
         
         // Ensure no element gets focused by the spacebar
         if (document.activeElement instanceof HTMLElement) {
           document.activeElement.blur()
         }
+        
+        // Set a timer to detect if this is a press-and-hold or a quick tap
+        const timer = setTimeout(() => {
+          // This is a press-and-hold (longer than 200ms)
+          setIsSpacePressed(true)
+          
+          // Set playback rate to 1.5x without changing play state
+          if (videoRef.current) {
+            // If video is paused, play it first
+            if (videoRef.current.paused) {
+              videoRef.current.play()
+                .then(() => {
+                  videoRef.current!.playbackRate = 1.5
+                  setIsPlaying(true)
+                })
+                .catch(e => console.error("Video play failed:", e))
+            } else {
+              // If already playing, just increase speed
+              videoRef.current.playbackRate = 1.5
+            }
+          }
+        }, 200)
+        
+        // Store the timer ID so we can clear it if needed
+        setSpaceKeyTimer(timer)
       }
     }
     
     const handleKeyUp = (e: KeyboardEvent) => {
-      // Reset video speed on Space key release
+      // Handle Space key release
       if (e.key === " " || e.code === "Space") {
         e.preventDefault()
         e.stopPropagation()
-        setIsSpacePressed(false)
         
-        // Reset playback rate to normal
-        if (videoRef.current) {
-          videoRef.current.playbackRate = 1.0
+        // If spacebar was being held down (speed control was active)
+        if (isSpacePressed) {
+          setIsSpacePressed(false)
+          
+          // Reset playback rate to normal without changing play state
+          if (videoRef.current) {
+            videoRef.current.playbackRate = 1.0
+          }
+          
+          // Important: Do NOT toggle play/pause when releasing after speed control
+          return
+        } 
+        
+        // If there's a pending timer (this was a quick press)
+        if (spaceKeyTimer) {
+          // Clear the timer to prevent speed control from activating
+          clearTimeout(spaceKeyTimer)
+          setSpaceKeyTimer(null)
+          
+          // Toggle play/pause ONLY for quick press
+          togglePlayPause()
         }
       }
     }
@@ -150,8 +201,13 @@ export function VideoPlayerDialog({
     return () => {
       document.removeEventListener("keydown", handleKeyDown)
       document.removeEventListener("keyup", handleKeyUp)
+      
+      // Clear any pending timers on cleanup
+      if (spaceKeyTimer) {
+        clearTimeout(spaceKeyTimer)
+      }
     }
-  }, [onClose, selectedVideoIndex, videos.length, hasPrevCard, hasNextCard, onPrevCard, onNextCard])
+  }, [onClose, selectedVideoIndex, videos.length, hasPrevCard, hasNextCard, onPrevCard, onNextCard, isSpacePressed, spaceKeyTimer, togglePlayPause])
   
   // Process video key when video changes
   useEffect(() => {
@@ -208,6 +264,23 @@ export function VideoPlayerDialog({
     } else if (videoRef.current) {
       videoRef.current.pause()
       setIsPlaying(false)
+    }
+  }, [videoUrl])
+  
+  // Add event listeners to keep track of video play/pause state
+  useEffect(() => {
+    const videoElement = videoRef.current
+    if (!videoElement) return
+    
+    const handlePlay = () => setIsPlaying(true)
+    const handlePause = () => setIsPlaying(false)
+    
+    videoElement.addEventListener('play', handlePlay)
+    videoElement.addEventListener('pause', handlePause)
+    
+    return () => {
+      videoElement.removeEventListener('play', handlePlay)
+      videoElement.removeEventListener('pause', handlePause)
     }
   }, [videoUrl])
   
