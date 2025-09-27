@@ -60,6 +60,7 @@ export function VideoPlayerDialog({
   const [isLoadingVideo, setIsLoadingVideo] = useState(false)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [currentDecision, setCurrentDecision] = useState<string | undefined>(decision)
+  const [isSpacePressed, setIsSpacePressed] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   
   const currentVideo = videos[selectedVideoIndex]
@@ -108,12 +109,41 @@ export function VideoPlayerDialog({
         e.preventDefault()
         onNextCard()
       }
+      
+      // Speed up video on Space key press
+      if (e.key === " " || e.code === "Space") {
+        e.preventDefault() // Prevent default space behavior (page scroll)
+        setIsSpacePressed(true)
+        
+        // Set playback rate to 1.5x
+        if (videoRef.current) {
+          videoRef.current.playbackRate = 1.5
+        }
+      }
     }
     
-    // Add event listener directly to the document to capture all keyboard events
+    const handleKeyUp = (e: KeyboardEvent) => {
+      // Reset video speed on Space key release
+      if (e.key === " " || e.code === "Space") {
+        e.preventDefault()
+        setIsSpacePressed(false)
+        
+        // Reset playback rate to normal
+        if (videoRef.current) {
+          videoRef.current.playbackRate = 1.0
+        }
+      }
+    }
+    
+    // Add event listeners directly to the document to capture all keyboard events
     // regardless of which element has focus
     document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
+    document.addEventListener("keyup", handleKeyUp)
+    
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+      document.removeEventListener("keyup", handleKeyUp)
+    }
   }, [onClose, selectedVideoIndex, videos.length, hasPrevCard, hasNextCard, onPrevCard, onNextCard])
   
   // Process video key when video changes
@@ -229,7 +259,7 @@ export function VideoPlayerDialog({
                     <span className="ml-2 text-white">Loading video...</span>
                   </div>
                 ) : videoUrl ? (
-                  <div className="w-full h-full">
+                  <div className="w-full h-full relative">
                     <video
                       ref={videoRef}
                       src={videoUrl}
@@ -238,6 +268,12 @@ export function VideoPlayerDialog({
                       playsInline
                       controlsList="nodownload"
                     />
+                    {/* Speed indicator */}
+                    {isSpacePressed && (
+                      <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        1.5x
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-black flex-col">
