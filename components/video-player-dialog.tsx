@@ -315,6 +315,28 @@ export function VideoPlayerDialog({
       setVideoUrl(null);
     }
   }, [isOpen])
+ // Add body scroll lock when dialog is open
+ useEffect(() => {
+  if (isOpen) {
+    // Save current scroll position
+    const scrollY = window.scrollY;
+    
+    // Add styles to prevent scrolling on the body
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.body.style.overflowY = 'hidden';
+    
+    return () => {
+      // Remove styles and restore scroll position when dialog closes
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflowY = '';
+      window.scrollTo(0, scrollY);
+    };
+  }
+}, [isOpen])
   
   // We're removing the aggressive focus trap that was causing issues with the settings menu
 
