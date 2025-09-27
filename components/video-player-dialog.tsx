@@ -76,6 +76,9 @@ export function VideoPlayerDialog({
     }
   }
   
+  // Create a ref for the dialog container
+  const dialogRef = useRef<HTMLDivElement>(null)
+  
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -107,8 +110,10 @@ export function VideoPlayerDialog({
       }
     }
     
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
+    // Add event listener directly to the document to capture all keyboard events
+    // regardless of which element has focus
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
   }, [onClose, selectedVideoIndex, videos.length, hasPrevCard, hasNextCard, onPrevCard, onNextCard])
   
   // Process video key when video changes
@@ -189,6 +194,7 @@ export function VideoPlayerDialog({
         >
           {/* Dialog Content */}
           <motion.div
+            ref={dialogRef}
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
@@ -199,8 +205,12 @@ export function VideoPlayerDialog({
           >
             {/* Close Button */}
             <button
-              onClick={onClose}
-              className="absolute top-4 right-4 z-10 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+              tabIndex={-1}
+              className="absolute top-4 right-4 z-10 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors focus:outline-none"
               aria-label="Close dialog"
             >
               <X size={20} />
@@ -233,7 +243,8 @@ export function VideoPlayerDialog({
                   <div className="w-full h-full flex items-center justify-center bg-black flex-col">
                     <div className="text-white mb-2">Unable to load video</div>
                     <button 
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         // Retry loading the video
                         if (currentVideo?.videoKey) {
                           setIsLoadingVideo(true);
@@ -270,8 +281,11 @@ export function VideoPlayerDialog({
                               });
                           }
                         }
+                        // Immediately blur the button to prevent it from capturing keyboard events
+                        (document.activeElement as HTMLElement)?.blur();
                       }}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                      tabIndex={-1}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
                     >
                       Retry
                     </button>
@@ -292,8 +306,11 @@ export function VideoPlayerDialog({
                           onClick={(e) => {
                             e.stopPropagation();
                             handlePrevVideo();
+                            // Immediately blur the button to prevent it from capturing keyboard events
+                            (document.activeElement as HTMLElement)?.blur();
                           }}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 p-3 rounded-full text-white transition-colors"
+                          tabIndex={-1}
+                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 p-3 rounded-full text-white transition-colors focus:outline-none"
                           aria-label="Previous video"
                         >
                           <ChevronLeft size={24} />
@@ -310,8 +327,11 @@ export function VideoPlayerDialog({
                           onClick={(e) => {
                             e.stopPropagation();
                             handleNextVideo();
+                            // Immediately blur the button to prevent it from capturing keyboard events
+                            (document.activeElement as HTMLElement)?.blur();
                           }}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 p-3 rounded-full text-white transition-colors"
+                          tabIndex={-1}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 p-3 rounded-full text-white transition-colors focus:outline-none"
                           aria-label="Next video"
                         >
                           <ChevronRight size={24} />
@@ -340,8 +360,13 @@ export function VideoPlayerDialog({
                   {videos.map((video, index) => (
                     <button
                       key={index}
-                      onClick={() => onVideoChange(index)}
-                      className={`text-left p-2 rounded-lg transition-colors ${
+                      onClick={() => {
+                        onVideoChange(index);
+                        // Immediately blur the button to prevent it from capturing keyboard events
+                        (document.activeElement as HTMLElement)?.blur();
+                      }}
+                      tabIndex={-1}
+                      className={`text-left p-2 rounded-lg transition-colors focus:outline-none ${
                         selectedVideoIndex === index
                           ? "bg-gray-100 border-l-4 border-blue-500"
                           : "hover:bg-gray-50"

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
 import { Star, ThumbsUp, X } from "lucide-react"
 
 interface SubmissionDecisionProps {
@@ -50,7 +49,7 @@ export function SubmissionDecision({ onDecision, currentDecision }: SubmissionDe
           const isHovered = hoveredOption === option.id
           
           return (
-            <motion.button
+            <button
               key={option.id}
               onClick={() => {
                 // If already selected, cancel the decision by passing null
@@ -59,48 +58,42 @@ export function SubmissionDecision({ onDecision, currentDecision }: SubmissionDe
                 } else {
                   onDecision(option.id);
                 }
+                // Immediately blur the button to prevent it from capturing keyboard events
+                (document.activeElement as HTMLElement)?.blur();
               }}
               onMouseEnter={() => setHoveredOption(option.id)}
               onMouseLeave={() => setHoveredOption(null)}
+              // Add tabIndex=-1 to prevent the button from receiving focus via tab navigation
+              tabIndex={-1}
               className={`
                 relative flex items-center justify-center rounded-xl px-4 py-3
-                transition-all duration-300 ease-out
+                active:scale-95 transition-transform duration-75
                 ${isSelected 
                   ? `${option.color} text-white border-2 border-transparent` 
                   : `bg-white border-2 ${option.borderColor} ${option.textColor}`
                 }
                 hover:scale-105
                 group
+                focus:outline-none
               `}
-              whileTap={{ scale: 0.95 }}
             >
               <div className="flex items-center">
-                <div className={`
-                  flex items-center justify-center rounded-full p-1
-                  ${isSelected ? 'bg-white/20' : ''}
-                `}>
-                  <option.icon 
-                    size={20} 
-                    className={isSelected ? 'text-white' : option.textColor} 
-                  />
-                </div>
+                <option.icon 
+                  size={20} 
+                  className={isSelected ? 'text-white' : option.textColor} 
+                />
                 <span className="ml-2 font-medium">{option.label}</span>
               </div>
               
-              {/* Animated background effect on hover */}
-              <AnimatePresence>
-                {isHovered && !isSelected && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.1 }}
-                    exit={{ opacity: 0 }}
-                    className={`absolute inset-0 rounded-xl ${option.color}`}
-                  />
-                )}
-              </AnimatePresence>
+              {/* Direct hover effect without animation */}
+              {isHovered && !isSelected && (
+                <div
+                  className={`absolute inset-0 rounded-xl ${option.color} opacity-10`}
+                />
+              )}
               
               {/* Selection indicator removed */}
-            </motion.button>
+            </button>
           )
         })}
       </div>
