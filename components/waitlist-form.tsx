@@ -100,7 +100,7 @@ export default function WaitlistForm() {
   
   const handleInvitationCodeSubmit = () => {
     if (invitationCode.toUpperCase() === 'SNIPE2025') {
-      window.location.href = 'https://app.thesnipe.co';
+      window.location.href = '/'; // Redirect to the root URL of this project
     } else {
       setMessage('Invalid invitation code');
     }
