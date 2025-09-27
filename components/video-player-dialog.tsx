@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
+import { SubmissionDecision } from "./submission-decision"
 
 interface Video {
   videoKey: string;
@@ -31,6 +32,9 @@ interface VideoPlayerDialogProps {
   onPrevCard?: () => void
   hasNextCard?: boolean
   hasPrevCard?: boolean
+  submissionId?: string
+  decision?: string
+  onDecision?: (submissionId: string, decision: string) => void
 }
 
 export function VideoPlayerDialog({
@@ -46,12 +50,16 @@ export function VideoPlayerDialog({
   onNextCard,
   onPrevCard,
   hasNextCard = false,
-  hasPrevCard = false
+  hasPrevCard = false,
+  submissionId,
+  decision,
+  onDecision
 }: VideoPlayerDialogProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
   const [isLoadingVideo, setIsLoadingVideo] = useState(false)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const [currentDecision, setCurrentDecision] = useState<string | undefined>(decision)
   const videoRef = useRef<HTMLVideoElement>(null)
   
   const currentVideo = videos[selectedVideoIndex]
@@ -317,7 +325,7 @@ export function VideoPlayerDialog({
             </div>
             
             {/* Video Info - Right Side */}
-            <div className="p-5 md:w-3/5 md:overflow-y-auto flex flex-col">
+            <div className="p-5 md:w-3/5 md:overflow-y-auto flex flex-col relative">
               {/* Title and candidate info - commented out as requested
               <h3 className="text-lg font-semibold text-gray-900 mb-1">{title}</h3>
               <p className="text-gray-600 mb-3">{candidate}</p>
@@ -349,7 +357,7 @@ export function VideoPlayerDialog({
               </div>
               
               {/* Content section - all displayed directly */}
-              <div className="mt-4 space-y-6">
+              <div className="mt-4 space-y-6 pb-24">
                 {/* Personal Details Section */}
                 <div className="space-y-4">
                   <h4 className="text-sm font-semibold text-gray-700">Personal Details</h4>
@@ -374,17 +382,22 @@ export function VideoPlayerDialog({
                     <p className="text-gray-900">{date || "N/A"}</p>
                   </div>
                   
-                    {/* Description section - not needed for now
-                    <div>
-                      <h5 className="text-xs font-medium text-gray-500 mb-1">Description</h5>
-                      <p className="text-gray-700 text-sm">
-                        This interview covers the candidate's background, experience, and suitability for the position.
-                        The candidate demonstrates strong communication skills and relevant expertise in the field.
-                      </p>
-                    </div>
-                    */}
+                  {/* Decision UI removed from here and moved to bottom */}
                 </div>
               </div>
+              
+              {/* Decision UI - Fixed at bottom */}
+              {submissionId && onDecision && (
+                <div className="absolute bottom-0 left-0 right-0 p-5 bg-white">
+                  <SubmissionDecision 
+                    currentDecision={currentDecision}
+                    onDecision={(decision) => {
+                      setCurrentDecision(decision || undefined);
+                      onDecision(submissionId, decision);
+                    }} 
+                  />
+                </div>
+              )}
             </div>
           </motion.div>
         </motion.div>

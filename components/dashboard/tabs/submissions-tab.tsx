@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
-import { Play, Loader2, Filter, X } from "lucide-react"
+import { Play, Loader2, Filter, X, Star, ThumbsUp } from "lucide-react"
 import { VideoPlayerDialog } from "@/components/video-player-dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
@@ -33,6 +33,7 @@ interface SnipeVideo {
   date: string;
   personalDetails?: PersonalDetail[];
   snipeId?: string;
+  decision?: string;
 }
 
 interface SnipeFilter {
@@ -53,6 +54,7 @@ export function SubmissionsTab() {
   const [error, setError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
+  const [submissionDecisions, setSubmissionDecisions] = useState<Record<string, string>>({})
   
   // Filter states
   const [snipeFilters, setSnipeFilters] = useState<SnipeFilter[]>([])
@@ -297,6 +299,61 @@ export function SubmissionsTab() {
     setSelectedVideoIndex(0) // Start with the first video
     setIsDialogOpen(true)
   }
+  
+  // Handle submission decisions
+  const handleSubmissionDecision = (submissionId: string, decision: string) => {
+    // Handle empty decision (cancellation)
+    if (decision === '') {
+      // Remove from local state
+      const updatedDecisions = { ...submissionDecisions };
+      delete updatedDecisions[submissionId];
+      setSubmissionDecisions(updatedDecisions);
+      
+      // Update the submission in the list to remove decision
+      setSubmissions(prev => 
+        prev.map(submission => 
+          submission.id === submissionId 
+            ? { ...submission, decision: undefined } 
+            : submission
+        )
+      );
+      
+      // If the selected video is the one being updated, update it too
+      if (selectedVideo?.id === submissionId) {
+        setSelectedVideo(prev => 
+          prev ? { ...prev, decision: undefined } : null
+        );
+      }
+      
+      console.log(`Decision cancelled for submission ${submissionId}`);
+      return;
+    }
+    
+    // Update local state with new decision
+    setSubmissionDecisions(prev => ({
+      ...prev,
+      [submissionId]: decision
+    }));
+    
+    // Update the submission in the list
+    setSubmissions(prev => 
+      prev.map(submission => 
+        submission.id === submissionId 
+          ? { ...submission, decision } 
+          : submission
+      )
+    );
+    
+    // If the selected video is the one being updated, update it too
+    if (selectedVideo?.id === submissionId) {
+      setSelectedVideo(prev => 
+        prev ? { ...prev, decision } : null
+      );
+    }
+    
+    // TODO: Send decision to backend when implemented
+    console.log(`Submission ${submissionId} marked as ${decision}`)
+  }
 
   const handleCloseVideo = () => {
     setIsDialogOpen(false)
@@ -474,6 +531,9 @@ export function SubmissionsTab() {
             onPrevCard={handlePrevCard}
             hasNextCard={findVideoIndex(selectedVideo.id) < submissions.length - 1}
             hasPrevCard={findVideoIndex(selectedVideo.id) > 0}
+            submissionId={selectedVideo.id}
+            decision={selectedVideo.decision || submissionDecisions[selectedVideo.id]}
+            onDecision={handleSubmissionDecision}
           />
         )}
       </div>
@@ -556,6 +616,26 @@ export function SubmissionsTab() {
                     (e.target as HTMLImageElement).src = "/placeholder-user.jpg";
                   }}
                 />
+                
+                {/* Decision indicator */}
+                {(video.decision || submissionDecisions[video.id]) && (video.decision !== '' && submissionDecisions[video.id] !== '') ? (
+                  <div className={`
+                    absolute top-2 right-2 z-10 p-1.5 rounded-full shadow-lg
+                    ${video.decision === 'like' || submissionDecisions[video.id] === 'like' ? 'bg-amber-500' : ''}
+                    ${video.decision === 'potential' || submissionDecisions[video.id] === 'potential' ? 'bg-blue-500' : ''}
+                    ${video.decision === 'reject' || submissionDecisions[video.id] === 'reject' ? 'bg-red-500' : ''}
+                  `}>
+                    {(video.decision === 'like' || submissionDecisions[video.id] === 'like') && (
+                      <Star className="h-4 w-4 text-white" />
+                    )}
+                    {(video.decision === 'potential' || submissionDecisions[video.id] === 'potential') && (
+                      <ThumbsUp className="h-4 w-4 text-white" />
+                    )}
+                    {(video.decision === 'reject' || submissionDecisions[video.id] === 'reject') && (
+                      <X className="h-4 w-4 text-white" />
+                    )}
+                  </div>
+                ) : null}
 
                 {/* Play Button Overlay */}
                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
