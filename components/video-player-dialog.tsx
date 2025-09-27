@@ -98,6 +98,22 @@ export function VideoPlayerDialog({
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Skip handling if focus is on a video control or menu
+      // This allows the native video controls to work properly
+      const activeElement = document.activeElement;
+      const isVideoControlFocused = 
+        activeElement?.tagName === 'VIDEO' || 
+        activeElement?.closest('video') || 
+        activeElement?.hasAttribute('role') ||
+        activeElement?.tagName === 'BUTTON' ||
+        activeElement?.tagName === 'INPUT' ||
+        activeElement?.tagName === 'SELECT';
+      
+      // If a video control has focus and it's not the spacebar, let the control handle it
+      if (isVideoControlFocused && e.key !== " " && e.code !== "Space") {
+        return;
+      }
+      
       // Close dialog on Escape
       if (e.key === "Escape") onClose()
       
@@ -127,46 +143,53 @@ export function VideoPlayerDialog({
       
       // Handle Space key press for both toggle play/pause and speed control
       if (e.key === " " || e.code === "Space") {
-        e.preventDefault() // Prevent default space behavior (page scroll)
-        e.stopPropagation() // Stop event from reaching video element
-        
-        // Ensure no element gets focused by the spacebar
-        if (document.activeElement instanceof HTMLElement) {
-          document.activeElement.blur()
-        }
-        
-        // Set a timer to detect if this is a press-and-hold or a quick tap
-        const timer = setTimeout(() => {
-          // This is a press-and-hold (longer than 200ms)
-          setIsSpacePressed(true)
+        // Only handle spacebar if we're not in a text input or similar
+        if (activeElement?.tagName !== 'INPUT' && 
+            activeElement?.tagName !== 'TEXTAREA' && 
+            activeElement?.tagName !== 'SELECT') {
           
-          // Set playback rate to 1.5x without changing play state
-          if (videoRef.current) {
-            // If video is paused, play it first
-            if (videoRef.current.paused) {
-              videoRef.current.play()
-                .then(() => {
-                  videoRef.current!.playbackRate = 1.5
-                  setIsPlaying(true)
-                })
-                .catch(e => console.error("Video play failed:", e))
-            } else {
-              // If already playing, just increase speed
-              videoRef.current.playbackRate = 1.5
+          e.preventDefault() // Prevent default space behavior (page scroll)
+          
+          // Set a timer to detect if this is a press-and-hold or a quick tap
+          const timer = setTimeout(() => {
+            // This is a press-and-hold (longer than 200ms)
+            setIsSpacePressed(true)
+            
+            // Set playback rate to 1.5x without changing play state
+            if (videoRef.current) {
+              // If video is paused, play it first
+              if (videoRef.current.paused) {
+                videoRef.current.play()
+                  .then(() => {
+                    videoRef.current!.playbackRate = 1.5
+                    setIsPlaying(true)
+                  })
+                  .catch(e => console.error("Video play failed:", e))
+              } else {
+                // If already playing, just increase speed
+                videoRef.current.playbackRate = 1.5
+              }
             }
-          }
-        }, 200)
-        
-        // Store the timer ID so we can clear it if needed
-        setSpaceKeyTimer(timer)
+          }, 200)
+          
+          // Store the timer ID so we can clear it if needed
+          setSpaceKeyTimer(timer)
+        }
       }
     }
     
     const handleKeyUp = (e: KeyboardEvent) => {
       // Handle Space key release
       if (e.key === " " || e.code === "Space") {
+        // Skip handling if focus is on a text input or similar
+        const activeElement = document.activeElement;
+        if (activeElement?.tagName === 'INPUT' || 
+            activeElement?.tagName === 'TEXTAREA' || 
+            activeElement?.tagName === 'SELECT') {
+          return;
+        }
+        
         e.preventDefault()
-        e.stopPropagation()
         
         // If spacebar was being held down (speed control was active)
         if (isSpacePressed) {
@@ -275,6 +298,8 @@ export function VideoPlayerDialog({
     const handlePlay = () => setIsPlaying(true)
     const handlePause = () => setIsPlaying(false)
     
+    // We're removing the aggressive focus management that was breaking the settings menu
+    
     videoElement.addEventListener('play', handlePlay)
     videoElement.addEventListener('pause', handlePause)
     
@@ -290,6 +315,8 @@ export function VideoPlayerDialog({
       setVideoUrl(null);
     }
   }, [isOpen])
+  
+  // We're removing the aggressive focus trap that was causing issues with the settings menu
 
   return (
     <AnimatePresence>
@@ -347,15 +374,8 @@ export function VideoPlayerDialog({
                       controls
                       playsInline
                       controlsList="nodownload"
-                      tabIndex={-1} /* Prevent video from receiving focus via tab */
-                      onClick={(e) => {
-                        // Prevent focus when clicking on the video
-                        if (document.activeElement === e.currentTarget) {
-                          (document.activeElement as HTMLElement).blur();
-                        }
-                      }}
                       onKeyDown={(e) => {
-                        // Prevent the video element from handling spacebar
+                        // Only prevent spacebar default behavior
                         if (e.key === " " || e.code === "Space") {
                           e.preventDefault();
                           e.stopPropagation();
