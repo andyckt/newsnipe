@@ -179,7 +179,7 @@ export default function AuthPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
+      className="min-h-screen flex flex-col items-center justify-center p-4 relative"
       style={{
         backgroundImage: "url('/bg.jpeg')",
         backgroundSize: "cover",
@@ -187,6 +187,18 @@ export default function AuthPage() {
         backgroundRepeat: "no-repeat",
       }}
     >
+      <div className="absolute top-4 left-4">
+        <a 
+          href="/home" 
+          className="p-2 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm border border-purple-500/30 transition-all duration-300 flex items-center justify-center"
+          aria-label="Go to homepage"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </a>
+      </div>
       <AuthCard
         isLoading={isLoading}
         email={email}
