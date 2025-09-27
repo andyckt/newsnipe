@@ -60,6 +60,11 @@ export function VideoPlayerDialog({
   const [isLoadingVideo, setIsLoadingVideo] = useState(false)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [currentDecision, setCurrentDecision] = useState<string | undefined>(decision)
+  
+  // Reset currentDecision when the submission changes
+  useEffect(() => {
+    setCurrentDecision(decision);
+  }, [submissionId, decision])
   const [isSpacePressed, setIsSpacePressed] = useState(false)
   const [spaceKeyTimer, setSpaceKeyTimer] = useState<NodeJS.Timeout | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)

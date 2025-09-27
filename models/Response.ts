@@ -24,6 +24,8 @@ export interface IResponse {
   ipAddress?: string;
   userAgent?: string;
   status: 'in_progress' | 'completed' | 'abandoned';
+  decision?: 'like' | 'potential' | 'reject'; // Decision made by the admin
+  decisionAt?: Date; // When the decision was made
   completedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -75,6 +77,12 @@ const responseSchema = new mongoose.Schema<IResponse>(
       enum: ['in_progress', 'completed', 'abandoned'],
       default: 'in_progress',
     },
+    decision: {
+      type: String,
+      enum: ['like', 'potential', 'reject'],
+      required: false,
+    },
+    decisionAt: Date,
     completedAt: Date,
   },
   { timestamps: true }
