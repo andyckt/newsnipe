@@ -43,7 +43,7 @@ export function Sidebar({ isOpen, isMobile = false, onClose, activeMenu = "dashb
             <div className="flex justify-center">
               <div>
                 <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Snipe
+                  Snipe 1.0
                 </h2>
               </div>
             </div>
