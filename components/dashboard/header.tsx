@@ -22,6 +22,7 @@ export function Header({ sidebarOpen, setSidebarOpen, setMobileMenuOpen, notific
         <PanelLeft className="h-5 w-5" />
       </Button>
       <div className="flex flex-1 items-center justify-between">
+        {/* Search bar commented out
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -30,6 +31,7 @@ export function Header({ sidebarOpen, setSidebarOpen, setMobileMenuOpen, notific
             className="w-full rounded-2xl bg-muted pl-9 pr-4 py-2"
           />
         </div>
+        */}
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9 border-2 border-primary">
             <AvatarImage src="/placeholder.svg?height=40&width=40" alt="User" />
