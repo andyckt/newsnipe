@@ -67,10 +67,10 @@ export function SubmissionDecision({ onDecision, currentDecision }: SubmissionDe
               tabIndex={-1}
               className={`
                 relative flex items-center justify-center rounded-xl px-4 py-3
-                active:scale-95 transition-transform duration-75
+                active:scale-95 transition-all duration-300
                 ${isSelected 
                   ? `${option.color} text-white border-2 border-transparent` 
-                  : `bg-white border-2 border-gray-200 text-gray-600`
+                  : `bg-white border-2 border-gray-200 text-gray-600 hover:border-gray-500`
                 }
                 hover:scale-105
                 group
