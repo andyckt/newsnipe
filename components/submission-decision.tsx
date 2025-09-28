@@ -70,7 +70,7 @@ export function SubmissionDecision({ onDecision, currentDecision }: SubmissionDe
                 active:scale-95 transition-all duration-300
                 ${isSelected 
                   ? `${option.color} text-white border-2 border-transparent` 
-                  : `bg-white border-2 border-gray-200 text-gray-600 hover:border-gray-500`
+                  : `bg-white border-2 border-gray-200 text-gray-600 hover:border-${option.textColor.replace('text-', '')}`
                 }
                 hover:scale-105
                 group
