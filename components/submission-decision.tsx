@@ -70,7 +70,7 @@ export function SubmissionDecision({ onDecision, currentDecision }: SubmissionDe
                 active:scale-95 transition-transform duration-75
                 ${isSelected 
                   ? `${option.color} text-white border-2 border-transparent` 
-                  : `bg-white border-2 ${option.borderColor} ${option.textColor}`
+                  : `bg-white border-2 border-gray-200 text-gray-600`
                 }
                 hover:scale-105
                 group
@@ -85,12 +85,7 @@ export function SubmissionDecision({ onDecision, currentDecision }: SubmissionDe
                 <span className="ml-2 font-medium">{option.label}</span>
               </div>
               
-              {/* Direct hover effect without animation */}
-              {isHovered && !isSelected && (
-                <div
-                  className={`absolute inset-0 rounded-xl ${option.color} opacity-10`}
-                />
-              )}
+              {/* No hover effect */}
               
               {/* Selection indicator removed */}
             </button>
