@@ -756,7 +756,6 @@ export function SubmissionsTab() {
       {!isLoading && submissions.length === 0 && !error && (
         <div className="p-8 text-center">
           <p className="text-gray-500">No submissions found.</p>
-          <p className="text-gray-500 mt-2">Create a Snipe and share it to get responses.</p>
         </div>
       )}
 
