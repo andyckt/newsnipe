@@ -102,16 +102,46 @@ export function SubmissionsTab() {
     return attemptApply();
   }).current;
   
+  // Track if we've already initialized filters
+  const initializedRef = useRef(false);
+
   // Fetch snipe filters when component mounts
   useEffect(() => {
-    fetchSnipeFilters();
+    // Prevent multiple initializations
+    if (initializedRef.current) {
+      console.log('Component already initialized, skipping');
+      return;
+    }
+    
+    initializedRef.current = true;
+    console.log('Initializing component for the first time');
     
     // Check if there's a selected snipe filter from localStorage (set by the View button in My Snipe tab)
     const selectedSnipeFilter = typeof window !== 'undefined' ? localStorage.getItem('selectedSnipeFilter') : null;
     
+    // If we have a selected filter in localStorage, prepare to apply it
+    if (selectedSnipeFilter) {
+      // Mark that we're coming from My Snipe tab
+      setIsComingFromMySnipeTab(true);
+      console.log('Coming from My Snipe tab via localStorage, setting flag');
+      
+      // Store it for application after filters are loaded
+      pendingFilterIdRef.current = selectedSnipeFilter;
+      
+      // Clear the localStorage item to prevent it from being applied again on future visits
+      localStorage.removeItem('selectedSnipeFilter');
+    }
+    
+    // Now fetch the filters
+    fetchSnipeFilters();
+    
     // Listen for navigation events from other tabs
     const handleNavigateToTab = (event: CustomEvent) => {
       if (event.detail?.snipeId) {
+        // Mark that we're coming from My Snipe tab
+        setIsComingFromMySnipeTab(true);
+        console.log('Coming from My Snipe tab via event, setting flag');
+        
         // Apply the filter when we receive the navigation event
         applyFilterWithRetry(event.detail.snipeId);
       }
@@ -119,15 +149,6 @@ export function SubmissionsTab() {
     
     // Add event listener
     window.addEventListener('navigateToTab', handleNavigateToTab as EventListener);
-    
-    // If we have a selected filter in localStorage, prepare to apply it
-    if (selectedSnipeFilter) {
-      // Store it for application after filters are loaded
-      pendingFilterIdRef.current = selectedSnipeFilter;
-      
-      // Clear the localStorage item to prevent it from being applied again on future visits
-      localStorage.removeItem('selectedSnipeFilter');
-    }
     
     return () => {
       window.removeEventListener('navigateToTab', handleNavigateToTab as EventListener);
@@ -140,6 +161,7 @@ export function SubmissionsTab() {
   // Fetch submissions when filters change
   useEffect(() => {
     if (snipeFilters.length > 0) {
+      console.log('Filters changed, fetching submissions with current filters');
       // Only fetch if we're not in the middle of applying a filter programmatically
       // or if we're done applying the filter
       fetchSubmissions(1);
@@ -168,6 +190,7 @@ export function SubmissionsTab() {
       }));
       
       console.log(`Loaded ${filters.length} filters, pendingId: ${pendingId || 'none'}`);
+      console.log('Selected filters:', filters.filter((f: SnipeFilter) => f.selected).map((f: SnipeFilter) => f.id));
       
       // Mark filters as loaded
       filtersLoadedRef.current = true;
@@ -207,6 +230,44 @@ export function SubmissionsTab() {
     }
   };
 
+  // Track if we're coming from the View button in My Snipe tab
+  const [isComingFromMySnipeTab, setIsComingFromMySnipeTab] = useState<boolean>(false);
+
+  // Function to fetch decisions for submissions
+  const fetchDecisionsForSubmissions = async (submissionsToFetch: SnipeVideo[]) => {
+    try {
+      // Get all submission IDs
+      const submissionIds = submissionsToFetch.map((s: SnipeVideo) => s.id).join(',');
+      
+      // Fetch decisions for these submissions
+      const decisionsResponse = await fetch(`/api/submissions/decisions?responseIds=${submissionIds}`);
+      
+      if (decisionsResponse.ok) {
+        const decisionsData = await decisionsResponse.json();
+        const decisionsMap = decisionsData.decisions || {};
+        
+        console.log('Fetched decisions:', decisionsMap);
+        
+        // Update decisions state
+        setSubmissionDecisions(prev => ({
+          ...prev,
+          ...decisionsMap
+        }));
+        
+        // Update submissions with decisions
+        setSubmissions(currentSubmissions => 
+          currentSubmissions.map(submission => ({
+            ...submission,
+            decision: decisionsMap[submission.id] || submission.decision
+          }))
+        );
+      }
+    } catch (decisionError) {
+      console.error('Error fetching decisions:', decisionError);
+      // Continue with submissions without decisions
+    }
+  };
+
   // Function to fetch submissions from the API
   const fetchSubmissions = async (pageNum: number) => {
     try {
@@ -218,6 +279,33 @@ export function SubmissionsTab() {
         .map(filter => filter.id);
       
       console.log(`Fetching submissions with filters: ${selectedFilters.length > 0 ? selectedFilters.join(', ') : 'none'}`);
+      // Log current filter state
+      const selectedFiltersInfo = snipeFilters
+        .filter((filter: SnipeFilter) => filter.selected)
+        .map((filter: SnipeFilter) => ({ id: filter.id, title: filter.title }));
+      console.log('Current filter state:', JSON.stringify(selectedFiltersInfo));
+      
+      // If we're coming from My Snipe tab and there's no filter selected, something went wrong
+      // Let's check if we need to recover the filter
+      if (isComingFromMySnipeTab && selectedFilters.length === 0 && pendingFilterIdRef.current) {
+        console.log(`RECOVERY: Reapplying filter ${pendingFilterIdRef.current} that was lost`);
+        // Try to re-apply the filter
+        const filterToApply = pendingFilterIdRef.current;
+        
+        // Update filters to select only the matching one
+        setSnipeFilters(filters => {
+          const updatedFilters = filters.map(filter => ({
+            ...filter,
+            selected: filter.id === filterToApply
+          }));
+          console.log('RECOVERY: Filter re-applied');
+          return updatedFilters;
+        });
+        
+        // Skip this fetch since we're about to trigger another one with the fixed filters
+        setIsLoading(false);
+        return;
+      }
       
       // Build the URL with filters if any are selected
       let url = `/api/submissions?page=${pageNum}&limit=20`;
@@ -262,39 +350,53 @@ export function SubmissionsTab() {
       if (filtersMatch) {
         let submissionsToSet = data.submissions;
         
-        // If we have submissions, fetch their decisions
-        if (submissionsToSet.length > 0) {
-          try {
-            // Get all submission IDs
-            const submissionIds = submissionsToSet.map((s: SnipeVideo) => s.id).join(',');
-            
-            // Fetch decisions for these submissions
-            const decisionsResponse = await fetch(`/api/submissions/decisions?responseIds=${submissionIds}`);
-            
-            if (decisionsResponse.ok) {
-              const decisionsData = await decisionsResponse.json();
-              const decisionsMap = decisionsData.decisions || {};
+        // If we're coming from the My Snipe tab, handle it like the original version
+        if (isComingFromMySnipeTab && pageNum === 1) {
+          console.log('Coming from My Snipe tab, using original approach');
+          
+          // If we have submissions, fetch their decisions
+          if (submissionsToSet.length > 0) {
+            try {
+              // Get all submission IDs
+              const submissionIds = submissionsToSet.map((s: SnipeVideo) => s.id).join(',');
               
-              console.log('Fetched decisions:', decisionsMap);
+              // Fetch decisions for these submissions
+              const decisionsResponse = await fetch(`/api/submissions/decisions?responseIds=${submissionIds}`);
               
-              // Update submissions with decisions
-              submissionsToSet = submissionsToSet.map((submission: SnipeVideo) => ({
-                ...submission,
-                decision: decisionsMap[submission.id] || undefined
-              }));
-              
-              // Update decisions state
-              setSubmissionDecisions(prev => ({
-                ...prev,
-                ...decisionsMap
-              }));
+              if (decisionsResponse.ok) {
+                const decisionsData = await decisionsResponse.json();
+                const decisionsMap = decisionsData.decisions || {};
+                
+                console.log('Fetched decisions:', decisionsMap);
+                
+                // Update submissions with decisions
+                submissionsToSet = submissionsToSet.map((submission: SnipeVideo) => ({
+                  ...submission,
+                  decision: decisionsMap[submission.id] || undefined
+                }));
+                
+                // Update decisions state
+                setSubmissionDecisions(prev => ({
+                  ...prev,
+                  ...decisionsMap
+                }));
+              }
+            } catch (decisionError) {
+              console.error('Error fetching decisions:', decisionError);
+              // Continue with submissions without decisions
             }
-          } catch (decisionError) {
-            console.error('Error fetching decisions:', decisionError);
-            // Continue with submissions without decisions
+          }
+          
+          // Only reset the flag after successfully handling the request
+          if (selectedFilters.length > 0) {
+            console.log('Successfully handled My Snipe tab request, resetting flag');
+            setIsComingFromMySnipeTab(false);
+          } else {
+            console.log('WARNING: My Snipe tab request had no filters, keeping flag active');
           }
         }
         
+        // Update the submissions state
         if (pageNum === 1) {
           console.log(`Setting ${submissionsToSet.length} submissions with filters: ${selectedFilters.join(', ')}`);
           setSubmissions(submissionsToSet);
@@ -304,6 +406,11 @@ export function SubmissionsTab() {
         
         setHasMore(pageNum < data.pagination?.pages);
         setPage(pageNum);
+        
+        // If we're NOT coming from My Snipe tab, fetch decisions separately
+        if (!isComingFromMySnipeTab && submissionsToSet.length > 0 && pageNum === 1) {
+          fetchDecisionsForSubmissions(submissionsToSet);
+        }
       } else {
         console.log('Filter state changed during fetch, ignoring results');
       }
@@ -462,6 +569,9 @@ export function SubmissionsTab() {
     
     console.log(`Applying filter for snipeId: ${snipeId}`);
     
+    // Store the snipeId in case we need to recover it
+    pendingFilterIdRef.current = snipeId;
+    
     // Update filters to select only the matching one
     setSnipeFilters(filters => {
       const updatedFilters = filters.map(filter => ({
@@ -470,7 +580,14 @@ export function SubmissionsTab() {
         selected: filter.id === snipeId
       }));
       
-      console.log('Filter applied:', updatedFilters.filter(f => f.selected).map(f => f.id));
+      const selectedFilters = updatedFilters.filter((f: SnipeFilter) => f.selected).map((f: SnipeFilter) => f.id);
+      console.log('Filter applied:', selectedFilters);
+      
+      // Check if the filter was actually found and applied
+      if (selectedFilters.length === 0) {
+        console.warn(`WARNING: Filter ${snipeId} not found in available filters!`);
+      }
+      
       return updatedFilters;
     });
     
@@ -485,6 +602,18 @@ export function SubmissionsTab() {
     // Reset the flag after a short delay to allow state updates to complete
     setTimeout(() => {
       isApplyingFilterRef.current = false;
+      
+      // Double-check that the filter was applied correctly
+      const currentSelectedFilters = snipeFilters
+        .filter(filter => filter.selected)
+        .map(filter => filter.id);
+      
+      if (!currentSelectedFilters.includes(snipeId)) {
+        console.warn(`WARNING: Filter ${snipeId} was not applied correctly. Will retry in fetchSubmissions.`);
+      } else {
+        // Filter was applied successfully, we can clear the pending reference
+        pendingFilterIdRef.current = null;
+      }
     }, 100);
   }
   
