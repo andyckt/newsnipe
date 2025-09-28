@@ -675,23 +675,30 @@ export function SubmissionsTab() {
                     No snipes found
                   </div>
                 ) : (
-                  <div className="max-h-[300px] overflow-y-auto space-y-2">
-                    {snipeFilters.map((filter) => (
-                      <div key={filter.id} className="flex items-center space-x-2">
-                        <Checkbox 
-                          id={`filter-${filter.id}`} 
-                          checked={filter.selected}
-                          onCheckedChange={() => toggleFilter(filter.id)}
-                        />
-                        <label 
-                          htmlFor={`filter-${filter.id}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1 truncate"
-                          title={filter.title}
+                  <div className="max-h-[300px] overflow-y-auto pr-1">
+                    <div className="space-y-1">
+                      {snipeFilters.map((filter) => (
+                        <div 
+                          key={filter.id} 
+                          className="flex items-center space-x-2 p-2 rounded-lg transition-all duration-200"
+                          onClick={() => toggleFilter(filter.id)}
                         >
-                          {filter.title}
-                        </label>
-                      </div>
-                    ))}
+                          <Checkbox 
+                            id={`filter-${filter.id}`} 
+                            checked={filter.selected}
+                            onCheckedChange={() => toggleFilter(filter.id)}
+                            className="transition-opacity"
+                          />
+                          <label 
+                            htmlFor={`filter-${filter.id}`}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1 truncate"
+                            title={filter.title}
+                          >
+                            {filter.title}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
