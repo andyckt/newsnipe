@@ -382,7 +382,7 @@ export function VideoPlayerDialog({
             
             {/* Video Player - Left Side */}
             <div 
-              className="md:w-2/5 bg-black relative"
+              className="md:w-2/5 md:w-[calc(40%+10px)] bg-black relative"
               onMouseEnter={() => setIsHovering(true)}
               onMouseLeave={() => setIsHovering(false)}
             >
@@ -533,28 +533,43 @@ export function VideoPlayerDialog({
               
               {/* Video selection tabs */}
               <div className="mb-4">
-                <div className="flex flex-col gap-2 max-h-[180px] overflow-y-auto pr-2">
-                  {videos.map((video, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        onVideoChange(index);
-                        // Immediately blur the button to prevent it from capturing keyboard events
-                        (document.activeElement as HTMLElement)?.blur();
-                      }}
-                      tabIndex={-1}
-                      className={`text-left p-2 rounded-lg transition-colors focus:outline-none ${
-                        selectedVideoIndex === index
-                          ? "bg-gray-100 border-l-4 border-blue-500"
-                          : "hover:bg-gray-50"
-                      }`}
-                    >
-                      <p className="font-medium text-sm">{video.title || `Video ${index + 1}`}</p>
-                      {video.duration && (
-                        <p className="text-xs text-gray-500 mt-0.5">{video.duration}</p>
-                      )}
-                    </button>
-                  ))}
+                <div className="flex flex-col gap-2 max-h-[150px] overflow-y-auto pr-2 custom-scrollbar">
+                  {videos.map((video, index) => {
+                    // Calculate if this video should be visible initially (first 3)
+                    const isInitiallyVisible = index < 3;
+                    
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          onVideoChange(index);
+                          // Immediately blur the button to prevent it from capturing keyboard events
+                          (document.activeElement as HTMLElement)?.blur();
+                        }}
+                        tabIndex={-1}
+                        className={`text-left p-2 rounded-lg transition-colors focus:outline-none ${
+                          selectedVideoIndex === index
+                            ? "bg-gray-100 border-l-4 border-blue-500"
+                            : "hover:bg-gray-50"
+                        } ${
+                          videos.length > 3 && index >= 3 ? "" : ""
+                        }`}
+                        ref={node => {
+                          // Auto-scroll to make selected video visible if it's not one of the first 3
+                          if (node && selectedVideoIndex === index && !isInitiallyVisible) {
+                            setTimeout(() => {
+                              node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            }, 100);
+                          }
+                        }}
+                      >
+                        <p className="font-medium text-sm">{video.title || `Video ${index + 1}`}</p>
+                        {video.duration && (
+                          <p className="text-xs text-gray-500 mt-0.5">{video.duration}</p>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
               
