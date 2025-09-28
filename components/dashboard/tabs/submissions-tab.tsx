@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
 
 interface Video {
   videoKey: string;
@@ -55,6 +56,9 @@ export function SubmissionsTab() {
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [submissionDecisions, setSubmissionDecisions] = useState<Record<string, string>>({})
+  
+  // Shortlisted filter state
+  const [shortlistedOnly, setShortlistedOnly] = useState(false)
   
   // Filter states
   const [snipeFilters, setSnipeFilters] = useState<SnipeFilter[]>([])
@@ -626,7 +630,21 @@ export function SubmissionsTab() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">Submissions</h2>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Shortlisted Toggle */}
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={shortlistedOnly}
+              onCheckedChange={setShortlistedOnly}
+              id="shortlisted-mode"
+            />
+            <label
+              htmlFor="shortlisted-mode"
+              className="text-sm font-medium cursor-pointer select-none"
+            >
+              Shortlisted
+            </label>
+          </div>
           
           {/* Filter Popover */}
           <Popover open={filterOpen} onOpenChange={setFilterOpen}>
@@ -758,6 +776,17 @@ export function SubmissionsTab() {
           <p className="text-gray-500">No submissions found.</p>
         </div>
       )}
+      
+      {/* Empty state when filtered by shortlisted but no matches */}
+      {!isLoading && submissions.length > 0 && !error && shortlistedOnly && 
+        submissions.filter(video => {
+          const decision = video.decision || submissionDecisions[video.id];
+          return decision === 'like' || decision === 'potential';
+        }).length === 0 && (
+        <div className="p-8 text-center">
+          <p className="text-gray-500">No shortlisted submissions found.</p>
+        </div>
+      )}
 
       {/* Regular Grid - 4 items per row */}
       <motion.div
@@ -766,7 +795,17 @@ export function SubmissionsTab() {
         transition={{ delay: 0.2 }}
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
       >
-        {submissions.map((video: SnipeVideo, index: number) => (
+        {submissions
+          .filter(video => {
+            // If shortlistedOnly is true, only show submissions with 'like' or 'potential' decisions
+            if (shortlistedOnly) {
+              const decision = video.decision || submissionDecisions[video.id];
+              return decision === 'like' || decision === 'potential';
+            }
+            // Otherwise show all submissions
+            return true;
+          })
+          .map((video: SnipeVideo, index: number) => (
           <motion.div
             key={video.id}
             initial={{ opacity: 0, y: 20 }}
