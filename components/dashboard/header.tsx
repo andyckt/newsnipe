@@ -32,12 +32,14 @@ export function Header({ sidebarOpen, setSidebarOpen, setMobileMenuOpen, notific
           />
         </div>
         */}
+        {/* Profile icon commented out
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9 border-2 border-primary">
             <AvatarImage src="/placeholder.svg?height=40&width=40" alt="User" />
             <AvatarFallback>JD</AvatarFallback>
           </Avatar>
         </div>
+        */}
       </div>
     </header>
   )
