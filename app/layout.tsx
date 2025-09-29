@@ -7,7 +7,7 @@ import { SessionProvider } from "@/components/providers/session-provider"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Snipe",
+  title: "Snipe - See and Hear your candidate",
   description: "See and Hear your candidate",
   generator: "v0.app",
   viewport: "width=device-width, initial-scale=1.0",
