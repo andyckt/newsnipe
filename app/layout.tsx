@@ -13,14 +13,14 @@ export const metadata: Metadata = {
   viewport: "width=device-width, initial-scale=1.0",
   icons: {
     icon: [
-      { url: '/forQRCode.png', sizes: 'any' },
+      { url: '/formeta.png', sizes: 'any' },
     ],
     apple: [
-      { url: '/forQRCode.png', sizes: '180x180', type: 'image/png' },
+      { url: '/formeta.png', sizes: '180x180', type: 'image/png' },
     ],
     other: [
-      { rel: 'mask-icon', url: '/forQRCode.png', color: '#000000' },
-      { rel: 'shortcut icon', url: '/forQRCode.png' },
+      { rel: 'mask-icon', url: '/formeta.png', color: '#000000' },
+      { rel: 'shortcut icon', url: '/formeta.png' },
     ],
   },
   applicationName: 'Snipe',
