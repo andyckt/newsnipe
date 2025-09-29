@@ -11,6 +11,25 @@ export const metadata: Metadata = {
   description: "See and Hear your candidate",
   generator: "v0.app",
   viewport: "width=device-width, initial-scale=1.0",
+  icons: {
+    icon: [
+      { url: '/forQRCode.png', sizes: 'any' },
+    ],
+    apple: [
+      { url: '/forQRCode.png', sizes: '180x180', type: 'image/png' },
+    ],
+    other: [
+      { rel: 'mask-icon', url: '/forQRCode.png', color: '#000000' },
+      { rel: 'shortcut icon', url: '/forQRCode.png' },
+    ],
+  },
+  applicationName: 'Snipe',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Snipe',
+  },
+  themeColor: '#000000',
 }
 
 export default function RootLayout({
