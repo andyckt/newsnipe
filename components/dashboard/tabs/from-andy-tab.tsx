@@ -48,7 +48,12 @@ export function FromAndyTab() {
                 cheating and provide deep candidate insights.
               </p>
               <div className="flex flex-wrap gap-3">
-                <Button className="rounded-2xl bg-white text-indigo-700 hover:bg-white/90">Start Interview</Button>
+                <Button 
+                  onClick={() => window.dispatchEvent(new CustomEvent('navigateToTab', { detail: { tab: 'create-snipe' } }))}
+                  className="rounded-2xl bg-white text-indigo-700 hover:bg-white/90"
+                >
+                  Start Sniping
+                </Button>
                 <Button
                   variant="outline"
                   className="rounded-2xl bg-transparent border-white text-white hover:bg-white/10"
