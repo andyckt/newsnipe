@@ -41,11 +41,10 @@ export function FromAndyTab() {
         >
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="space-y-4">
-              <Badge className="bg-white/20 text-white hover:bg-white/30 rounded-xl">AI-Powered</Badge>
+              {/* <Badge className="bg-white/20 text-white hover:bg-white/30 rounded-xl">AI-Powered</Badge> */}
               <h2 className="text-3xl font-bold">Welcome to Snipe</h2>
               <p className="max-w-[600px] text-white/80">
-                Revolutionize your hiring and assessment process with AI-powered voice interviews that eliminate
-                cheating and provide deep candidate insights.
+                where you can See & Hear your candidates.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button 
