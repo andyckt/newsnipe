@@ -7,8 +7,7 @@ import "./globals.css"
 
 export const metadata: Metadata = {
   title: "Snipe",
-  description: "Created with v0",
-  generator: "v0.app",
+  description: "See & Hear your candidates"
 }
 
 export default function RootLayout({

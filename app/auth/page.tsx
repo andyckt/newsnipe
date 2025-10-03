@@ -179,7 +179,7 @@ export default function AuthPage() {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center p-4 relative"
+      className="min-h-screen relative overflow-hidden"
       style={{
         backgroundImage: "url('/bg.jpeg')",
         backgroundSize: "cover",
@@ -187,7 +187,8 @@ export default function AuthPage() {
         backgroundRepeat: "no-repeat",
       }}
     >
-      <div className="absolute top-4 left-4">
+      
+      <div className="absolute top-4 left-4 z-10">
         <a 
           href="/home" 
           className="p-2 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm border border-purple-500/30 transition-all duration-300 flex items-center justify-center"
@@ -199,21 +200,44 @@ export default function AuthPage() {
           </svg>
         </a>
       </div>
-      <AuthCard
-        isLoading={isLoading}
-        email={email}
-        setEmail={setEmail}
-        password={password}
-        setPassword={setPassword}
-        name={name}
-        setName={setName}
-        rememberMe={rememberMe}
-        setRememberMe={setRememberMe}
-        onSignIn={handleSignIn}
-        onSignUp={handleSignUp}
-        onSocialLogin={handleSocialLogin}
-        onForgotPassword={handleForgotPassword}
-      />
+      
+      {/* Main content */}
+      <div className="relative z-10 container mx-auto px-4 py-20">
+        <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[80vh]">
+          {/* Left side - Slogan content */}
+          <div className="space-y-8 lg:pr-8">
+            <div className="space-y-6">
+              <h1 className="text-5xl lg:text-7xl font-bold tracking-tight leading-tight text-white">
+                See & Hear your candidate,{" "}
+                <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+                  Snipe
+                </span>
+              </h1>
+            </div>
+          </div>
+          
+          {/* Right side - Auth Card */}
+          <div className="flex justify-center lg:justify-end">
+            <div className="w-full max-w-md">
+              <AuthCard
+                isLoading={isLoading}
+                email={email}
+                setEmail={setEmail}
+                password={password}
+                setPassword={setPassword}
+                name={name}
+                setName={setName}
+                rememberMe={rememberMe}
+                setRememberMe={setRememberMe}
+                onSignIn={handleSignIn}
+                onSignUp={handleSignUp}
+                onSocialLogin={handleSocialLogin}
+                onForgotPassword={handleForgotPassword}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
       <Toaster />
     </div>
   )
