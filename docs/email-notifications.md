@@ -26,13 +26,23 @@ This will verify that your email configuration is valid. To send an actual test 
 ## How It Works
 
 1. When a submission is completed, the system looks up the snipe owner's email address
-2. It sends a formatted HTML email with details about the submission:
+2. It sends a beautifully designed HTML email with details about the submission:
    - Snipe title
    - Submission ID
    - Submission date and time
    - Number of recordings
    - Candidate name (if available in personal details)
 3. The email includes a direct link to the submissions page
+
+## Email Design
+
+The email features a modern design with:
+- Rounded corners (16px border radius)
+- Subtle gradient background in the header
+- Clean typography with proper spacing
+- A prominent call-to-action button with 50px border radius
+- Subtle shadows for depth and modern feel
+- Left border accent on the submission details section
 
 ## Troubleshooting
 
