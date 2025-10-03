@@ -4,6 +4,8 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import connectToDatabase from '@/lib/mongodb';
 import Response from '@/models/Response';
 import Snipe from '@/models/Snipe';
+import User from '@/models/User';
+import { sendSubmissionNotification } from '@/lib/email-service';
 
 /**
  * POST handler to save personal details and create a new response entry
@@ -175,12 +177,40 @@ export async function PUT(request: Request) {
         updateData.completedAt = new Date();
         
         // Increment the submissions count in the Snipe document
-        await Snipe.findByIdAndUpdate(
+        const snipe = await Snipe.findByIdAndUpdate(
           response.snipeId,
-          { $inc: { submissions: 1 } }
-        );
+          { $inc: { submissions: 1 } },
+          { new: true }
+        ).lean();
         
         console.log(`Incremented submission count for Snipe ${response.snipeShortId}`);
+        
+        // Send email notification to the snipe owner
+        try {
+          if (snipe && snipe.userId) {
+            // Get the user's email
+            const user = await User.findById(snipe.userId).lean();
+            
+            if (user && user.email) {
+              // Send the notification email
+              await sendSubmissionNotification(
+                user.email,
+                snipe.title || 'Untitled Snipe',
+                {
+                  personalDetails: response.personalDetails,
+                  submissionId: response.shortId,
+                  submissionDate: new Date(),
+                  numRecordings: response.recordings?.length || 0
+                }
+              );
+              
+              console.log(`Sent submission notification email to ${user.email} for Snipe ${snipe.shortId}`);
+            }
+          }
+        } catch (emailError) {
+          // Log the error but don't fail the request
+          console.error('Error sending submission notification email:', emailError);
+        }
       }
     }
     
