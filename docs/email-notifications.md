@@ -32,7 +32,7 @@ This will verify that your email configuration is valid. To send an actual test 
    - Submission date and time
    - Number of recordings
    - Candidate name (if available in personal details)
-3. The email includes a direct link to the submissions page
+3. The email includes a direct link to thesnipe.co
 
 ## Email Design
 

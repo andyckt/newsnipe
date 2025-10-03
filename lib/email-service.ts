@@ -79,7 +79,7 @@ export async function sendSubmissionNotification(
         </p>
         
         <div style="text-align: center; margin: 35px 0;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://snipe.ai'}/submissions" 
+          <a href="https://thesnipe.co" 
              style="background-color: #1649ff; background-image: linear-gradient(135deg, #1649ff, #3a66ff); color: white; padding: 14px 28px; text-decoration: none; border-radius: 50px; font-weight: 600; display: inline-block; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(22, 73, 255, 0.25);">
             View Submission
           </a>
