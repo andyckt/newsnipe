@@ -29,7 +29,7 @@ const companySchema = new mongoose.Schema<ICompany, CompanyModel, ICompanyMethod
       type: String,
       required: true,
       unique: true,
-      default: () => generateCompanyCode(),
+      // No default value - will be provided from the frontend
     },
     name: {
       type: String,

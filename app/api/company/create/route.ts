@@ -21,12 +21,20 @@ export async function POST(request: Request) {
     }
     
     // Parse request body
-    const { passcode } = await request.json();
+    const { passcode, companyCode } = await request.json();
     
     // Validate required fields
-    if (!passcode) {
+    if (!passcode || !companyCode) {
       return NextResponse.json(
-        { error: 'Passcode is required' },
+        { error: 'Passcode and company code are required' },
+        { status: 400 }
+      );
+    }
+    
+    // Validate company code format (6 digits)
+    if (!/^\d{6}$/.test(companyCode)) {
+      return NextResponse.json(
+        { error: 'Company code must be a 6-digit number' },
         { status: 400 }
       );
     }
@@ -52,9 +60,20 @@ export async function POST(request: Request) {
       );
     }
     
+    // Check if company code is already taken
+    const existingCode = await Company.findOne({ companyCode });
+    
+    if (existingCode) {
+      return NextResponse.json(
+        { error: 'This company code is already taken. Please try again with a different code.' },
+        { status: 400 }
+      );
+    }
+    
     // Create a new company
     const company = await Company.create({
       name: `${session.user.name}'s Company`, // Use user's name as default company name
+      companyCode, // Use the frontend-generated company code
       passcode,
       creatorId: session.user.id,
       members: [session.user.id], // Add creator as a member

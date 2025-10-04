@@ -62,6 +62,7 @@ export function CreateCompanyDialog({ isOpen, onClose }: CreateCompanyDialogProp
         },
         body: JSON.stringify({
           passcode,
+          companyCode, // Send the frontend-generated company code
         }),
       })
       
