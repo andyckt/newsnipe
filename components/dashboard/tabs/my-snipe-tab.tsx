@@ -31,6 +31,10 @@ interface CreatedSnipe {
   status: "active" | "draft" | "completed"
   submissions: number
   url: string
+  // Creator information
+  creatorName?: string
+  creatorId?: string
+  isOwnSnipe?: boolean
   textInputs?: Array<{
     id: string
     value: string
@@ -387,13 +391,16 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
                           <Download className="h-4 w-4 mr-2" />
                           Download QR Code
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="rounded-xl text-red-600"
-                          onClick={() => handleDeleteClick(snipe)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
+                        {/* Only show delete option for snipes created by the current user */}
+                        {snipe.isOwnSnipe && (
+                          <DropdownMenuItem 
+                            className="rounded-xl text-red-600"
+                            onClick={() => handleDeleteClick(snipe)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -428,6 +435,15 @@ export function MySnipeTab({ createdSnipes = [] }: MySnipeTabProps) {
                       <Calendar className="h-4 w-4 mr-2" />
                       Created {new Date(snipe.createdAt).toLocaleDateString()}
                     </div>
+                    
+                    {/* Show creator info if it's not the user's own snipe */}
+                    {!snipe.isOwnSnipe && snipe.creatorName && (
+                      <div className="flex items-center text-sm">
+                        <Badge variant="outline" className="rounded-full border-blue-200 bg-blue-50 text-blue-700">
+                          Created by {snipe.creatorName}
+                        </Badge>
+                      </div>
+                    )}
                   </div>
 
                   <div className="pt-4 border-t">
