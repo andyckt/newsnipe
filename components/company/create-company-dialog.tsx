@@ -49,22 +49,17 @@ export function CreateCompanyDialog({ isOpen, onClose }: CreateCompanyDialogProp
               
               // Fetch the raw passcode
               try {
-                console.log('[DIALOG] Fetching raw passcode')
                 const passcodeResponse = await fetch('/api/company/passcode')
-                console.log('[DIALOG] Passcode response status:', passcodeResponse.status)
                 
                 if (passcodeResponse.ok) {
                   const passcodeData = await passcodeResponse.json()
-                  console.log('[DIALOG] Received passcode data:', passcodeData)
                   setPasscode(passcodeData.rawPasscode || 'No passcode returned')
                 } else {
                   // Fallback if we can't get the raw passcode
-                  const errorData = await passcodeResponse.json().catch(() => ({}))
-                  console.log('[DIALOG] Error response:', errorData)
                   setPasscode('Unable to retrieve passcode')
                 }
               } catch (error) {
-                console.error('[DIALOG] Error fetching raw passcode:', error)
+                console.error('Error fetching raw passcode:', error)
                 setPasscode('Error retrieving passcode')
               }
             } else {
@@ -157,7 +152,10 @@ export function CreateCompanyDialog({ isOpen, onClose }: CreateCompanyDialogProp
       })
       setCompanyCode(data.companyCode)
       setPasscode(data.rawPasscode || passcode) // Use the raw passcode from response
-      console.log('[DIALOG] Company created successfully with passcode:', data.rawPasscode || passcode)
+      
+      // Dispatch custom event to notify header to refresh
+      const companyUpdateEvent = new Event('company-updated')
+      window.dispatchEvent(companyUpdateEvent)
       
       // Wait a moment before fetching company info to ensure DB transaction is complete
       setTimeout(() => {

@@ -154,12 +154,12 @@ export function JoinCompanyDialog({ isOpen, onClose }: JoinCompanyDialogProps) {
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle className="text-xl text-green-600">Successfully Joined!</DialogTitle>
+              <DialogTitle className="text-xl text-blue-600">Successfully Joined!</DialogTitle>
             </DialogHeader>
             
             <div className="space-y-4 py-4">
               <p>
-                You have successfully joined <strong>{joinedCompanyName}</strong>. You now have access to view and review all submissions in this company.
+                You have successfully joined <strong>{joinedCompanyName}</strong>'s Snipe. You now have access to view and review all submissions.
               </p>
               
               <div className="bg-blue-50 p-4 rounded-md">
@@ -170,7 +170,12 @@ export function JoinCompanyDialog({ isOpen, onClose }: JoinCompanyDialogProps) {
             </div>
             
             <DialogFooter>
-              <Button onClick={handleClose}>Done</Button>
+              <Button 
+                onClick={handleClose}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                Done
+              </Button>
             </DialogFooter>
           </>
         )}

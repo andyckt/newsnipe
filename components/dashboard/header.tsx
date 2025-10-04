@@ -21,38 +21,51 @@ export function Header({ sidebarOpen, setSidebarOpen, setMobileMenuOpen, notific
   const [companyInfo, setCompanyInfo] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   
+  // Function to fetch company info
+  const fetchCompanyInfo = async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/company/info')
+      
+      if (response.ok) {
+        const data = await response.json()
+        setCompanyInfo(data)
+      }
+    } catch (error) {
+      console.error('Error fetching company info:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   // Fetch company info when component mounts
   useEffect(() => {
-    const fetchCompanyInfo = async () => {
-      try {
-        const response = await fetch('/api/company/info')
-        
-        if (response.ok) {
-          const data = await response.json()
-          setCompanyInfo(data)
-        }
-      } catch (error) {
-        console.error('Error fetching company info:', error)
-      } finally {
-        setIsLoading(false)
-      }
+    fetchCompanyInfo()
+  }, [])
+  
+  // Listen for custom event to refresh company info
+  useEffect(() => {
+    const handleCompanyUpdate = () => {
+      fetchCompanyInfo()
     }
     
-    fetchCompanyInfo()
+    // Add event listener
+    window.addEventListener('company-updated', handleCompanyUpdate)
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('company-updated', handleCompanyUpdate)
+    }
   }, [])
 
   // Render company info and buttons
   const renderCompanySection = () => {
     return (
       <div className="flex items-center gap-3">
-        {/* Company Info - Show if user has a company */}
-        {!isLoading && companyInfo?.hasCompany && (
-          <div className="flex items-center gap-2 text-sm text-gray-500 mr-4">
-            <Users className="h-4 w-4" />
-            <span>Company: <span className="font-medium text-gray-700">{companyInfo.company.name}</span></span>
-            {companyInfo.isCreator && (
-              <div className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">Admin</div>
-            )}
+        {/* Admin Badge - Show if user is company creator */}
+        {!isLoading && companyInfo?.hasCompany && companyInfo.isCreator && (
+          <div className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full mr-4">
+            Admin
           </div>
         )}
         
