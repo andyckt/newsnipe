@@ -636,183 +636,191 @@ export function VideoPlayerDialog({
                       <h5 className="text-xs font-medium text-gray-500">Recorded on</h5>
                       <p className="text-gray-900">{date || "N/A"}</p>
                     </div>
-                    
-                    {/* Collaborative voting buttons */}
-                    <div className="flex items-center space-x-2">
-                      <div className="flex items-center">
-                        <button
-                          onClick={async () => {
-                            if (!submissionId) return;
-                            
-                            try {
-                              // If already upvoted, remove the vote
-                              if (userVote === 'up') {
-                                const response = await fetch('/api/submissions/votes', {
-                                  method: 'POST',
-                                  headers: {
-                                    'Content-Type': 'application/json',
-                                  },
-                                  body: JSON.stringify({
-                                    submissionId,
-                                    voteType: 'none'
-                                  }),
-                                });
-                                
-                                if (!response.ok) {
-                                  throw new Error('Failed to remove vote');
-                                }
-                                
-                                const data = await response.json();
-                                setUpvotes(data.upvotes);
-                                setDownvotes(data.downvotes);
-                                setUserVote(data.userVote);
-                                
-                                toast({
-                                  description: "Vote removed",
-                                  duration: 1500,
-                                });
-                              } else {
-                                // Add or switch vote
-                                const response = await fetch('/api/submissions/votes', {
-                                  method: 'POST',
-                                  headers: {
-                                    'Content-Type': 'application/json',
-                                  },
-                                  body: JSON.stringify({
-                                    submissionId,
-                                    voteType: 'up'
-                                  }),
-                                });
-                                
-                                if (!response.ok) {
-                                  throw new Error('Failed to record vote');
-                                }
-                                
-                                const data = await response.json();
-                                setUpvotes(data.upvotes);
-                                setDownvotes(data.downvotes);
-                                setUserVote(data.userVote);
-                                
-                                toast({
-                                  description: "Voted up!",
-                                  duration: 1500,
-                                });
-                              }
-                            } catch (error) {
-                              console.error('Error updating vote:', error);
-                              toast({
-                                title: "Error",
-                                description: "Failed to update vote",
-                                variant: "destructive",
-                                duration: 3000,
-                              });
-                            }
-                          }}
-                          className={`flex items-center space-x-1 px-2 py-1 rounded-l-full ${
-                            userVote === 'up' 
-                              ? 'bg-blue-100 text-blue-600' 
-                              : 'hover:bg-gray-100'
-                          }`}
-                        >
-                          <ArrowUp size={16} className={userVote === 'up' ? 'text-blue-600' : 'text-gray-500'} />
-                          <span className="text-xs font-medium">{upvotes}</span>
-                        </button>
-                        
-                        <button
-                          onClick={async () => {
-                            if (!submissionId) return;
-                            
-                            try {
-                              // If already downvoted, remove the vote
-                              if (userVote === 'down') {
-                                const response = await fetch('/api/submissions/votes', {
-                                  method: 'POST',
-                                  headers: {
-                                    'Content-Type': 'application/json',
-                                  },
-                                  body: JSON.stringify({
-                                    submissionId,
-                                    voteType: 'none'
-                                  }),
-                                });
-                                
-                                if (!response.ok) {
-                                  throw new Error('Failed to remove vote');
-                                }
-                                
-                                const data = await response.json();
-                                setUpvotes(data.upvotes);
-                                setDownvotes(data.downvotes);
-                                setUserVote(data.userVote);
-                                
-                                toast({
-                                  description: "Vote removed",
-                                  duration: 1500,
-                                });
-                              } else {
-                                // Add or switch vote
-                                const response = await fetch('/api/submissions/votes', {
-                                  method: 'POST',
-                                  headers: {
-                                    'Content-Type': 'application/json',
-                                  },
-                                  body: JSON.stringify({
-                                    submissionId,
-                                    voteType: 'down'
-                                  }),
-                                });
-                                
-                                if (!response.ok) {
-                                  throw new Error('Failed to record vote');
-                                }
-                                
-                                const data = await response.json();
-                                setUpvotes(data.upvotes);
-                                setDownvotes(data.downvotes);
-                                setUserVote(data.userVote);
-                                
-                                toast({
-                                  description: "Voted down",
-                                  duration: 1500,
-                                });
-                              }
-                            } catch (error) {
-                              console.error('Error updating vote:', error);
-                              toast({
-                                title: "Error",
-                                description: "Failed to update vote",
-                                variant: "destructive",
-                                duration: 3000,
-                              });
-                            }
-                          }}
-                          className={`flex items-center space-x-1 px-2 py-1 rounded-r-full ${
-                            userVote === 'down' 
-                              ? 'bg-red-100 text-red-600' 
-                              : 'hover:bg-gray-100'
-                          }`}
-                        >
-                          <ArrowDown size={16} className={userVote === 'down' ? 'text-red-600' : 'text-gray-500'} />
-                          <span className="text-xs font-medium">{downvotes}</span>
-                        </button>
-                      </div>
-                    </div>
                   </div>
+                  
+                  {/* Voting buttons moved to bottom with decision buttons */}
                   
                   {/* Decision UI removed from here and moved to bottom */}
                 </div>
               </div>
               
-              {/* Decision UI - Fixed at bottom */}
+              {/* Decision UI with voting buttons - Fixed at bottom */}
               {submissionId && onDecision && (
-                <div className="absolute bottom-0 left-0 right-0 p-5 bg-white">
-                  <SubmissionDecision 
-                    currentDecision={currentDecision}
-                    onDecision={(decision) => {
-                      setCurrentDecision(decision || undefined);
-                      onDecision(submissionId, decision);
-                    }} 
-                  />
+                <div className="absolute bottom-0 left-0 right-0 p-5 bg-white border-t">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <SubmissionDecision 
+                        currentDecision={currentDecision}
+                        onDecision={(decision) => {
+                          setCurrentDecision(decision || undefined);
+                          onDecision(submissionId, decision);
+                        }} 
+                      />
+                    </div>
+                    
+                    {/* Voting buttons */}
+                    <div className="flex items-center space-x-2 ml-4">
+                      <button
+                        onClick={async () => {
+                          if (!submissionId) return;
+                          
+                          try {
+                            // If already upvoted, remove the vote
+                            if (userVote === 'up') {
+                              const response = await fetch('/api/submissions/votes', {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                  submissionId,
+                                  voteType: 'none'
+                                }),
+                              });
+                              
+                              if (!response.ok) {
+                                throw new Error('Failed to remove vote');
+                              }
+                              
+                              const data = await response.json();
+                              setUpvotes(data.upvotes);
+                              setDownvotes(data.downvotes);
+                              setUserVote(data.userVote);
+                              
+                              toast({
+                                description: "Vote removed",
+                                duration: 1500,
+                              });
+                            } else {
+                              // Add or switch vote
+                              const response = await fetch('/api/submissions/votes', {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                  submissionId,
+                                  voteType: 'up'
+                                }),
+                              });
+                              
+                              if (!response.ok) {
+                                throw new Error('Failed to record vote');
+                              }
+                              
+                              const data = await response.json();
+                              setUpvotes(data.upvotes);
+                              setDownvotes(data.downvotes);
+                              setUserVote(data.userVote);
+                              
+                              toast({
+                                description: "Voted up!",
+                                duration: 1500,
+                              });
+                            }
+                          } catch (error) {
+                            console.error('Error updating vote:', error);
+                            toast({
+                              title: "Error",
+                              description: "Failed to update vote",
+                              variant: "destructive",
+                              duration: 3000,
+                            });
+                          }
+                        }}
+                        className={`flex flex-col items-center justify-center h-12 w-12 rounded-lg transition-all ${
+                          userVote === 'up' 
+                            ? 'bg-blue-500 text-white shadow-md' 
+                            : 'bg-white border border-gray-200 text-gray-600 hover:border-blue-300 hover:bg-blue-50'
+                        }`}
+                      >
+                        <ArrowUp size={16} className={userVote === 'up' ? 'text-white' : 'text-blue-500'} />
+                        <span className={`text-xs font-medium ${userVote === 'up' ? 'text-white' : 'text-gray-700'}`}>
+                          {upvotes}
+                        </span>
+                      </button>
+                      
+                      <button
+                        onClick={async () => {
+                          if (!submissionId) return;
+                          
+                          try {
+                            // If already downvoted, remove the vote
+                            if (userVote === 'down') {
+                              const response = await fetch('/api/submissions/votes', {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                  submissionId,
+                                  voteType: 'none'
+                                }),
+                              });
+                              
+                              if (!response.ok) {
+                                throw new Error('Failed to remove vote');
+                              }
+                              
+                              const data = await response.json();
+                              setUpvotes(data.upvotes);
+                              setDownvotes(data.downvotes);
+                              setUserVote(data.userVote);
+                              
+                              toast({
+                                description: "Vote removed",
+                                duration: 1500,
+                              });
+                            } else {
+                              // Add or switch vote
+                              const response = await fetch('/api/submissions/votes', {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                  submissionId,
+                                  voteType: 'down'
+                                }),
+                              });
+                              
+                              if (!response.ok) {
+                                throw new Error('Failed to record vote');
+                              }
+                              
+                              const data = await response.json();
+                              setUpvotes(data.upvotes);
+                              setDownvotes(data.downvotes);
+                              setUserVote(data.userVote);
+                              
+                              toast({
+                                description: "Voted down",
+                                duration: 1500,
+                              });
+                            }
+                          } catch (error) {
+                            console.error('Error updating vote:', error);
+                            toast({
+                              title: "Error",
+                              description: "Failed to update vote",
+                              variant: "destructive",
+                              duration: 3000,
+                            });
+                          }
+                        }}
+                        className={`flex flex-col items-center justify-center h-12 w-12 rounded-lg transition-all ${
+                          userVote === 'down' 
+                            ? 'bg-red-500 text-white shadow-md' 
+                            : 'bg-white border border-gray-200 text-gray-600 hover:border-red-300 hover:bg-red-50'
+                        }`}
+                      >
+                        <ArrowDown size={16} className={userVote === 'down' ? 'text-white' : 'text-red-500'} />
+                        <span className={`text-xs font-medium ${userVote === 'down' ? 'text-white' : 'text-gray-700'}`}>
+                          {downvotes}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
