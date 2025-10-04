@@ -25,9 +25,15 @@ export async function GET(request: Request) {
     await connectToDatabase();
     
     // Find companies where the user is a member
-    const companies = await Company.find({
+    // If the user is the creator, we'll also select the rawPasscode field
+    const query = Company.find({
       members: session.user.id
-    }).lean();
+    });
+    
+    // Add logging
+    console.log('[COMPANY INFO] Looking for companies for user:', session.user.id);
+    
+    const companies = await query.lean();
     
     if (companies.length === 0) {
       return NextResponse.json({

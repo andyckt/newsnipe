@@ -47,9 +47,26 @@ export function CreateCompanyDialog({ isOpen, onClose }: CreateCompanyDialogProp
               setCompanyCode(data.company.companyCode)
               setMembers(data.members || [])
               
-              // For demo purposes, set a temporary password
-              // In a real implementation, you would retrieve this from an API
-              setPasscode('123456')
+              // Fetch the raw passcode
+              try {
+                console.log('[DIALOG] Fetching raw passcode')
+                const passcodeResponse = await fetch('/api/company/passcode')
+                console.log('[DIALOG] Passcode response status:', passcodeResponse.status)
+                
+                if (passcodeResponse.ok) {
+                  const passcodeData = await passcodeResponse.json()
+                  console.log('[DIALOG] Received passcode data:', passcodeData)
+                  setPasscode(passcodeData.rawPasscode || 'No passcode returned')
+                } else {
+                  // Fallback if we can't get the raw passcode
+                  const errorData = await passcodeResponse.json().catch(() => ({}))
+                  console.log('[DIALOG] Error response:', errorData)
+                  setPasscode('Unable to retrieve passcode')
+                }
+              } catch (error) {
+                console.error('[DIALOG] Error fetching raw passcode:', error)
+                setPasscode('Error retrieving passcode')
+              }
             } else {
               // No company or not an admin, generate new code
               setExistingCompany(null)
@@ -132,8 +149,29 @@ export function CreateCompanyDialog({ isOpen, onClose }: CreateCompanyDialogProp
         description: "Your company has been created successfully",
       })
       
-      // Reload the page to reflect the changes
-      window.location.reload()
+      // Instead of reloading, update the UI state
+      setExistingCompany({
+        id: data.id,
+        name: data.name,
+        companyCode: data.companyCode
+      })
+      setCompanyCode(data.companyCode)
+      setPasscode(data.rawPasscode || passcode) // Use the raw passcode from response
+      console.log('[DIALOG] Company created successfully with passcode:', data.rawPasscode || passcode)
+      
+      // Wait a moment before fetching company info to ensure DB transaction is complete
+      setTimeout(() => {
+        // Fetch updated company info
+        fetch('/api/company/info')
+          .then(response => response.json())
+          .then(data => {
+            if (data.hasCompany) {
+              setExistingCompany(data.company)
+              setMembers(data.members || [])
+            }
+          })
+          .catch(err => console.error('Error fetching updated company info:', err))
+      }, 1000) // Wait 1 second
       
     } catch (error: any) {
       toast({
@@ -222,6 +260,7 @@ export function CreateCompanyDialog({ isOpen, onClose }: CreateCompanyDialogProp
                     size="icon"
                     className="absolute right-2 top-1/2 -translate-y-1/2"
                     onClick={() => setShowPassword(!showPassword)}
+                    title={showPassword ? "Hide passcode" : "Show passcode"}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>

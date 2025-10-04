@@ -10,6 +10,7 @@ export interface ICompany {
   companyCode: string;        // 6-digit unique company code
   name: string;               // Company name
   passcode: string;           // Hashed passcode for joining
+  rawPasscode: string;        // Plain text passcode for display purposes
   creatorId: mongoose.Types.ObjectId; // User who created the company
   members: mongoose.Types.ObjectId[]; // Array of user IDs who are members
   createdAt: Date;
@@ -41,6 +42,12 @@ const companySchema = new mongoose.Schema<ICompany, CompanyModel, ICompanyMethod
       type: String,
       required: [true, 'Please provide a passcode'],
       minlength: [6, 'Passcode must be at least 6 characters'],
+    },
+    rawPasscode: {
+      type: String,
+      required: [true, 'Raw passcode is required for display purposes'],
+      minlength: [6, 'Passcode must be at least 6 characters'],
+      select: false, // Don't include in normal queries for security
     },
     creatorId: {
       type: mongoose.Schema.Types.ObjectId,

@@ -75,14 +75,17 @@ export async function POST(request: Request) {
       name: `${session.user.name}'s Company`, // Use user's name as default company name
       companyCode, // Use the frontend-generated company code
       passcode,
+      rawPasscode: passcode, // Store the raw passcode for display purposes
       creatorId: session.user.id,
       members: [session.user.id], // Add creator as a member
     });
     
-    // Return the company code
+    // Return more complete company data
     return NextResponse.json({
       companyCode: company.companyCode,
       name: company.name,
+      id: company._id,
+      rawPasscode: passcode, // Include the raw passcode in the response
       message: 'Company created successfully'
     });
     
