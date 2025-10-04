@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2, Copy, Check } from "lucide-react"
+import { Loader2, Copy, Check, Eye, EyeOff } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { customAlphabet } from 'nanoid'
 
@@ -23,16 +23,71 @@ export function CreateCompanyDialog({ isOpen, onClose }: CreateCompanyDialogProp
   const [isLoading, setIsLoading] = useState(false)
   const [companyCode, setCompanyCode] = useState("")
   const [copied, setCopied] = useState(false)
+  const [existingCompany, setExistingCompany] = useState<any>(null)
+  const [members, setMembers] = useState<any[]>([])
+  const [showPassword, setShowPassword] = useState(false)
+  const [isInitializing, setIsInitializing] = useState(true)
   
-  // Generate a company code when the dialog opens
+  // Check for existing company and generate code if needed
   useEffect(() => {
     if (isOpen) {
-      setCompanyCode(generateCompanyCode())
+      setIsInitializing(true)
+      
+      // Check if user already has a company
+      const checkExistingCompany = async () => {
+        try {
+          const response = await fetch('/api/company/info')
+          
+          if (response.ok) {
+            const data = await response.json()
+            
+            if (data.hasCompany && data.isCreator) {
+              // User is admin of an existing company
+              setExistingCompany(data.company)
+              setCompanyCode(data.company.companyCode)
+              setMembers(data.members || [])
+              
+              // For demo purposes, set a temporary password
+              // In a real implementation, you would retrieve this from an API
+              setPasscode('123456')
+            } else {
+              // No company or not an admin, generate new code
+              setExistingCompany(null)
+              setMembers([])
+              setCompanyCode(generateCompanyCode())
+              setPasscode('')
+            }
+          } else {
+            // Error, fallback to generating new code
+            setExistingCompany(null)
+            setMembers([])
+            setCompanyCode(generateCompanyCode())
+            setPasscode('')
+          }
+        } catch (error) {
+          console.error('Error checking existing company:', error)
+          // Error, fallback to generating new code
+          setExistingCompany(null)
+          setMembers([])
+          setCompanyCode(generateCompanyCode())
+          setPasscode('')
+        } finally {
+          setIsInitializing(false)
+        }
+      }
+      
+      checkExistingCompany()
     }
   }, [isOpen])
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // If user already has a company, don't do anything on submit
+    if (existingCompany) {
+      onClose()
+      return
+    }
     
     if (!passcode) {
       toast({
@@ -62,7 +117,7 @@ export function CreateCompanyDialog({ isOpen, onClose }: CreateCompanyDialogProp
         },
         body: JSON.stringify({
           passcode,
-          companyCode, // Send the frontend-generated company code
+          companyCode,
         }),
       })
       
@@ -109,6 +164,7 @@ export function CreateCompanyDialog({ isOpen, onClose }: CreateCompanyDialogProp
     // Reset state when closing
     setPasscode("")
     setCopied(false)
+    setShowPassword(false)
     onClose()
   }
   
@@ -119,71 +175,130 @@ export function CreateCompanyDialog({ isOpen, onClose }: CreateCompanyDialogProp
           <DialogTitle className="text-xl">Add My Colleagues</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-6 py-4">
-          {/* Company Code Display */}
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <div className="bg-gray-100 p-3 rounded-xl flex-1 text-center">
-                <span className="text-2xl font-mono tracking-wider">{companyCode}</span>
+        {isInitializing ? (
+          <div className="py-8 flex justify-center items-center">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6 py-4">
+            {/* Company Code Display */}
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <div className="bg-gray-100 p-3 rounded-xl flex-1 text-center">
+                  <span className="text-2xl font-mono tracking-wider">{companyCode}</span>
+                </div>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="outline"
+                  onClick={handleCopyCode}
+                  className="flex-shrink-0"
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
               </div>
+              <p className="text-xs text-gray-500">
+                Share this code with your colleagues.
+              </p>
+            </div>
+            
+            {/* Passcode Input */}
+            <div className="space-y-2">
+              <Label htmlFor="passcode">{existingCompany ? "Current Passcode" : "Create a Passcode"}</Label>
+              <div className="relative">
+                <Input
+                  id="passcode"
+                  type={showPassword ? "text" : "password"}
+                  placeholder={existingCompany ? "" : "Minimum 6 characters"}
+                  value={passcode}
+                  onChange={(e) => !existingCompany && setPasscode(e.target.value)}
+                  disabled={isLoading || !!existingCompany}
+                  className="rounded-xl pr-10"
+                />
+                {existingCompany && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-2 top-1/2 -translate-y-1/2"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-gray-500">
+                {existingCompany 
+                  ? "This is the passcode your colleagues need to join." 
+                  : "This passcode will be required for your colleagues to join."}
+              </p>
+            </div>
+            
+            {/* Member List - Only shown for existing companies */}
+            {existingCompany && members.length > 0 && (
+              <div className="space-y-3">
+                <Label>Team Members</Label>
+                <div className="border rounded-xl overflow-hidden">
+                  <div className="max-h-48 overflow-y-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 text-xs font-medium text-gray-500">
+                        <tr>
+                          <th className="px-4 py-2 text-left">Name</th>
+                          <th className="px-4 py-2 text-left">Email</th>
+                          <th className="px-4 py-2 text-right">Role</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                        {members.map((member) => (
+                          <tr key={member.id} className="text-sm">
+                            <td className="px-4 py-3 font-medium">{member.name}</td>
+                            <td className="px-4 py-3 text-gray-600">{member.email}</td>
+                            <td className="px-4 py-3 text-right">
+                              {member.isCreator ? (
+                                <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
+                                  Admin
+                                </span>
+                              ) : (
+                                <span className="text-gray-500 text-xs">Member</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <DialogFooter className="pt-4">
               <Button
                 type="button"
-                size="icon"
                 variant="outline"
-                onClick={handleCopyCode}
-                className="flex-shrink-0"
+                onClick={handleClose}
+                disabled={isLoading}
               >
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                {existingCompany ? "Close" : "Cancel"}
               </Button>
-            </div>
-            <p className="text-xs text-gray-500">
-              Share this code with your colleagues.
-            </p>
-          </div>
-          
-          {/* Passcode Input */}
-          <div className="space-y-2">
-            <Label htmlFor="passcode">Create a Passcode</Label>
-            <Input
-              id="passcode"
-              type="password"
-              placeholder="Minimum 6 characters"
-              value={passcode}
-              onChange={(e) => setPasscode(e.target.value)}
-              disabled={isLoading}
-              className="rounded-xl"
-            />
-            <p className="text-xs text-gray-500">
-              This passcode will be required for your colleagues to join.
-            </p>
-          </div>
-          
-          
-          <DialogFooter className="pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={isLoading}
-              className="bg-blue-500 hover:bg-blue-600 text-white"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                "Create Company"
+              {!existingCompany && (
+                <Button 
+                  type="submit" 
+                  disabled={isLoading}
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Company"
+                  )}
+                </Button>
               )}
-            </Button>
-          </DialogFooter>
-        </form>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   )
