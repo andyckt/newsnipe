@@ -4,6 +4,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import connectToDatabase from '@/lib/mongodb';
 import Response from '@/models/Response';
 import Snipe from '@/models/Snipe';
+import Company from '@/models/Company';
 
 /**
  * GET handler to retrieve all submissions (responses) for the authenticated user
@@ -39,9 +40,23 @@ export async function GET(request: Request) {
     // Connect to the database
     await connectToDatabase();
     
-    // Get all snipes created by the user
-    const userSnipes = await Snipe.find({ userId: session.user.id }).lean();
-    // Get the shortIds of all snipes created by the user
+    // Find companies where the user is a member
+    const userCompanies = await Company.find({
+      members: session.user.id
+    }).lean();
+    
+    // Get all the creator IDs from the companies the user is a member of
+    const companyCreatorIds = userCompanies.map(company => company.creatorId);
+    
+    // Get all snipes created by the user OR by creators of companies the user is a member of
+    const userSnipes = await Snipe.find({
+      $or: [
+        { userId: session.user.id },
+        { userId: { $in: companyCreatorIds } }
+      ]
+    }).lean();
+    
+    // Get the shortIds of all accessible snipes
     const snipeShortIds = userSnipes.map(snipe => snipe.shortId);
  
     
