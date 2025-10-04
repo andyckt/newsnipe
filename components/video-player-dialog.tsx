@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
+import { X, ChevronLeft, ChevronRight, Loader2, ArrowUp, ArrowDown } from "lucide-react"
 import { SubmissionDecision } from "./submission-decision"
+import { useToast } from "@/components/ui/use-toast"
 
 interface Video {
   videoKey: string;
@@ -55,16 +56,52 @@ export function VideoPlayerDialog({
   decision,
   onDecision
 }: VideoPlayerDialogProps) {
+  const { toast } = useToast()
   const [isPlaying, setIsPlaying] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
   const [isLoadingVideo, setIsLoadingVideo] = useState(false)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [currentDecision, setCurrentDecision] = useState<string | undefined>(decision)
+  const [upvotes, setUpvotes] = useState(0)
+  const [downvotes, setDownvotes] = useState(0)
+  const [userVote, setUserVote] = useState<'up' | 'down' | null>(null)
   
   // Reset currentDecision when the submission changes
   useEffect(() => {
     setCurrentDecision(decision);
+    
+    // Reset votes and fetch from API when submission changes
+    if (submissionId) {
+      fetchVotes(submissionId);
+    } else {
+      setUpvotes(0);
+      setDownvotes(0);
+      setUserVote(null);
+    }
   }, [submissionId, decision])
+  
+  // Function to fetch votes from the API
+  const fetchVotes = async (subId: string) => {
+    try {
+      const response = await fetch(`/api/submissions/votes?submissionId=${subId}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch votes');
+      }
+      
+      const data = await response.json();
+      
+      setUpvotes(data.upvotes);
+      setDownvotes(data.downvotes);
+      setUserVote(data.userVote);
+    } catch (error) {
+      console.error('Error fetching votes:', error);
+      // Set default values on error
+      setUpvotes(0);
+      setDownvotes(0);
+      setUserVote(null);
+    }
+  }
   const [isSpacePressed, setIsSpacePressed] = useState(false)
   const [spaceKeyTimer, setSpaceKeyTimer] = useState<NodeJS.Timeout | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -594,9 +631,172 @@ export function VideoPlayerDialog({
                 
                 {/* Video Info Section */}
                 <div className="space-y-4 pt-2">
-                  <div>
-                    <h5 className="text-xs font-medium text-gray-500">Recorded on</h5>
-                    <p className="text-gray-900">{date || "N/A"}</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h5 className="text-xs font-medium text-gray-500">Recorded on</h5>
+                      <p className="text-gray-900">{date || "N/A"}</p>
+                    </div>
+                    
+                    {/* Collaborative voting buttons */}
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center">
+                        <button
+                          onClick={async () => {
+                            if (!submissionId) return;
+                            
+                            try {
+                              // If already upvoted, remove the vote
+                              if (userVote === 'up') {
+                                const response = await fetch('/api/submissions/votes', {
+                                  method: 'POST',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                  },
+                                  body: JSON.stringify({
+                                    submissionId,
+                                    voteType: 'none'
+                                  }),
+                                });
+                                
+                                if (!response.ok) {
+                                  throw new Error('Failed to remove vote');
+                                }
+                                
+                                const data = await response.json();
+                                setUpvotes(data.upvotes);
+                                setDownvotes(data.downvotes);
+                                setUserVote(data.userVote);
+                                
+                                toast({
+                                  description: "Vote removed",
+                                  duration: 1500,
+                                });
+                              } else {
+                                // Add or switch vote
+                                const response = await fetch('/api/submissions/votes', {
+                                  method: 'POST',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                  },
+                                  body: JSON.stringify({
+                                    submissionId,
+                                    voteType: 'up'
+                                  }),
+                                });
+                                
+                                if (!response.ok) {
+                                  throw new Error('Failed to record vote');
+                                }
+                                
+                                const data = await response.json();
+                                setUpvotes(data.upvotes);
+                                setDownvotes(data.downvotes);
+                                setUserVote(data.userVote);
+                                
+                                toast({
+                                  description: "Voted up!",
+                                  duration: 1500,
+                                });
+                              }
+                            } catch (error) {
+                              console.error('Error updating vote:', error);
+                              toast({
+                                title: "Error",
+                                description: "Failed to update vote",
+                                variant: "destructive",
+                                duration: 3000,
+                              });
+                            }
+                          }}
+                          className={`flex items-center space-x-1 px-2 py-1 rounded-l-full ${
+                            userVote === 'up' 
+                              ? 'bg-blue-100 text-blue-600' 
+                              : 'hover:bg-gray-100'
+                          }`}
+                        >
+                          <ArrowUp size={16} className={userVote === 'up' ? 'text-blue-600' : 'text-gray-500'} />
+                          <span className="text-xs font-medium">{upvotes}</span>
+                        </button>
+                        
+                        <button
+                          onClick={async () => {
+                            if (!submissionId) return;
+                            
+                            try {
+                              // If already downvoted, remove the vote
+                              if (userVote === 'down') {
+                                const response = await fetch('/api/submissions/votes', {
+                                  method: 'POST',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                  },
+                                  body: JSON.stringify({
+                                    submissionId,
+                                    voteType: 'none'
+                                  }),
+                                });
+                                
+                                if (!response.ok) {
+                                  throw new Error('Failed to remove vote');
+                                }
+                                
+                                const data = await response.json();
+                                setUpvotes(data.upvotes);
+                                setDownvotes(data.downvotes);
+                                setUserVote(data.userVote);
+                                
+                                toast({
+                                  description: "Vote removed",
+                                  duration: 1500,
+                                });
+                              } else {
+                                // Add or switch vote
+                                const response = await fetch('/api/submissions/votes', {
+                                  method: 'POST',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                  },
+                                  body: JSON.stringify({
+                                    submissionId,
+                                    voteType: 'down'
+                                  }),
+                                });
+                                
+                                if (!response.ok) {
+                                  throw new Error('Failed to record vote');
+                                }
+                                
+                                const data = await response.json();
+                                setUpvotes(data.upvotes);
+                                setDownvotes(data.downvotes);
+                                setUserVote(data.userVote);
+                                
+                                toast({
+                                  description: "Voted down",
+                                  duration: 1500,
+                                });
+                              }
+                            } catch (error) {
+                              console.error('Error updating vote:', error);
+                              toast({
+                                title: "Error",
+                                description: "Failed to update vote",
+                                variant: "destructive",
+                                duration: 3000,
+                              });
+                            }
+                          }}
+                          className={`flex items-center space-x-1 px-2 py-1 rounded-r-full ${
+                            userVote === 'down' 
+                              ? 'bg-red-100 text-red-600' 
+                              : 'hover:bg-gray-100'
+                          }`}
+                        >
+                          <ArrowDown size={16} className={userVote === 'down' ? 'text-red-600' : 'text-gray-500'} />
+                          <span className="text-xs font-medium">{downvotes}</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                   
                   {/* Decision UI removed from here and moved to bottom */}
