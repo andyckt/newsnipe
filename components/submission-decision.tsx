@@ -9,7 +9,7 @@ interface SubmissionDecisionProps {
 }
 
 export function SubmissionDecision({ onDecision, currentDecision }: SubmissionDecisionProps) {
-  const [hoveredOption, setHoveredOption] = useState<string | null>(null)
+  // Remove hover state for more direct interaction
   
   const options = [
     {
@@ -17,7 +17,7 @@ export function SubmissionDecision({ onDecision, currentDecision }: SubmissionDe
       label: "I like this one",
       icon: Star,
       color: "bg-amber-500",
-      hoverColor: "bg-amber-600",
+      activeColor: "bg-amber-600",
       textColor: "text-amber-500",
       borderColor: "border-amber-500"
     },
@@ -26,7 +26,7 @@ export function SubmissionDecision({ onDecision, currentDecision }: SubmissionDe
       label: "Not bad",
       icon: ThumbsUp,
       color: "bg-blue-500",
-      hoverColor: "bg-blue-600",
+      activeColor: "bg-blue-600",
       textColor: "text-blue-500",
       borderColor: "border-blue-500"
     },
@@ -35,7 +35,7 @@ export function SubmissionDecision({ onDecision, currentDecision }: SubmissionDe
       label: "Nah",
       icon: X,
       color: "bg-red-500",
-      hoverColor: "bg-red-600",
+      activeColor: "bg-red-600",
       textColor: "text-red-500",
       borderColor: "border-red-500"
     }
@@ -46,7 +46,6 @@ export function SubmissionDecision({ onDecision, currentDecision }: SubmissionDe
       <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
         {options.map((option) => {
           const isSelected = currentDecision === option.id
-          const isHovered = hoveredOption === option.id
           
           return (
             <button
@@ -61,19 +60,17 @@ export function SubmissionDecision({ onDecision, currentDecision }: SubmissionDe
                 // Immediately blur the button to prevent it from capturing keyboard events
                 (document.activeElement as HTMLElement)?.blur();
               }}
-              onMouseEnter={() => setHoveredOption(option.id)}
-              onMouseLeave={() => setHoveredOption(null)}
+              // Remove hover state management for more direct interaction
               // Add tabIndex=-1 to prevent the button from receiving focus via tab navigation
               tabIndex={-1}
               className={`
-                relative flex items-center justify-center rounded-xl px-4 py-3
-                active:scale-95 transition-all duration-300
+                relative flex items-center justify-center rounded-xl px-4 py-3 font-medium
                 ${isSelected 
-                  ? `${option.color} text-white border-2 border-transparent` 
-                  : `bg-white border-2 border-gray-200 text-gray-600 hover:border-${option.textColor.replace('text-', '')}`
+                  ? `${option.color} text-white border-2 border-transparent shadow-md` 
+                  : `bg-white border-2 border-gray-200 text-gray-700 hover:border-${option.textColor.replace('text-', '')} active:bg-gray-100`
                 }
                 hover:scale-105
-                group
+                cursor-pointer select-none
                 focus:outline-none
               `}
             >
