@@ -64,7 +64,7 @@ export function SubmissionDecision({ onDecision, currentDecision }: SubmissionDe
               // Add tabIndex=-1 to prevent the button from receiving focus via tab navigation
               tabIndex={-1}
               className={`
-                relative flex items-center justify-center rounded-xl px-4 py-3 font-medium
+                relative flex items-center justify-center rounded-xl px-3.5 py-2.5 font-medium
                 ${isSelected 
                   ? `${option.color} text-white border-2 border-transparent shadow-md` 
                   : `bg-white border-2 border-gray-200 text-gray-700 hover:border-${option.textColor.replace('text-', '')} active:bg-gray-100`
@@ -76,10 +76,10 @@ export function SubmissionDecision({ onDecision, currentDecision }: SubmissionDe
             >
               <div className="flex items-center">
                 <option.icon 
-                  size={20} 
+                  size={18} 
                   className={isSelected ? 'text-white' : option.textColor} 
                 />
-                <span className="ml-2 font-medium">{option.label}</span>
+                <span className="ml-2 text-sm font-medium">{option.label}</span>
               </div>
               
               {/* No hover effect */}
