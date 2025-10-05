@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, ChevronLeft, ChevronRight, Loader2, ArrowUp, ArrowDown } from "lucide-react"
+import { X, ChevronLeft, ChevronRight, Loader2, ArrowUp, ArrowDown, MessageSquare } from "lucide-react"
 import { SubmissionDecision } from "./submission-decision"
+import { SubmissionComments } from "./submission-comments"
 import { useToast } from "@/components/ui/use-toast"
 
 interface Video {
@@ -65,6 +66,7 @@ export function VideoPlayerDialog({
   const [upvotes, setUpvotes] = useState(0)
   const [downvotes, setDownvotes] = useState(0)
   const [userVote, setUserVote] = useState<'up' | 'down' | null>(null)
+  const [showComments, setShowComments] = useState(false)
   
   // Reset currentDecision when the submission changes
   useEffect(() => {
@@ -610,38 +612,64 @@ export function VideoPlayerDialog({
                 </div>
               </div>
               
-              {/* Content section - all displayed directly */}
+              {/* Content section with tabs */}
               <div className="mt-4 space-y-6 pb-24">
-                {/* Personal Details Section */}
-                <div className="space-y-4">
-                  <h4 className="text-sm font-semibold text-gray-700">Personal Details</h4>
-                  {personalDetails && personalDetails.length > 0 ? (
-                    <div className="max-h-[180px] overflow-y-auto pr-2 space-y-4">
-                      {personalDetails.map((detail, index) => (
-                        <div key={index} className="pb-2">
-                          <h5 className="text-xs font-medium text-gray-500">{detail.question}</h5>
-                          <p className="text-sm text-gray-900">{detail.answer}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">No personal details available.</p>
-                  )}
+                {/* Tab navigation */}
+                <div className="flex border-b">
+                  <button
+                    className={`px-4 py-2 text-sm font-medium ${!showComments 
+                      ? 'text-blue-600 border-b-2 border-blue-600' 
+                      : 'text-gray-600 hover:text-gray-800'}`}
+                    onClick={() => setShowComments(false)}
+                  >
+                    Details
+                  </button>
+                  <button
+                    className={`px-4 py-2 text-sm font-medium flex items-center ${showComments 
+                      ? 'text-blue-600 border-b-2 border-blue-600' 
+                      : 'text-gray-600 hover:text-gray-800'}`}
+                    onClick={() => setShowComments(true)}
+                  >
+                    Comments
+                    <MessageSquare className="ml-1 h-3.5 w-3.5" />
+                  </button>
                 </div>
                 
-                {/* Video Info Section */}
-                <div className="space-y-4 pt-2">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h5 className="text-xs font-medium text-gray-500">Submitted on</h5>
-                      <p className="text-gray-900">{date || "N/A"}</p>
+                {/* Tab content */}
+                {!showComments ? (
+                  <>
+                    {/* Personal Details Section */}
+                    <div className="space-y-4">
+                      {personalDetails && personalDetails.length > 0 ? (
+                        <div className="max-h-[180px] overflow-y-auto pr-2 space-y-4">
+                          {personalDetails.map((detail, index) => (
+                            <div key={index} className="pb-2">
+                              <h5 className="text-xs font-medium text-gray-500">{detail.question}</h5>
+                              <p className="text-sm text-gray-900">{detail.answer}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">No personal details available.</p>
+                      )}
                     </div>
-                  </div>
-                  
-                  {/* Voting buttons moved to bottom with decision buttons */}
-                  
-                  {/* Decision UI removed from here and moved to bottom */}
-                </div>
+                    
+                    {/* Video Info Section */}
+                    <div className="space-y-4 pt-2">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="text-xs font-medium text-gray-500">Submitted on</h5>
+                          <p className="text-gray-900">{date || "N/A"}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  /* Comments Section */
+                  submissionId && (
+                    <SubmissionComments submissionId={submissionId} />
+                  )
+                )}
               </div>
               
               {/* Decision UI with voting buttons - Fixed at bottom */}
