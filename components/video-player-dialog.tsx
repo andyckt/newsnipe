@@ -613,11 +613,11 @@ export function VideoPlayerDialog({
               </div>
               
               {/* Content section with tabs */}
-              <div className="mt-4 space-y-6 pb-24">
+              <div className="mt-3 space-y-4 pb-24">
                 {/* Tab navigation */}
                 <div className="flex border-b">
                   <button
-                    className={`px-4 py-2 text-sm font-medium ${!showComments 
+                    className={`px-3 py-1.5 text-xs font-medium ${!showComments 
                       ? 'text-blue-600 border-b-2 border-blue-600' 
                       : 'text-gray-600 hover:text-gray-800'}`}
                     onClick={() => setShowComments(false)}
@@ -625,13 +625,13 @@ export function VideoPlayerDialog({
                     Details
                   </button>
                   <button
-                    className={`px-4 py-2 text-sm font-medium flex items-center ${showComments 
+                    className={`px-3 py-1.5 text-xs font-medium flex items-center ${showComments 
                       ? 'text-blue-600 border-b-2 border-blue-600' 
                       : 'text-gray-600 hover:text-gray-800'}`}
                     onClick={() => setShowComments(true)}
                   >
                     Comments
-                    <MessageSquare className="ml-1 h-3.5 w-3.5" />
+                    <MessageSquare className="ml-1 h-3 w-3" />
                   </button>
                 </div>
                 

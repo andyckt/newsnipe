@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Send, Trash2, Loader2 } from "lucide-react"
+import { Send, Loader2 } from "lucide-react" // Trash2 removed as delete feature is commented out
 import { useToast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -131,7 +131,8 @@ export function SubmissionComments({ submissionId }: SubmissionCommentsProps) {
     }
   }
   
-  // Delete a comment
+  // Delete a comment - Commented out for now
+  /*
   const deleteComment = async (commentId: string) => {
     try {
       // Optimistically remove from UI
@@ -162,6 +163,7 @@ export function SubmissionComments({ submissionId }: SubmissionCommentsProps) {
       })
     }
   }
+  */
   
   // Handle Enter key to send comment
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -193,7 +195,7 @@ export function SubmissionComments({ submissionId }: SubmissionCommentsProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Comments list */}
-      <div className="flex-1 overflow-y-auto max-h-[200px] space-y-3 pr-1">
+      <div className="flex-1 overflow-y-auto max-h-[175px] space-y-3 pr-1">
         {isLoading ? (
           <div className="flex items-center justify-center py-4">
             <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
@@ -241,6 +243,7 @@ export function SubmissionComments({ submissionId }: SubmissionCommentsProps) {
                   <p className="whitespace-pre-wrap break-words">{comment.text}</p>
                 </div>
                 
+                {/* Delete button commented out
                 {comment.isCurrentUser && !comment.id.startsWith('temp-') && (
                   <Button
                     variant="ghost"
@@ -251,6 +254,7 @@ export function SubmissionComments({ submissionId }: SubmissionCommentsProps) {
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 )}
+                */}
               </div>
             ))}
             <div ref={commentsEndRef} />
@@ -265,7 +269,7 @@ export function SubmissionComments({ submissionId }: SubmissionCommentsProps) {
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Add a comment..."
+          placeholder="What do you think of this?"
           className="resize-none min-h-[40px] max-h-[120px] rounded-xl"
           disabled={isSending}
         />
