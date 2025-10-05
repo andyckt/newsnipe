@@ -633,7 +633,7 @@ export function VideoPlayerDialog({
                 <div className="space-y-4 pt-2">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h5 className="text-xs font-medium text-gray-500">Recorded on</h5>
+                      <h5 className="text-xs font-medium text-gray-500">Submitted on</h5>
                       <p className="text-gray-900">{date || "N/A"}</p>
                     </div>
                   </div>
@@ -661,74 +661,99 @@ export function VideoPlayerDialog({
                     {/* Voting buttons */}
                     <div className="flex items-center space-x-2 ml-4">
                       <button
-                        onClick={async () => {
+                        onClick={() => {
                           if (!submissionId) return;
                           
-                          try {
+                          // Immediately update UI state for direct feedback
+                          if (userVote === 'up') {
                             // If already upvoted, remove the vote
-                            if (userVote === 'up') {
-                              const response = await fetch('/api/submissions/votes', {
-                                method: 'POST',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                  submissionId,
-                                  voteType: 'none'
-                                }),
-                              });
-                              
-                              if (!response.ok) {
-                                throw new Error('Failed to remove vote');
-                              }
-                              
-                              const data = await response.json();
+                            setUserVote(null);
+                            setUpvotes(Math.max(0, upvotes - 1));
+                            
+                            // Then update the server
+                            fetch('/api/submissions/votes', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                submissionId,
+                                voteType: 'none'
+                              }),
+                            })
+                            .then(response => {
+                              if (!response.ok) throw new Error('Failed to remove vote');
+                              return response.json();
+                            })
+                            .then(data => {
+                              // Update with actual counts from server
                               setUpvotes(data.upvotes);
                               setDownvotes(data.downvotes);
                               setUserVote(data.userVote);
-                              
+                            })
+                            .catch(error => {
+                              console.error('Error updating vote:', error);
+                              // Revert to previous state on error
+                              setUserVote('up');
+                              setUpvotes(upvotes);
                               toast({
-                                description: "Vote removed",
-                                duration: 1500,
+                                title: "Error",
+                                description: "Failed to update vote",
+                                variant: "destructive",
                               });
-                            } else {
-                              // Add or switch vote
-                              const response = await fetch('/api/submissions/votes', {
-                                method: 'POST',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                  submissionId,
-                                  voteType: 'up'
-                                }),
-                              });
-                              
-                              if (!response.ok) {
-                                throw new Error('Failed to record vote');
-                              }
-                              
-                              const data = await response.json();
-                              setUpvotes(data.upvotes);
-                              setDownvotes(data.downvotes);
-                              setUserVote(data.userVote);
-                              
-                              toast({
-                                description: "Voted up!",
-                                duration: 1500,
-                              });
+                            });
+                          } else {
+                            // Add or switch vote - immediately update UI
+                            const previousVote = userVote;
+                            const previousUpvotes = upvotes;
+                            const previousDownvotes = downvotes;
+                            
+                            // Update UI immediately
+                            setUserVote('up');
+                            setUpvotes(upvotes + 1);
+                            if (previousVote === 'down') {
+                              setDownvotes(Math.max(0, downvotes - 1));
                             }
-                          } catch (error) {
-                            console.error('Error updating vote:', error);
-                            toast({
-                              title: "Error",
-                              description: "Failed to update vote",
-                              variant: "destructive",
-                              duration: 3000,
+                            
+                            // Then update the server
+                            fetch('/api/submissions/votes', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                submissionId,
+                                voteType: 'up'
+                              }),
+                            })
+                            .then(response => {
+                              if (!response.ok) throw new Error('Failed to record vote');
+                              return response.json();
+                            })
+                            .then(data => {
+                              // Update with actual counts from server
+                              setUpvotes(data.upvotes);
+                              setDownvotes(data.downvotes);
+                              setUserVote(data.userVote);
+                            })
+                            .catch(error => {
+                              console.error('Error updating vote:', error);
+                              // Revert to previous state on error
+                              setUserVote(previousVote);
+                              setUpvotes(previousUpvotes);
+                              setDownvotes(previousDownvotes);
+                              toast({
+                                title: "Error",
+                                description: "Failed to update vote",
+                                variant: "destructive",
+                              });
                             });
                           }
+                          
+                          // Immediately blur the button to prevent it from capturing keyboard events
+                          (document.activeElement as HTMLElement)?.blur();
                         }}
-                        className={`flex flex-col items-center justify-center h-12 w-12 rounded-lg transition-all ${
+                        className={`flex flex-col items-center justify-center h-12 w-12 rounded-lg ${
                           userVote === 'up' 
                             ? 'bg-blue-500 text-white shadow-md' 
                             : 'bg-white border border-gray-200 text-gray-600 hover:border-blue-300 hover:bg-blue-50'
@@ -741,74 +766,99 @@ export function VideoPlayerDialog({
                       </button>
                       
                       <button
-                        onClick={async () => {
+                        onClick={() => {
                           if (!submissionId) return;
                           
-                          try {
+                          // Immediately update UI state for direct feedback
+                          if (userVote === 'down') {
                             // If already downvoted, remove the vote
-                            if (userVote === 'down') {
-                              const response = await fetch('/api/submissions/votes', {
-                                method: 'POST',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                  submissionId,
-                                  voteType: 'none'
-                                }),
-                              });
-                              
-                              if (!response.ok) {
-                                throw new Error('Failed to remove vote');
-                              }
-                              
-                              const data = await response.json();
+                            setUserVote(null);
+                            setDownvotes(Math.max(0, downvotes - 1));
+                            
+                            // Then update the server
+                            fetch('/api/submissions/votes', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                submissionId,
+                                voteType: 'none'
+                              }),
+                            })
+                            .then(response => {
+                              if (!response.ok) throw new Error('Failed to remove vote');
+                              return response.json();
+                            })
+                            .then(data => {
+                              // Update with actual counts from server
                               setUpvotes(data.upvotes);
                               setDownvotes(data.downvotes);
                               setUserVote(data.userVote);
-                              
+                            })
+                            .catch(error => {
+                              console.error('Error updating vote:', error);
+                              // Revert to previous state on error
+                              setUserVote('down');
+                              setDownvotes(downvotes);
                               toast({
-                                description: "Vote removed",
-                                duration: 1500,
+                                title: "Error",
+                                description: "Failed to update vote",
+                                variant: "destructive",
                               });
-                            } else {
-                              // Add or switch vote
-                              const response = await fetch('/api/submissions/votes', {
-                                method: 'POST',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                  submissionId,
-                                  voteType: 'down'
-                                }),
-                              });
-                              
-                              if (!response.ok) {
-                                throw new Error('Failed to record vote');
-                              }
-                              
-                              const data = await response.json();
-                              setUpvotes(data.upvotes);
-                              setDownvotes(data.downvotes);
-                              setUserVote(data.userVote);
-                              
-                              toast({
-                                description: "Voted down",
-                                duration: 1500,
-                              });
+                            });
+                          } else {
+                            // Add or switch vote - immediately update UI
+                            const previousVote = userVote;
+                            const previousUpvotes = upvotes;
+                            const previousDownvotes = downvotes;
+                            
+                            // Update UI immediately
+                            setUserVote('down');
+                            setDownvotes(downvotes + 1);
+                            if (previousVote === 'up') {
+                              setUpvotes(Math.max(0, upvotes - 1));
                             }
-                          } catch (error) {
-                            console.error('Error updating vote:', error);
-                            toast({
-                              title: "Error",
-                              description: "Failed to update vote",
-                              variant: "destructive",
-                              duration: 3000,
+                            
+                            // Then update the server
+                            fetch('/api/submissions/votes', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                submissionId,
+                                voteType: 'down'
+                              }),
+                            })
+                            .then(response => {
+                              if (!response.ok) throw new Error('Failed to record vote');
+                              return response.json();
+                            })
+                            .then(data => {
+                              // Update with actual counts from server
+                              setUpvotes(data.upvotes);
+                              setDownvotes(data.downvotes);
+                              setUserVote(data.userVote);
+                            })
+                            .catch(error => {
+                              console.error('Error updating vote:', error);
+                              // Revert to previous state on error
+                              setUserVote(previousVote);
+                              setUpvotes(previousUpvotes);
+                              setDownvotes(previousDownvotes);
+                              toast({
+                                title: "Error",
+                                description: "Failed to update vote",
+                                variant: "destructive",
+                              });
                             });
                           }
+                          
+                          // Immediately blur the button to prevent it from capturing keyboard events
+                          (document.activeElement as HTMLElement)?.blur();
                         }}
-                        className={`flex flex-col items-center justify-center h-12 w-12 rounded-lg transition-all ${
+                        className={`flex flex-col items-center justify-center h-12 w-12 rounded-lg ${
                           userVote === 'down' 
                             ? 'bg-red-500 text-white shadow-md' 
                             : 'bg-white border border-gray-200 text-gray-600 hover:border-red-300 hover:bg-red-50'
