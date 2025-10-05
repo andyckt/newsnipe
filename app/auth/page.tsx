@@ -188,6 +188,7 @@ export default function AuthPage() {
       }}
     >
       
+      {/* Home icon commented out as requested
       <div className="absolute top-4 left-4 z-10">
         <a 
           href="/home" 
@@ -200,6 +201,7 @@ export default function AuthPage() {
           </svg>
         </a>
       </div>
+      */}
       
       {/* Main content */}
       <div className="relative z-10 container mx-auto px-4 py-20">
