@@ -69,10 +69,7 @@ export function Header({ sidebarOpen, setSidebarOpen, setMobileMenuOpen, notific
           </div>
         )}
         
-        {/* Loading Placeholder */}
-        {isLoading && (
-          <div className="h-8 w-40 bg-gray-100 animate-pulse rounded-full mr-4"></div>
-        )}
+        {/* Loading Placeholder removed */}
         
         {/* Show different buttons based on user role */}
         {!isLoading && companyInfo?.hasCompany ? (
