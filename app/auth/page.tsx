@@ -212,7 +212,7 @@ export default function AuthPage() {
             {/* Left side - Video and Slogan content */}
             <div className="space-y-8 max-w-[700px]">
               {/* YouTube Video */}
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl border border-white/20 mb-10" style={{ maxWidth: "650px" }}>
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl border border-white/20 mb-10">
                 <iframe 
                   className="absolute inset-0 w-full h-full"
                   src="https://www.youtube-nocookie.com/embed/ttcW7PjHiRY?si=hWh2PU5bM1etzOdr&amp;controls=1&amp;loop=1&amp;playlist=ttcW7PjHiRY" 
