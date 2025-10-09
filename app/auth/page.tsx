@@ -177,6 +177,8 @@ export default function AuthPage() {
     })
   }
 
+  // YouTube video is embedded via iframe, no need for video loading handlers
+
   return (
     <div
       className="min-h-screen relative overflow-hidden"
@@ -206,8 +208,21 @@ export default function AuthPage() {
       {/* Main content */}
       <div className="relative z-10 container mx-auto px-4 py-20">
         <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[80vh]">
-          {/* Left side - Slogan content */}
+          {/* Left side - Video and Slogan content */}
           <div className="space-y-8 lg:pr-8">
+            {/* YouTube Video */}
+            <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl border border-white/20 mb-10">
+              <iframe 
+                className="absolute inset-0 w-full h-full"
+                src="https://www.youtube-nocookie.com/embed/ttcW7PjHiRY?si=hWh2PU5bM1etzOdr&amp;controls=1&amp;loop=1&amp;playlist=ttcW7PjHiRY" 
+                title="Snipe Introduction" 
+                frameBorder="0" 
+                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerPolicy="strict-origin-when-cross-origin" 
+                allowFullScreen
+              ></iframe>
+            </div>
+            
             <div className="space-y-6">
               <h1 className="text-5xl lg:text-7xl font-bold tracking-tight leading-tight text-white">
                 See & Hear your candidate,{" "}
