@@ -206,51 +206,53 @@ export default function AuthPage() {
       */}
       
       {/* Main content */}
-      <div className="relative z-10 container mx-auto px-4 py-20">
-        <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[80vh]">
-          {/* Left side - Video and Slogan content */}
-          <div className="space-y-8 lg:pr-8">
-            {/* YouTube Video */}
-            <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl border border-white/20 mb-10">
-              <iframe 
-                className="absolute inset-0 w-full h-full"
-                src="https://www.youtube-nocookie.com/embed/ttcW7PjHiRY?si=hWh2PU5bM1etzOdr&amp;controls=1&amp;loop=1&amp;playlist=ttcW7PjHiRY" 
-                title="Snipe Introduction" 
-                frameBorder="0" 
-                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                referrerPolicy="strict-origin-when-cross-origin" 
-                allowFullScreen
-              ></iframe>
+      <div className="relative z-10 flex justify-center items-center min-h-screen py-10">
+        <div className="w-full max-w-[1400px] mx-auto px-12 md:px-16 lg:px-20">
+          <div className="grid lg:grid-cols-2 gap-6 items-center">
+            {/* Left side - Video and Slogan content */}
+            <div className="space-y-8 max-w-[700px]">
+              {/* YouTube Video */}
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl border border-white/20 mb-10" style={{ maxWidth: "650px" }}>
+                <iframe 
+                  className="absolute inset-0 w-full h-full"
+                  src="https://www.youtube-nocookie.com/embed/ttcW7PjHiRY?si=hWh2PU5bM1etzOdr&amp;controls=1&amp;loop=1&amp;playlist=ttcW7PjHiRY" 
+                  title="Snipe Introduction" 
+                  frameBorder="0" 
+                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                  referrerPolicy="strict-origin-when-cross-origin" 
+                  allowFullScreen
+                ></iframe>
+              </div>
+              
+              <div className="space-y-6">
+                <h1 className="text-5xl lg:text-7xl font-bold tracking-tight leading-tight text-white" style={{ maxWidth: "650px" }}>
+                  See & Hear your candidate,{" "}
+                  <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+                    Snipe
+                  </span>
+                </h1>
+              </div>
             </div>
             
-            <div className="space-y-6">
-              <h1 className="text-5xl lg:text-7xl font-bold tracking-tight leading-tight text-white">
-                See & Hear your candidate,{" "}
-                <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                  Snipe
-                </span>
-              </h1>
-            </div>
-          </div>
-          
-          {/* Right side - Auth Card */}
-          <div className="flex justify-center lg:justify-end">
-            <div className="w-full max-w-md">
-              <AuthCard
-                isLoading={isLoading}
-                email={email}
-                setEmail={setEmail}
-                password={password}
-                setPassword={setPassword}
-                name={name}
-                setName={setName}
-                rememberMe={rememberMe}
-                setRememberMe={setRememberMe}
-                onSignIn={handleSignIn}
-                onSignUp={handleSignUp}
-                onSocialLogin={handleSocialLogin}
-                onForgotPassword={handleForgotPassword}
-              />
+            {/* Right side - Auth Card */}
+            <div className="flex justify-center lg:justify-end">
+              <div className="w-full max-w-md">
+                <AuthCard
+                  isLoading={isLoading}
+                  email={email}
+                  setEmail={setEmail}
+                  password={password}
+                  setPassword={setPassword}
+                  name={name}
+                  setName={setName}
+                  rememberMe={rememberMe}
+                  setRememberMe={setRememberMe}
+                  onSignIn={handleSignIn}
+                  onSignUp={handleSignUp}
+                  onSocialLogin={handleSocialLogin}
+                  onForgotPassword={handleForgotPassword}
+                />
+              </div>
             </div>
           </div>
         </div>
