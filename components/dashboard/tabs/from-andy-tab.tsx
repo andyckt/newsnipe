@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Play } from "lucide-react"
+import { useSession } from "next-auth/react"
 
 const features = [
   {
@@ -35,6 +36,9 @@ const features = [
 ]
 
 export function FromAndyTab() {
+  const { data: session, status } = useSession()
+  const userName = session?.user?.name?.split(' ')[0] || ''
+  
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
@@ -48,7 +52,9 @@ export function FromAndyTab() {
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="space-y-4">
               {/* <Badge className="bg-white/20 text-white hover:bg-white/30 rounded-xl">AI-Powered</Badge> */}
-              <h2 className="text-3xl font-bold">Welcome to Snipe</h2>
+              <h2 className="text-3xl font-bold">
+                {userName ? `Hiii ${userName}, Welcome to Snipe` : 'Welcome to Snipe'}
+              </h2>
               <p className="max-w-[600px] text-white/80">
                 Learn how to see & hear your candidates with our video tutorials below.
               </p>
