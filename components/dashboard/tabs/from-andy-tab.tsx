@@ -65,12 +65,14 @@ export function FromAndyTab() {
                 >
                   Start Sniping
                 </Button>
+                {/* View Demo button commented out
                 <Button
                   variant="outline"
                   className="rounded-2xl bg-transparent border-white text-white hover:bg-white/10"
                 >
                   View Demo
                 </Button>
+                */}
               </div>
             </div>
             <div className="hidden lg:block">
