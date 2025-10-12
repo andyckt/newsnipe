@@ -27,7 +27,10 @@ export const sidebarItems = [
   {
     id: "coming-soon",
     title: "What's Coming Soon",
-    icon: <Clock />,
+    icon: null,
+    badge: "NEW",
+    badgeColor: "bg-red-500 text-white",
+    badgePosition: "left",
   },
   // {
   //   id: "dashboard",

@@ -70,12 +70,32 @@ export function Sidebar({ isOpen, isMobile = false, onClose, activeMenu = "dashb
                     activeMenu === item.id ? "bg-primary/10 text-primary" : "hover:bg-muted",
                   )}
                 >
-                  <div className="flex items-center gap-3">
-                    {item.icon}
+                  <div className={cn(
+                    "flex items-center",
+                    item.badgePosition === "left" ? "gap-1" : "gap-3"
+                  )}>
+                    {item.icon && item.icon}
+                    {item.badgePosition === "left" && item.badge && (
+                      <Badge 
+                        variant="outline" 
+                        className={cn(
+                          "mr-0.5 rounded-full px-1.5 py-0.5 text-xs font-bold",
+                          item.badgeColor || ""
+                        )}
+                      >
+                        {item.badge}
+                      </Badge>
+                    )}
                     <span>{item.title}</span>
                   </div>
-                  {item.badge && (
-                    <Badge variant="outline" className="ml-auto rounded-full px-2 py-0.5 text-xs">
+                  {item.badge && item.badgePosition !== "left" && (
+                    <Badge 
+                      variant="outline" 
+                      className={cn(
+                        "ml-auto rounded-full px-2 py-0.5 text-xs font-bold",
+                        item.badgeColor || ""
+                      )}
+                    >
                       {item.badge}
                     </Badge>
                   )}
