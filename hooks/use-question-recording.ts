@@ -61,6 +61,36 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
 
   const runCountdown = async () => {
     setIsCountingDown(true)
+    
+    // Get the current recording index
+    const currentIndex = currentRecordingIndexRef.current;
+    
+    // Start prefetching the audio for the current question during countdown
+    if (textInputsRef.current.length > currentIndex && 
+        textInputsRef.current[currentIndex].audioUrl && 
+        textInputsRef.current[currentIndex].audioKey) {
+      
+      // Get a fresh presigned URL if we have the key (in case the old one expired)
+      let urlToPreload = textInputsRef.current[currentIndex].audioUrl;
+      try {
+        // Import the getPresignedUrl function
+        const { getPresignedUrl } = await import('@/lib/api-service');
+        urlToPreload = await getPresignedUrl(textInputsRef.current[currentIndex].audioKey!);
+        console.log(`Got fresh presigned URL for prefetching recording ${currentIndex + 1} audio`);
+      } catch (err) {
+        console.log(`Using existing URL for prefetching recording ${currentIndex + 1} audio`);
+      }
+      
+      // Prefetch the audio in the background
+      console.log(`Prefetching audio for recording ${currentIndex + 1} during countdown...`);
+      import('@/lib/mobile-audio').then(({ preloadMobileAudio }) => {
+        preloadMobileAudio(urlToPreload).catch(err => 
+          console.warn(`Failed to prefetch audio: ${err}`)
+        );
+      });
+    }
+    
+    // Run the countdown
     for (let i = 3; i >= 1; i--) {
       setCountdown(i)
       await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -271,6 +301,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
             textInputsRef.current[0].audioKey) {
           
           // Get a fresh presigned URL if we have the key (in case the old one expired)
+          // We should already have this prefetched during countdown, but double-check
           let urlToPlay = textInputsRef.current[0].audioUrl;
           try {
             // Import the getPresignedUrl function
@@ -303,6 +334,7 @@ export function useQuestionRecording(streamRef: React.RefObject<MediaStream | nu
             textInputsRef.current[recordingIndex].audioKey) {
           
           // Get a fresh presigned URL if we have the key (in case the old one expired)
+          // We should already have this prefetched during countdown, but double-check
           let urlToPlay = textInputsRef.current[recordingIndex].audioUrl;
           try {
             // Import the getPresignedUrl function
