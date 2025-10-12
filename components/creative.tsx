@@ -15,6 +15,7 @@ import { SubmissionsTab } from "./dashboard/tabs/submissions-tab"
 import { FromAndyTab } from "./dashboard/tabs/from-andy-tab"
 import { MySnipeTab } from "./dashboard/tabs/my-snipe-tab"
 import { SettingsTab } from "./dashboard/tabs/settings-tab"
+import { ComingSoonTab } from "./dashboard/tabs/coming-soon-tab"
 // import { LaunchRecorderTab } from "./dashboard/tabs/launch-recorder-tab"
 import CreateSnipeTab from "./dashboard/tabs/create-snipe-tab"
 
@@ -136,6 +137,8 @@ export function DesignaliCreative() {
       //   return <LaunchRecorderTab />
       case "settings":
         return <SettingsTab />
+      case "coming-soon":
+        return <ComingSoonTab />
       default:
         return <DashboardHome openRecordingViewer={openRecordingViewer} />
     }
