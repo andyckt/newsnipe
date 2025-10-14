@@ -24,14 +24,14 @@ export const sidebarItems = [
     title: "My Snipe",
     icon: <Target />,
   },
-  {
-    id: "coming-soon",
-    title: "What's Coming Soon",
-    icon: null,
-    badge: "NEW",
-    badgeColor: "bg-red-500 text-white",
-    badgePosition: "left",
-  },
+  // {
+  //   id: "coming-soon",
+  //   title: "What's Coming Soon",
+  //   icon: null,
+  //   badge: "NEW",
+  //   badgeColor: "bg-red-500 text-white",
+  //   badgePosition: "left",
+  // },
   // {
   //   id: "dashboard",
   //   title: "Dashboard",
