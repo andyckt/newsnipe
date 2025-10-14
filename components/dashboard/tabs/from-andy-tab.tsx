@@ -18,7 +18,7 @@ const features = [
   {
     title: "Create a Snipe",
     description: "Learn how to create your own Snipe to collect video responses from candidates.",
-    videoId: "ttcW7PjHiRY", // Replace with actual video ID
+    videoId: "jc07OXPqkMQ",
     benefits: ["Easy setup", "Customizable questions", "Share with candidates"],
   },
   {
