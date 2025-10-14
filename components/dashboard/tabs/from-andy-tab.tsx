@@ -22,15 +22,9 @@ const features = [
     benefits: ["Easy setup", "Customizable questions", "Share with candidates"],
   },
   {
-    title: "Review a Snipe",
-    description: "Discover how to review and evaluate candidate responses effectively.",
-    videoId: "ttcW7PjHiRY", // Replace with actual video ID
-    benefits: ["Organized responses", "Evaluation tools", "Candidate comparison"],
-  },
-  {
-    title: "Collaborate with Colleagues",
-    description: "Work together with your team to review and discuss candidate submissions.",
-    videoId: "ttcW7PjHiRY", // Replace with actual video ID
+    title: "Review Submission with Your Team",
+    description: "Discover how to review, evaluate, and collaborate on candidate submissions with your team.",
+    videoId: "KjiIrH90mBU",
     benefits: ["Team collaboration", "Shared access", "Collective decision making"],
   },
 ]
@@ -107,7 +101,7 @@ export function FromAndyTab() {
                   <div className="space-y-6">
                     <div className="space-y-3">
                       <Badge variant="secondary" className="rounded-xl px-3 py-1 bg-blue-100 text-blue-700 hover:bg-blue-200">
-                        {index === 0 ? "Introduction" : index === 1 ? "Tutorial" : index === 2 ? "Guide" : "Collaboration"}
+                        {index === 0 ? "Introduction" : index === 1 ? "Tutorial" : "Collaboration"}
                       </Badge>
                       <h3 className="text-2xl font-bold text-gray-900">{feature.title}</h3>
                       <p className="text-gray-600 leading-relaxed">{feature.description}</p>
