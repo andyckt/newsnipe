@@ -37,12 +37,33 @@ interface AnalyticsData {
   };
 }
 
+interface UserData {
+  _id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface UsersPaginationData {
+  users: UserData[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [waitlistData, setWaitlistData] = useState<WaitlistEntry[]>([]);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [usersData, setUsersData] = useState<UsersPaginationData | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -113,12 +134,47 @@ export default function AdminPage() {
     }
   };
 
+  const fetchUsersData = async (page = 1, search = "") => {
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      const response = await fetch(`/api/admin/users?page=${page}&limit=20${search ? `&search=${encodeURIComponent(search)}` : ""}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${password}`
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch users data");
+      }
+      
+      const data = await response.json();
+      setUsersData(data);
+      setCurrentPage(page);
+    } catch (err) {
+      setError("Error fetching users data");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchUsersData(1, searchQuery);
+  };
+
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     if (value === "waitlist") {
       fetchWaitlistData();
     } else if (value === "dashboard") {
       fetchAnalyticsData();
+    } else if (value === "users") {
+      fetchUsersData();
     }
   };
 
@@ -181,6 +237,7 @@ export default function AdminPage() {
             <Tabs defaultValue="dashboard" value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsList className="bg-gray-800 border-gray-700">
                 <TabsTrigger value="dashboard" className="data-[state=active]:bg-gray-700">Dashboard</TabsTrigger>
+                <TabsTrigger value="users" className="data-[state=active]:bg-gray-700">Users</TabsTrigger>
                 <TabsTrigger value="waitlist" className="data-[state=active]:bg-gray-700">Waitlist</TabsTrigger>
                 <TabsTrigger value="tools" className="data-[state=active]:bg-gray-700">Tools</TabsTrigger>
               </TabsList>
@@ -386,6 +443,88 @@ export default function AdminPage() {
                         </div>
                       </CardContent>
                     </Card>
+                  </div>
+                ) : null}
+              </TabsContent>
+
+              <TabsContent value="users" className="mt-6">
+                <div className="mb-6">
+                  <form onSubmit={handleSearch} className="flex gap-2">
+                    <Input
+                      type="text"
+                      placeholder="Search by name or email"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="bg-gray-800 border-gray-700 text-white flex-1"
+                    />
+                    <Button 
+                      type="submit" 
+                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500"
+                    >
+                      Search
+                    </Button>
+                  </form>
+                </div>
+
+                {isLoading ? (
+                  <div className="text-center py-10">
+                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-purple-400 border-r-transparent"></div>
+                    <p className="mt-2 text-gray-400">Loading users data...</p>
+                  </div>
+                ) : error ? (
+                  <div className="bg-red-900/20 border border-red-900/50 rounded-lg p-4 text-red-400">
+                    {error}
+                  </div>
+                ) : usersData?.users.length === 0 ? (
+                  <div className="bg-gray-800 rounded-lg p-8 text-center text-gray-400">
+                    No users found.
+                  </div>
+                ) : usersData ? (
+                  <div className="space-y-4">
+                    <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
+                      <table className="w-full">
+                        <thead className="bg-gray-800/50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Name</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Email</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Created At</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-800">
+                          {usersData.users.map((user) => (
+                            <tr key={user._id} className="hover:bg-gray-800/30">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200">{user.name}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200">{user.email}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{formatDate(user.createdAt)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-400">
+                        Showing {((usersData.pagination.page - 1) * usersData.pagination.limit) + 1} to {Math.min(usersData.pagination.page * usersData.pagination.limit, usersData.pagination.total)} of {usersData.pagination.total} users
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => fetchUsersData(currentPage - 1, searchQuery)}
+                          disabled={currentPage === 1}
+                          variant="outline"
+                          className="border-gray-700 text-gray-300 hover:bg-gray-800 disabled:opacity-50"
+                        >
+                          Previous
+                        </Button>
+                        <Button
+                          onClick={() => fetchUsersData(currentPage + 1, searchQuery)}
+                          disabled={currentPage >= usersData.pagination.totalPages}
+                          variant="outline"
+                          className="border-gray-700 text-gray-300 hover:bg-gray-800 disabled:opacity-50"
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 ) : null}
               </TabsContent>
